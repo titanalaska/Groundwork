@@ -1361,7 +1361,19 @@ function layoutBlock(bed, massCodes, L, W){
                    rows: r.rows, per: r.per, x0: cursor, len: r.len});
       cursor += r.len;
     });
-  if(!drifts.length) return "";
+  // 20 of the 44 beds carry no massed material at all -- they are trees and
+  // shrubs only, which are drawn individually on the sheet and staked off the
+  // plan. Returning nothing was correct but SILENT, and silence is
+  // indistinguishable from a broken feature when you are standing in a bed
+  // waiting for something to appear. Matt hit exactly that.
+  if(!drifts.length){
+    return '<div class="lay-box"><div class="fit-head">How to lay it out</div>' +
+      '<div class="lay-ok">Nothing to lay out here.</div>' +
+      '<div class="lay-foot">Every plant in this bed is a tree or shrub. Those ' +
+      "are drawn as individual symbols on the sheet, so stake them off the plan " +
+      "rather than to a spacing. Row layouts only apply to massed grasses and " +
+      "perennials.</div></div>";
+  }
 
   var head = tight
     ? '<div class="lay-warn"><b>Tighter than spec &mdash; ' + Math.round(k * 100) +
