@@ -560,6 +560,25 @@
   .fit-total{border-top:2px solid var(--line);font-weight:700;}
   .fit-total .fit-name{color:var(--ink);}
   .fit-ok{color:var(--green-text);font-weight:700;}
+  .lay-box{
+    border-top:1px solid var(--line);background:var(--card);padding:11px 14px 13px;
+  }
+  .lay-warn{
+    background:var(--amber-bg);border:1px solid var(--amber);border-radius:8px;
+    padding:9px 11px;font-size:.82rem;line-height:1.45;margin:0 0 10px;
+  }
+  .lay-warn b{color:var(--amber);}
+  .lay-ok{font-size:.82rem;color:var(--green-text);font-weight:700;margin:0 0 10px;}
+  .lay-row{
+    border-top:1px solid var(--line);padding:8px 0;font-size:.82rem;line-height:1.5;
+  }
+  .lay-row b{font-size:.88rem;}
+  .lay-row span{display:block;color:var(--ink-soft);}
+  .lay-svg{
+    display:block;width:100%;height:auto;margin:12px 0 6px;
+    background:var(--bg);border-radius:6px;
+  }
+  .lay-foot{font-size:.76rem;color:var(--ink-soft);line-height:1.45;}
   .fit-off{color:var(--amber);font-weight:700;}
 
   .loc-wrap{margin-top:10px;}
@@ -1281,6 +1300,135 @@ function countBy(pred){
 
 // Measure the bed, and the plan's count either fits it or it does not. Catches a
 // bed dug the wrong size before anything goes in the ground.
+// ---- planting layout ------------------------------------------------------
+// Trees and shrubs are drawn on the sheet as individual symbols, so they can be
+// staked straight off the plan. Massed material never is: "(38) DFA" is a count
+// on a leader line pointing at an area, and nothing says where those 38 go.
+//
+// And the spec spacing is NOT the fixed thing. Matt raised this on site -- at
+// the called-for OC the called-for quantity does not fit the area it is called
+// for. The direction he was given was to pack them tight enough that the WHOLE
+// COUNT lands inside the SELECTED AREA without growing the footprint. So the bed
+// and the quantity are fixed, and the spacing is what gives.
+//
+// The factor is solved geometrically, not from area. Area per plant assumes
+// infinite tiling; a real drift has half-a-spacing setbacks and whole rows, so
+// it eats more ground than the area maths predicts. Compressing by area alone
+// left a B20 drift at 18.8 ft inside a 14 ft bed.
+function rowsFor(count, ocIn, widthFt){
+  var oc = ocIn / 12, rowgap = oc * ROOT3_2;
+  var usable = Math.max(0, widthFt - oc);
+  var rows = Math.max(1, Math.floor(usable / rowgap) + 1);
+  rows = Math.min(rows, count);
+  var per = Math.ceil(count / rows);
+  // A staggered row starts half a spacing in, so it needs half a spacing MORE
+  // length to hold the same number as an unstaggered one. Without this every
+  // offset row came up one plant short.
+  return {rows: rows, per: per, len: per * oc + oc / 2};
+}
+
+function compressionK(bed, massCodes, W, L){
+  function totalLen(k){
+    var t = 0;
+    massCodes.forEach(function(c){
+      var oc = ocOf(c);
+      if(oc !== null) t += rowsFor(bed.items[c], oc * k, W).len;
+    });
+    return t;
+  }
+  if(totalLen(1) <= L) return 1;          // spec fits as drawn
+  var lo = 0.15, hi = 1, i, mid;
+  for(i = 0; i < 50; i++){
+    mid = (lo + hi) / 2;
+    if(totalLen(mid) <= L) lo = mid; else hi = mid;
+  }
+  return lo;
+}
+
+var LAY_COL = {trees: "#1b7f3b", shrubs: "#1565c0",
+               grasses: "#c2620a", perennials: "#7b2fa3"};
+
+function layoutBlock(bed, massCodes, L, W){
+  var k = compressionK(bed, massCodes, W, L);
+  var tight = k < 0.995;
+  var cursor = 0, drifts = [];
+  massCodes.slice().sort(function(a, b){ return bed.items[b] - bed.items[a]; })
+    .forEach(function(c){
+      var spec = ocOf(c);
+      if(spec === null) return;
+      var oc = spec * k, r = rowsFor(bed.items[c], oc, W);
+      drifts.push({c: c, q: bed.items[c], spec: spec, oc: oc,
+                   rows: r.rows, per: r.per, x0: cursor, len: r.len});
+      cursor += r.len;
+    });
+  if(!drifts.length) return "";
+
+  var head = tight
+    ? '<div class="lay-warn"><b>Tighter than spec &mdash; ' + Math.round(k * 100) +
+      "% of the drawn spacing.</b><br>The count does not fit this bed at the " +
+      "spacing on the sheet, so it is packed to hold the full count inside the " +
+      "same footprint.</div>"
+    : '<div class="lay-ok">Spec spacing fits this bed as drawn.</div>';
+
+  var rows = drifts.map(function(d){
+    var sp = tight
+      ? "spec " + d.spec + '" &rarr; plant at <b>' + d.oc.toFixed(1) + '" OC</b>'
+      : d.spec + '" OC as drawn';
+    return '<div class="lay-row"><b>' + d.q + " " + SPECIES[d.c] + "</b>" +
+      "<span>" + sp + "</span><span>" + d.rows + " rows of " + d.per +
+      ", rows " + (d.oc * ROOT3_2).toFixed(1) + '" apart</span>' +
+      "<span>drift runs " + d.len.toFixed(1) + " ft &middot; start " +
+      (d.oc / 2).toFixed(0) + '" in, stagger alternate rows ' +
+      (d.oc / 2).toFixed(0) + '"</span></div>';
+  }).join("");
+
+  // Picture of the PATTERN. Not the bed shape -- beds curve, and the plan
+  // carries no bed outlines at all.
+  var sc = Math.min(640 / Math.max(L, 0.1), 190 / Math.max(W, 0.1));
+  var wpx = L * sc + 8, hpx = W * sc + 8, dots = "";
+  drifts.forEach(function(d){
+    var oc = d.oc / 12, gap = oc * ROOT3_2;
+    var placed = 0, r = 0, y = gap / 2, x, xo;
+    var col = LAY_COL[CATEGORY[d.c]] || "#c2620a";
+    if(d.x0 > 0.01){
+      dots += '<line x1="' + (d.x0 * sc + 4).toFixed(1) + '" y1="4" x2="' +
+              (d.x0 * sc + 4).toFixed(1) + '" y2="' + (W * sc + 4).toFixed(1) +
+              '" stroke="#9aa091" stroke-width="1" stroke-dasharray="4 4"/>';
+    }
+    while(y <= W - gap / 4 && placed < d.q){
+      xo = (r % 2) ? oc / 2 : 0;
+      x = oc / 2 + xo;
+      while(x <= d.len - oc / 4 && placed < d.q){
+        dots += '<circle cx="' + ((d.x0 + x) * sc + 4).toFixed(1) + '" cy="' +
+                (y * sc + 4).toFixed(1) + '" r="' +
+                Math.max(1.6, Math.min(5, oc * sc * 0.22)).toFixed(1) +
+                '" fill="' + col + '" fill-opacity="0.85"/>';
+        placed++;
+        x += oc;
+      }
+      y += gap;
+      r++;
+    }
+  });
+  var svg = '<svg class="lay-svg" viewBox="0 0 ' + wpx.toFixed(0) + " " +
+    hpx.toFixed(0) + '" preserveAspectRatio="xMidYMid meet">' +
+    '<rect x="4" y="4" width="' + (L * sc).toFixed(1) + '" height="' +
+    (W * sc).toFixed(1) + '" fill="var(--bg)" stroke="var(--ink-soft)" ' +
+    'stroke-width="1.5"/>' + dots + "</svg>";
+
+  var spare = L - cursor;
+  var tail = spare > 0.2
+    ? "Drifts use " + cursor.toFixed(1) + " ft of " + L.toFixed(0) + " ft. The other " +
+      spare.toFixed(1) + " ft is mulch or open ground &mdash; do not spread into it."
+    : "Drifts fill the bed end to end.";
+
+  return '<div class="lay-box"><div class="fit-head">How to lay it out</div>' +
+    head + rows + svg +
+    '<div class="lay-foot">' + tail + "<br>The rectangle is the spacing pattern, " +
+    "not the bed shape &mdash; the plan carries no bed outlines. Follow the real " +
+    "edge.</div></div>";
+}
+
 function renderFit(bed, massCodes){
   var m = measured[bed.bed] || {};
   var L = parseFloat(m.l), W = parseFloat(m.w);
@@ -1329,7 +1477,8 @@ function renderFit(bed, massCodes){
     (area === null ? '<div class="fit-hint">Pace the bed and put the two numbers ' +
       "in. Beds are rarely a clean rectangle &mdash; use the average length and " +
       "width, it only has to be close.</div>" : "") +
-    "</div>";
+    "</div>" +
+    (area !== null ? layoutBlock(bed, massCodes, L, W) : "");
 }
 
 
