@@ -579,6 +579,15 @@
     background:var(--bg);border-radius:6px;
   }
   .lay-foot{font-size:.76rem;color:var(--ink-soft);line-height:1.45;}
+  .share-row{display:flex;gap:8px;margin:8px 0 0;}
+  .share-link{
+    flex:1;text-align:center;padding:10px 8px;border:1px solid var(--green);
+    border-radius:9px;background:var(--card);color:var(--green-text);
+    font-weight:700;font-size:.84rem;text-decoration:none;
+  }
+  .share-hint{
+    margin:8px 0 0;font-size:.74rem;line-height:1.45;color:var(--ink-soft);
+  }
   .fit-off{color:var(--amber);font-weight:700;}
 
   .loc-wrap{margin-top:10px;}
@@ -707,6 +716,13 @@
 
 <div class="report-btn-wrap">
   <button id="reportBtn" class="report-btn">Send status report to Chris</button>
+  <div class="share-row">
+    <a class="share-link" href="./status.html">Status page</a>
+    <a class="share-link" href="./shortage.html">Shortage notice</a>
+  </div>
+  <p class="share-hint">These two are safe to send. Do <b>not</b> send this
+    checklist &mdash; it saves to this phone only, so they would open a blank
+    sheet with every count at zero.</p>
 </div>
 <div id="reportPanel" class="report-panel" style="display:none;">
   <div class="report-panel-header">
@@ -743,7 +759,7 @@
 <div id="flagsSlot"></div>
 <div id="groups"></div>
 
-<footer>Counts save as you tap. &middot; build v11</footer>
+<footer>Counts save as you tap. &middot; build v12</footer>
 
 <script>
 var JOBS = {

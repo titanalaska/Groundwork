@@ -40,7 +40,7 @@
  * Bump CACHE_VERSION on deploy.
  */
 
-const CACHE_VERSION = 'v11';
+const CACHE_VERSION = 'v12';
 const SHELL_CACHE = `wolf-shell-${CACHE_VERSION}`;
 
 // Bed crops and the site map: ~17 MB across 45 files, cached as they are viewed
@@ -62,6 +62,8 @@ const EXTRA = [
   './icon-512.png',
   './icon-maskable-512.png',
   './apple-touch-icon.png',
+  './status.html',
+  './shortage.html',
 ];
 
 /* Install ALWAYS succeeds, on purpose.
