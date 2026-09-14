@@ -743,7 +743,7 @@
 <div id="flagsSlot"></div>
 <div id="groups"></div>
 
-<footer>Counts save as you tap. &middot; build v10</footer>
+<footer>Counts save as you tap. &middot; build v11</footer>
 
 <script>
 var JOBS = {
@@ -1890,8 +1890,11 @@ function renderBeds(){
       sh.innerHTML = isPlanted
         ? "<b>Planted, short " + shortList.reduce(function(n, o){ return n + o.qty; }, 0) +
           "</b><br>Still owed here: " + shortText(shortList) +
-          ". Everything else in this bed is in the ground."
-        : "<b>Cannot finish this bed yet</b><br>None on hand: " + shortText(shortList) + ".";
+          ". Everything else in this bed is in the ground.<br>" +
+          "<b>Spots are flagged &mdash; drop-in when material arrives.</b> " +
+          "Do not re-stake this bed."
+        : "<b>Cannot finish this bed yet</b><br>None on hand: " + shortText(shortList) +
+          ".<br>Stake the spots anyway so it is drop-in when material lands.";
       card.appendChild(sh);
     }
 
