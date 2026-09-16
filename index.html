@@ -947,6 +947,16 @@
     <span id="backupStatus" class="copy-status"></span>
   </div>
   <div class="log-prompts">
+    <h4>Sync</h4>
+    <p class="log-note" id="syncState"></p>
+    <input type="text" id="syncKeyIn" class="bk-file" placeholder="Paste the write key"
+           autocomplete="off" autocapitalize="characters" spellcheck="false">
+    <div class="report-actions">
+      <button id="saveKeyBtn" class="report-copy">Save the key on this phone</button>
+      <button id="clearKeyBtn" class="log-undo">Remove it</button>
+    </div>
+  </div>
+  <div class="log-prompts">
     <h4>Restore from a backup file</h4>
     <p class="bk-warn">This <b>replaces</b> everything on this phone with what is
       in the file. You get to read what the file holds first, and an undo
@@ -983,7 +993,7 @@
 <div id="flagsSlot"></div>
 <div id="groups"></div>
 
-<footer>Counts save as you tap. &middot; build v27</footer>
+<footer>Counts save as you tap. &middot; build v28</footer>
 
 <script>
 var JOBS = {
@@ -1238,6 +1248,110 @@ var MSG_LOCAL_ONLY = "This copy saves to this device only. Counts stay in this b
 var MSG_OFFLINE = "Working offline. Counts are held on this device and will sync when you are back on signal.";
 var syncAvailable = null; // null = not checked yet, false = no sync here, true = sync exists
 
+// ---- the shared store, on GitHub Pages -------------------------------------
+// claude.use("db") exists ONLY inside Claude's Artifact runtime. On Pages it
+// resolves null, which is why this app has said "saves to this device only" for
+// its whole life -- the reconcile logic below was written and correct, it just
+// had nothing to talk to.
+//
+// This supplies the same shape that logic already expects -- doc().get(),
+// .set(), .onSnapshot() -- backed by an Apps Script web app over a Sheet. Not
+// one line of the reconcile code had to change, and the Artifact copy keeps
+// using claude.use("db") because that is still tried first.
+//
+// READS ARE OPEN on purpose: that is what lets status.html show Chris and Todd
+// live numbers instead of a snapshot somebody has to regenerate and push.
+// WRITES carry a key that Matt enters once on his phone. The key is NOT in this
+// file and must never be put in it -- everything here is public view-source.
+// Same lesson as the Inventory session tokens.
+var SYNC_URL = "";                       // filled in once the web app is deployed
+var SYNC_KEY_STORE = "wolf-sync-key";
+var POLL_MS = 60000;
+
+function syncKey(){
+  try{ return localStorage.getItem(SYNC_KEY_STORE) || ""; }catch(e){ return ""; }
+}
+
+function setSyncKey(k){
+  try{
+    if(k) localStorage.setItem(SYNC_KEY_STORE, k);
+    else localStorage.removeItem(SYNC_KEY_STORE);
+  }catch(e){}
+}
+
+function sheetDb(){
+  if(!SYNC_URL) return null;
+  return {
+    doc: function(){
+      var listeners = [], timer = null, lastSeen = "";
+
+      function fetchState(){
+        return fetch(SYNC_URL + "?action=get&t=" + Date.now(), {cache: "no-store"})
+          .then(function(r){ return r.json(); })
+          .then(function(j){
+            if(!j || !j.ok) throw new Error((j && j.error) || "sync read failed");
+            return j;
+          });
+      }
+
+      // Apps Script has no push channel, so "live" is a poll. Skipped while the
+      // tab is hidden -- this runs all day in a pocket and there is no reason to
+      // spend the battery or the signal on a screen nobody is looking at.
+      function startPolling(){
+        if(timer) return;
+        timer = setInterval(function(){
+          if(document.hidden) return;
+          fetchState().then(function(j){
+            if(!j.data || !j.updatedAt || j.updatedAt === lastSeen) return;
+            lastSeen = j.updatedAt;
+            listeners.forEach(function(cb){ try{ cb({data: j.data}); }catch(e){} });
+          }).catch(function(){ /* a missed poll is not an error worth shouting about */ });
+        }, POLL_MS);
+      }
+
+      return {
+        get: function(){
+          return fetchState().then(function(j){
+            lastSeen = j.updatedAt || "";
+            return {data: j.data};
+          });
+        },
+        set: function(p){
+          var k = syncKey();
+          if(!k){
+            var e = new Error("no write key on this device");
+            e.noKey = true;
+            return Promise.reject(e);
+          }
+          return fetch(SYNC_URL, {
+            method: "POST",
+            // text/plain dodges the CORS preflight that Apps Script web apps do
+            // not answer. Learned on Titan Inventory; do not "tidy" this to
+            // application/json.
+            headers: {"Content-Type": "text/plain;charset=utf-8"},
+            body: JSON.stringify({action: "set", key: k, payload: p})
+          }).then(function(r){ return r.json(); }).then(function(j){
+            // Something newer is already up there. Do not fight it -- the poll
+            // brings it down and the next tap writes again from the newer base.
+            if(j && j.stale){
+              var se = new Error("a newer record is already synced");
+              se.stale = true;
+              throw se;
+            }
+            if(!j || !j.ok) throw new Error((j && j.error) || "sync write failed");
+            lastSeen = j.updatedAt || lastSeen;
+            return j;
+          });
+        },
+        onSnapshot: function(cb){
+          listeners.push(cb);
+          startPolling();
+        }
+      };
+    }
+  };
+}
+
 function setOffline(isOffline, msg){
   var el = document.getElementById("saveWarning");
   if(!el) return;
@@ -1302,9 +1416,15 @@ function scheduleSave(){
       setOffline(false);
       var t = new Date().toLocaleTimeString([], {hour:"numeric", minute:"2-digit"});
       setSaveNote("Saved " + t + " — safe to close.");
-    }).catch(function(){
+    }).catch(function(err){
       setOffline(true);
-      setSaveNote("Saved on this device — will sync when signal returns.");
+      // "No signal" and "this phone was never given the key" look identical from
+      // the outside and need completely different things done about them.
+      setSaveNote(err && err.noKey
+        ? "Saved on this device. Add the sync key under Back up / restore to share it."
+        : err && err.stale
+          ? "Saved here. Another device holds newer counts — they will come down shortly."
+          : "Saved on this device — will sync when signal returns.");
     });
   }, 250);
 }
@@ -3116,9 +3236,30 @@ function wireBackupUI(){
   var preview = document.getElementById("restorePreview");
   var applyBtn = document.getElementById("applyRestoreBtn");
   var undoBtn = document.getElementById("undoRestoreBtn");
+  var keyIn = document.getElementById("syncKeyIn");
+  var syncState = document.getElementById("syncState");
+  var saveKeyBtn = document.getElementById("saveKeyBtn");
+  var clearKeyBtn = document.getElementById("clearKeyBtn");
   var pending = null, undoTo = null;
 
   function show(el, on){ el.style.display = on ? "" : "none"; }
+
+  function paintSync(){
+    var hasKey = !!syncKey();
+    if(!SYNC_URL){
+      syncState.textContent = "Sync is not switched on yet. Everything is on this " +
+        "phone, so keep saving backup files.";
+    } else if(hasKey){
+      syncState.textContent = "This phone writes to the shared record. Chris and Todd " +
+        "see the numbers you tap.";
+    } else {
+      syncState.textContent = "Reading the shared record, but this phone cannot write " +
+        "to it yet. Paste the key to turn that on.";
+    }
+    show(keyIn, !!SYNC_URL && !hasKey);
+    show(saveKeyBtn, !!SYNC_URL && !hasKey);
+    show(clearKeyBtn, !!SYNC_URL && hasKey);
+  }
 
   function paintNow(){
     var d = describePayload(payload());
@@ -3134,11 +3275,28 @@ function wireBackupUI(){
     show(applyBtn, false); show(undoBtn, !!undoTo);
     fileIn.value = "";
     pending = null;
+    paintSync();
     panel.style.display = "block";
     panel.scrollIntoView({behavior: "smooth", block: "start"});
   });
 
   closeBtn.addEventListener("click", function(){ panel.style.display = "none"; });
+
+  saveKeyBtn.addEventListener("click", function(){
+    var k = (keyIn.value || "").trim().toUpperCase();
+    if(!k){ statusEl.textContent = "Paste the key first."; return; }
+    setSyncKey(k);
+    keyIn.value = "";
+    paintSync();
+    statusEl.textContent = "Key saved. The next tap syncs.";
+    scheduleSave();
+  });
+
+  clearKeyBtn.addEventListener("click", function(){
+    setSyncKey("");
+    paintSync();
+    statusEl.textContent = "Key removed. This phone reads but no longer writes.";
+  });
 
   saveBtn.addEventListener("click", function(){
     var text = JSON.stringify(backupPayload(), null, 2);
@@ -3322,6 +3480,8 @@ function init(){
     catch(e){ usePromise = Promise.resolve(null); }
 
     Promise.resolve(usePromise).then(function(db){
+      // Artifact runtime first, then the Sheet. One of the two, or neither.
+      if(!db) db = sheetDb();
       if(!db){
         syncAvailable = false;
         setOffline(true, MSG_LOCAL_ONLY);
