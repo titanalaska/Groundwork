@@ -368,6 +368,63 @@
     color:var(--green-text);
     font-weight:600;
   }
+  .log-btn{
+    width:100%;
+    margin-top:8px;
+    padding:12px;
+    border:1px solid var(--green);
+    background:var(--card);
+    color:var(--green-text);
+    border-radius:9px;
+    font-weight:700;
+    font-size:0.92rem;
+    font-family:inherit;
+    touch-action:manipulation;
+    cursor:pointer;
+  }
+  .log-note{
+    font-size:0.82rem;
+    color:var(--ink-soft);
+    line-height:1.45;
+    margin:0 0 8px;
+  }
+  .log-prompts{
+    margin:12px 0 0;
+    border-top:1px solid var(--line);
+    padding-top:10px;
+  }
+  .log-prompts h4{
+    margin:0 0 6px;
+    font-size:0.84rem;
+    color:var(--amber);
+  }
+  .log-prompts ul{margin:0;padding-left:18px;}
+  .log-prompts li{
+    font-size:0.82rem;
+    color:var(--ink-soft);
+    line-height:1.5;
+    margin-bottom:3px;
+  }
+  .log-mark{
+    padding:10px 14px;
+    border-radius:8px;
+    border:1px solid var(--amber);
+    background:var(--amber-bg);
+    color:var(--amber);
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .log-undo{
+    border:none;
+    background:none;
+    color:var(--ink-soft);
+    font-family:inherit;
+    font-size:0.82rem;
+    text-decoration:underline;
+    padding:4px;
+    cursor:pointer;
+  }
   .save-warning{
     display:none;
     margin:12px 16px 0;
@@ -792,6 +849,7 @@
 
 <div class="report-btn-wrap">
   <button id="reportBtn" class="report-btn">Export status report</button>
+  <button id="logBtn" class="log-btn">Draft today&rsquo;s daily log</button>
   <div class="share-row">
     <a class="share-link" href="./status.html">Status page</a>
     <a class="share-link" href="./shortage.html">Shortage notice</a>
@@ -809,6 +867,31 @@
   <div class="report-actions">
     <button id="copyReportBtn" class="report-copy">Copy to clipboard</button>
     <span id="copyStatus" class="copy-status"></span>
+  </div>
+</div>
+<div id="logPanel" class="report-panel" style="display:none;">
+  <div class="report-panel-header">
+    <span>Daily log draft</span>
+    <button id="closeLogBtn" class="report-close">&#10005; close</button>
+  </div>
+  <p class="log-note" id="logNote"></p>
+  <textarea id="logText" class="report-textarea"></textarea>
+  <div class="report-actions" id="logActions">
+    <button id="copyLogBtn" class="report-copy">Copy to clipboard</button>
+    <span id="logStatus" class="copy-status"></span>
+  </div>
+  <div class="log-prompts" id="logPrompts">
+    <h4>Add before you post &mdash; the app cannot know these</h4>
+    <ul>
+      <li>Did any material move between jobs? What, how many, from where, to where.</li>
+      <li>Did anyone direct a change? Who, and what they said.</li>
+      <li>What arrived today, and who delivered it?</li>
+      <li>What did you flag but could not finish, and what is it waiting on?</li>
+    </ul>
+  </div>
+  <div class="report-actions">
+    <button id="markLogBtn" class="log-mark">Posted it &mdash; start next draft from here</button>
+    <button id="undoLogBtn" class="log-undo" style="display:none;">Undo</button>
   </div>
 </div>
 
@@ -835,7 +918,7 @@
 <div id="flagsSlot"></div>
 <div id="groups"></div>
 
-<footer>Counts save as you tap. &middot; build v24</footer>
+<footer>Counts save as you tap. &middot; build v25</footer>
 
 <script>
 var JOBS = {
@@ -1050,6 +1133,9 @@ var measured = {};         // bed -> {l, w} in feet, as paced out on site
 // goes, and it is what lets a bed read "planted, spots staked, waiting on 8
 // Miss Kim" instead of just "planted".
 var owed = {};
+// The state as it stood when Matt last posted a daily log. The draft is a DIFF
+// against this, so without it there is nothing to draft. See draftDailyLog().
+var lastLogged = null;
 var dbDoc = null;
 var saveTimer = null;
 var lastSavedAt = 0;
@@ -1096,7 +1182,8 @@ function setOffline(isOffline, msg){
 
 function payload(){
   return {counts: state, notes: notes, staked: staked, planted: planted,
-          measured: measured, owed: owed, updatedAt: new Date().toISOString()};
+          measured: measured, owed: owed, lastLogged: lastLogged,
+          updatedAt: new Date().toISOString()};
 }
 
 function applyPayload(p){
@@ -1107,6 +1194,7 @@ function applyPayload(p){
   if(p.planted && typeof p.planted === "object") planted = Object.assign({}, p.planted);
   if(p.measured && typeof p.measured === "object") measured = Object.assign({}, p.measured);
   if(p.owed && typeof p.owed === "object") owed = Object.assign({}, p.owed);
+  if(p.lastLogged && typeof p.lastLogged === "object") lastLogged = p.lastLogged;
   try{
     var savedLang = localStorage.getItem("wolf-lang");
     if(savedLang === "es" || savedLang === "en") lang = savedLang;
@@ -2593,6 +2681,237 @@ function generateReport(){
   return lines.join("\n");
 }
 
+// ---- the daily-log draft --------------------------------------------------
+// Matt writes his BuilderTrend log at the end of a long day, from memory. His
+// logs are already the best on that job, but material MOVED between jobs went
+// unwritten and that caused three phantom shortages in two days.
+//
+// The app already knows what he tapped, so it drafts the FACTUAL half -- beds
+// planted and staked, counts that moved, shortfalls recorded -- and he adds the
+// human half. It does not invent who was on site or what was directed; the four
+// things it cannot know are asked as prompts BELOW the box, never inside it, so
+// a question can never get pasted into the log by accident.
+//
+// Copying does NOT move the baseline. The app cannot tell whether he actually
+// posted the log, and a baseline that advanced on a copy he never pasted would
+// silently swallow a day of work -- the exact failure this feature exists to
+// fix. Moving it is its own button, with an undo.
+
+function logSnapshot(){
+  return {
+    counts: JSON.parse(JSON.stringify(state)),
+    staked: JSON.parse(JSON.stringify(staked)),
+    planted: JSON.parse(JSON.stringify(planted)),
+    owed: JSON.parse(JSON.stringify(owed)),
+    at: new Date().toISOString()
+  };
+}
+
+function logSpecies(code){
+  var row = codeRow(code);
+  return row ? decode(row[0]) : decode(SPECIES[code] || code);
+}
+
+// "B01" -> "1". The pull list pads so the beds sort; a sentence should not.
+function bedNo(bed){ return String(bed).replace(/^B0*/, "") || String(bed); }
+
+function whenLabel(iso){
+  try{
+    var d = new Date(iso);
+    return d.toLocaleDateString(undefined, {month: "short", day: "numeric"}) +
+           ", " + d.toLocaleTimeString(undefined, {hour: "numeric", minute: "2-digit"});
+  }catch(e){ return "the last log"; }
+}
+
+function draftDailyLog(){
+  if(!lastLogged) return {first: true, empty: true, text: ""};
+  var prev = lastLogged, any = false;
+
+  // Beds. A bed staked AND planted since the last log is reported as planted --
+  // the stronger fact, and both lines would say the same day of work twice.
+  var nowPlanted = [], nowStaked = [], wasUnplanted = [];
+  BEDS.forEach(function(b){
+    var wasP = !!prev.planted[b.bed], isP = !!planted[b.bed];
+    var wasS = !!prev.staked[b.bed], isS = !!staked[b.bed];
+    if(isP && !wasP) nowPlanted.push(bedNo(b.bed));
+    else if(wasP && !isP) wasUnplanted.push(bedNo(b.bed));
+    if(isS && !wasS && !(isP && !wasP)) nowStaked.push(bedNo(b.bed));
+  });
+  function byNumber(a, c){ return (parseInt(a, 10) || 0) - (parseInt(c, 10) || 0); }
+  nowPlanted.sort(byNumber); nowStaked.sort(byNumber); wasUnplanted.sort(byNumber);
+
+  // Counts, across all four jobs.
+  var received = [], corrected = [];
+  Object.keys(JOBS).forEach(function(jobKey){
+    var job = JOBS[jobKey];
+    Object.keys(job.groups).forEach(function(gk){
+      job.groups[gk].items.forEach(function(row){
+        var k = jobKey + ":" + slug(row[0]);
+        // No baseline for this one -- a species added to the app since the last
+        // log. Reporting "0 -> 45" would claim 45 arrived today. Skip it.
+        if(!(k in prev.counts)) return;
+        var was = prev.counts[k] || 0, now = state[k] || 0;
+        if(now === was) return;
+        var line = "  " + decode(job.short || job.label) + " \u2014 " +
+                   decode(row[0]) + " " + was + " \u2192 " + now;
+        if(now > was) received.push(line); else corrected.push(line);
+      });
+    });
+  });
+
+  // Per-bed shortfalls, off the owe steppers.
+  var short = [], filled = [], bedIds = {};
+  Object.keys(prev.owed || {}).forEach(function(b){ bedIds[b] = 1; });
+  Object.keys(owed).forEach(function(b){ bedIds[b] = 1; });
+  Object.keys(bedIds).sort().forEach(function(b){
+    var wasMap = (prev.owed && prev.owed[b]) || {}, nowMap = owed[b] || {}, codes = {};
+    Object.keys(wasMap).forEach(function(c){ codes[c] = 1; });
+    Object.keys(nowMap).forEach(function(c){ codes[c] = 1; });
+    Object.keys(codes).forEach(function(c){
+      var was = wasMap[c] || 0, now = nowMap[c] || 0;
+      if(now === was) return;
+      if(now > was){
+        short.push("  Bed " + bedNo(b) + " \u2014 " + now + " " + logSpecies(c) +
+                   (was ? " (was " + was + ")" : ""));
+      } else if(now === 0){
+        filled.push("  Bed " + bedNo(b) + " \u2014 " + was + " " + logSpecies(c));
+      } else {
+        filled.push("  Bed " + bedNo(b) + " \u2014 down to " + now + " " +
+                    logSpecies(c) + ", from " + was);
+      }
+    });
+  });
+
+  var out = [];
+  out.push(new Date().toLocaleDateString(undefined,
+    {weekday: "long", month: "long", day: "numeric"}));
+  out.push("");
+  function beds(label, list){
+    if(!list.length) return;
+    out.push(label + " bed" + (list.length > 1 ? "s " : " ") + list.join(", ") + ".");
+    any = true;
+  }
+  beds("Planted:", nowPlanted);
+  beds("Staked out:", nowStaked);
+  beds("Correction \u2014 no longer marked planted:", wasUnplanted);
+  function block(title, rows){
+    if(!rows.length) return;
+    if(out[out.length - 1] !== "") out.push("");
+    out.push(title);
+    rows.forEach(function(r){ out.push(r); });
+    any = true;
+  }
+  block("Received on site:", received);
+  block("Count corrections:", corrected);
+  block("Short at the bed \u2014 spots flagged, drop in when it lands:", short);
+  block("Filled since the last log:", filled);
+
+  if(!any) return {first: false, empty: true, text: "", since: whenLabel(prev.at)};
+  out.push("");
+  out.push("(Covers everything since " + whenLabel(prev.at) + ".)");
+  return {first: false, empty: false, text: out.join("\n"), since: whenLabel(prev.at)};
+}
+
+function wireDailyLogUI(){
+  var btn = document.getElementById("logBtn");
+  var panel = document.getElementById("logPanel");
+  var note = document.getElementById("logNote");
+  var textarea = document.getElementById("logText");
+  var actions = document.getElementById("logActions");
+  var prompts = document.getElementById("logPrompts");
+  var copyBtn = document.getElementById("copyLogBtn");
+  var markBtn = document.getElementById("markLogBtn");
+  var undoBtn = document.getElementById("undoLogBtn");
+  var closeBtn = document.getElementById("closeLogBtn");
+  var statusEl = document.getElementById("logStatus");
+  var undoTo = null, hasUndo = false;
+
+  function show(el, on){ el.style.display = on ? "" : "none"; }
+
+  function render(){
+    var d = draftDailyLog();
+    statusEl.textContent = "";
+    show(undoBtn, hasUndo);
+    if(d.first){
+      note.textContent = "First time. The log is a diff, so it needs a starting " +
+        "point \u2014 tap below, and from tomorrow this drafts only what changed. " +
+        "It will not claim you did the whole job today.";
+      show(textarea, false); show(copyBtn, false); show(prompts, false);
+      markBtn.textContent = "Start from here";
+      show(markBtn, true);
+      return;
+    }
+    if(d.empty){
+      note.textContent = "Nothing has changed since you logged at " + d.since +
+        ". Anything you tap from here shows up in the next draft.";
+      show(textarea, false); show(copyBtn, false); show(prompts, false);
+      show(markBtn, false);
+      return;
+    }
+    note.textContent = "The facts the app can vouch for. Edit it freely \u2014 " +
+      "this box is yours, nothing here is sent anywhere.";
+    textarea.value = d.text;
+    show(textarea, true); show(copyBtn, true); show(prompts, true);
+    markBtn.textContent = "Posted it \u2014 start next draft from here";
+    show(markBtn, true);
+  }
+
+  btn.addEventListener("click", function(){
+    hasUndo = false;
+    render();
+    panel.style.display = "block";
+    panel.scrollIntoView({behavior: "smooth", block: "start"});
+  });
+
+  closeBtn.addEventListener("click", function(){
+    panel.style.display = "none";
+    hasUndo = false;
+  });
+
+  copyBtn.addEventListener("click", function(){
+    textarea.focus();
+    textarea.setSelectionRange(0, textarea.value.length);
+    function fallback(){
+      var ok = false;
+      try{ ok = document.execCommand("copy"); }catch(e){ ok = false; }
+      statusEl.textContent = ok ? "Copied" : "Long-press the text above and Copy";
+      setTimeout(function(){ statusEl.textContent = ""; }, 3000);
+    }
+    if(navigator.share){
+      navigator.share({text: textarea.value, title: "Daily log"})
+        .then(function(){
+          statusEl.textContent = "Shared";
+          setTimeout(function(){ statusEl.textContent = ""; }, 3000);
+        })
+        .catch(fallback);
+      return;
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(textarea.value).then(function(){
+        statusEl.textContent = "Copied";
+        setTimeout(function(){ statusEl.textContent = ""; }, 3000);
+      }).catch(fallback);
+    } else { fallback(); }
+  });
+
+  markBtn.addEventListener("click", function(){
+    undoTo = lastLogged;
+    hasUndo = true;
+    lastLogged = logSnapshot();
+    scheduleSave();
+    render();
+    statusEl.textContent = "Marked \u2014 the next draft starts from here.";
+  });
+
+  undoBtn.addEventListener("click", function(){
+    lastLogged = undoTo;
+    hasUndo = false;
+    scheduleSave();
+    render();
+    statusEl.textContent = "Put back.";
+  });
+}
+
 function wireReportUI(){
   var reportBtn = document.getElementById("reportBtn");
   var panel = document.getElementById("reportPanel");
@@ -2682,6 +3001,7 @@ function init(){
 
   renderAll();
   wireReportUI();
+  wireDailyLogUI();
   setSaveNote(local ? "Counts loaded from this device." : "Starting from the September 8 baseline.");
 
   // 2. Then reach for the shared store and take it if it is newer.
