@@ -583,6 +583,30 @@
     border-bottom:1px solid var(--line);
   }
   .map-img{width:100%;height:auto;display:block;background:var(--bg);}
+  /* The overlay sits ON the picture, so the wrapper is the positioning context
+     and the dots never take the tap -- the map still opens full size. */
+  .map-stack{position:relative;display:block;}
+  .map-dots-wrap{position:absolute;inset:0;pointer-events:none;}
+  .map-dots{width:100%;height:100%;display:block;}
+  .map-legend{
+    display:flex;flex-wrap:wrap;gap:6px 12px;
+    padding:9px 11px 2px;
+  }
+  .map-key{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:0.78rem;color:var(--ink-soft);
+  }
+  .map-key i{
+    width:13px;height:13px;border-radius:50%;
+    border:2px solid #fff;box-shadow:0 0 0 1px var(--line);
+    flex-shrink:0;
+  }
+  .map-legend-note{
+    margin:4px 0 0;padding:0 11px 9px;
+    font-size:0.76rem;line-height:1.45;color:var(--ink-soft);
+  }
+  .lb-stack{position:relative;display:inline-block;flex-shrink:0;max-width:100%;}
+  .lb-dots{position:absolute;inset:0;pointer-events:none;}
   .map-hint{
     padding:9px 14px;font-size:0.76rem;color:var(--ink-soft);
     border-top:1px solid var(--line);
@@ -911,14 +935,14 @@
     </span>
     <button class="lb-close" id="lbClose">&#10005;</button>
   </div>
-  <div class="lb-scroll" id="lbScroll"><img class="lb-img" id="lbImg" alt=""></div>
+  <div class="lb-scroll" id="lbScroll"><span class="lb-stack" id="lbStack"><img class="lb-img" id="lbImg" alt=""><span class="lb-dots" id="lbDots"></span></span></div>
   <div class="lb-hint" id="lbHint"></div>
 </div>
 
 <div id="flagsSlot"></div>
 <div id="groups"></div>
 
-<footer>Counts save as you tap. &middot; build v25</footer>
+<footer>Counts save as you tap. &middot; build v26</footer>
 
 <script>
 var JOBS = {
@@ -1874,15 +1898,22 @@ function applyZoom(){
   var scroll = document.getElementById("lbScroll");
   var hint = document.getElementById("lbHint");
   if(!img.naturalWidth) return;
+  // The dot overlay is absolutely positioned inside the stack, so the stack has
+  // to be exactly the size of the picture at every zoom step. Left to itself it
+  // caps at max-width:100% and the overlay stays phone-width while the image
+  // grows to 5200px underneath it.
+  var stack = document.getElementById("lbStack");
   if(lbZoom === "fit"){
     img.style.width = "";
     img.style.maxWidth = "100%";
+    if(stack){ stack.style.width = ""; stack.style.maxWidth = "100%"; }
     scroll.classList.remove("zoomed");
     hint.textContent = "Whole bed. Tap 2\u00d7 or 3\u00d7 to get in close, then drag to pan.";
   } else {
     var f = parseFloat(lbZoom);
     img.style.maxWidth = "none";
     img.style.width = Math.round(img.naturalWidth * f) + "px";
+    if(stack){ stack.style.maxWidth = "none"; stack.style.width = img.style.width; }
     scroll.classList.add("zoomed");
     hint.textContent = f === 1
       ? "Actual size of the drawing. 1 pixel is about 1.6 in on the ground."
@@ -1904,6 +1935,10 @@ function showLightbox(src, title){
     lbZoom = "fit";
     img.onload = applyZoom;
     img.src = src;
+    // Only the site map carries bed colours; every other picture is a bed crop
+    // or a plant symbol, where a ring of dots would be nonsense.
+    var dots = document.getElementById("lbDots");
+    if(dots) dots.innerHTML = src.indexOf("site-map.jpg") === -1 ? "" : mapOverlaySVG();
     document.getElementById("lbTitle").textContent = title || "";
     box.hidden = false;
     document.body.style.overflow = "hidden";
@@ -1952,6 +1987,61 @@ function wirePictures(root){
       openPicture(a.getAttribute("href"), a.getAttribute("data-title") || "");
     });
   });
+}
+
+// ---- live bed colours on the site map --------------------------------------
+// site-map.jpg is BAKED by tools/bed-map.py -- the red numbered markers are
+// pixels, not elements, so state cannot be painted into them. This is an SVG
+// laid over the image using the same geometry the baker used: centre
+// max(50, box[0]-px0-60), cy-py0, radius 46, white ring 5 -- so each circle
+// lands exactly on its baked marker and covers it. The viewBox is the plan
+// crop, so it scales with the image at any zoom, including inside the
+// lightbox. Change the geometry here only if bed-map.py changes.
+var MAP_PLAN = [4013, 3690];
+var MAP_XY = {"B01":[1513,431],"B02":[3177,464],"B03":[1099,679],"B04":[3186,714],"B05":[3188,843],"B06":[2728,928],"B07":[1478,959],"B08":[993,923],"B09":[1968,1460],"B10":[2299,1355],"B11":[2123,1347],"B12":[2143,1342],"B13":[2782,1535],"B14":[994,1427],"B15":[3172,1615],"B16":[2299,1651],"B17":[1564,1686],"B18":[1584,1716],"B19":[1978,1788],"B20":[2559,1762],"B21":[993,1856],"B22":[1564,1959],"B23":[1407,2070],"B24":[3168,2048],"B25":[1978,2180],"B26":[2564,2233],"B27":[1554,2363],"B28":[1978,2435],"B29":[1583,2404],"B30":[2249,2468],"B31":[3168,2557],"B32":[2268,2530],"B33":[972,2631],"B34":[2248,2763],"B35":[2007,2868],"B36":[2739,2958],"B37":[3209,2998],"B38":[1468,3020],"B39":[2007,2906],"B40":[971,3054],"B41":[1753,3294],"B42":[2508,3214],"B43":[2381,3286],"B44":[1809,3417]};
+// A planted bed that is still owed material is AMBER, never green. Matt's
+// call, and his reason is the right one: "it is to remember to finish the
+// job." The colour is an open to-do, not a progress score. 13 of the 44 will
+// sit amber for weeks while the hair grass is unbought -- that is the point,
+// not a flaw to design around. Do not "improve" this later.
+var MAP_COLOR = {open: "#5b6157", staked: "#1565c0", short: "#a6461d", done: "#2f5233"};
+var MAP_LABEL = {open: "Not started", staked: "Staked out",
+                 short: "Planted, still owed", done: "Planted, complete"};
+
+function bedMapState(b){
+  if(planted[b.bed]) return bedOutstanding(b).length ? "short" : "done";
+  if(staked[b.bed]) return "staked";
+  return "open";
+}
+
+function mapOverlaySVG(){
+  var out = ['<svg class="map-dots" viewBox="0 0 ' + MAP_PLAN[0] + " " +
+             MAP_PLAN[1] + '" preserveAspectRatio="xMidYMid meet" aria-hidden="true">'];
+  BEDS.forEach(function(b){
+    var p = MAP_XY[b.bed];
+    if(!p) return;
+    var col = MAP_COLOR[bedMapState(b)];
+    out.push('<circle cx="' + p[0] + '" cy="' + p[1] + '" r="46" fill="' + col +
+             '" stroke="#ffffff" stroke-width="5"/>');
+    out.push('<text x="' + p[0] + '" y="' + p[1] + '" fill="#ffffff" font-size="48" ' +
+             'font-weight="700" font-family="Arial, Helvetica, sans-serif" ' +
+             'text-anchor="middle" dominant-baseline="central">' +
+             b.bed.replace(/^B0*/, "") + "</text>");
+  });
+  out.push("</svg>");
+  return out.join("");
+}
+
+function mapLegendHTML(){
+  var tally = {open: 0, staked: 0, short: 0, done: 0};
+  BEDS.forEach(function(b){ tally[bedMapState(b)]++; });
+  var rows = ["open", "staked", "short", "done"].map(function(k){
+    return '<span class="map-key"><i style="background:' + MAP_COLOR[k] + '"></i>' +
+           tally[k] + " " + MAP_LABEL[k].toLowerCase() + "</span>";
+  }).join("");
+  return '<div class="map-legend">' + rows + "</div>" +
+    '<p class="map-legend-note">A bed that is planted but still owed material stays ' +
+    "<b>amber</b>, never green. It is a reminder to finish the job, not a score.</p>";
 }
 
 // ---- the third bed state: finished, but short -----------------------------
@@ -2317,10 +2407,15 @@ function renderBeds(){
   mapWrap.className = "map-wrap";
   mapWrap.innerHTML =
     '<div class="map-title">Site map &mdash; all ' + BEDS.length + " beds</div>" +
-    '<a href="' + BED_IMG + 'site-map.jpg" data-lb="1" data-title="Site map">' +
-      imgOrNothing(BED_IMG + "site-map.jpg", "Site map with every bed numbered", "map-img") +
-    "</a>" +
-    '<div class="map-hint">Tap the map to open it full size, then pinch to zoom. Back closes it.</div>';
+    '<span class="map-stack">' +
+      '<a href="' + BED_IMG + 'site-map.jpg" data-lb="1" data-title="Site map">' +
+        imgOrNothing(BED_IMG + "site-map.jpg", "Site map with every bed numbered", "map-img") +
+      "</a>" +
+      '<span class="map-dots-wrap">' + mapOverlaySVG() + "</span>" +
+    "</span>" +
+    mapLegendHTML() +
+    '<div class="map-hint">Tap the map to open it full size, then pinch to zoom. ' +
+      "The colours come with it. Back closes it.</div>";
   container.appendChild(mapWrap);
 
   var offline = document.createElement("button");
