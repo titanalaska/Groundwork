@@ -230,6 +230,15 @@
     font-size:.92rem;line-height:1.45;
   }
   .bed-short b{color:#8a5d00;}
+  /* Where the drawing's callouts do not match the planters on the ground. */
+  .bed-link{
+    margin:10px 0 0;padding:10px 12px;border-radius:8px;
+    background:rgba(21,101,192,0.10);border:1px solid rgba(21,101,192,0.40);
+    font-size:.9rem;line-height:1.45;
+  }
+  .bed-link b{color:#1565c0;}
+  @media (prefers-color-scheme:dark){ .bed-link b{color:#7fb0e8;} }
+  :root[data-theme="dark"] .bed-link b{color:#7fb0e8;}
   @media (prefers-color-scheme:dark){ .bed-short b{color:#f0c168;} }
   :root[data-theme="dark"] .bed-short b{color:#f0c168;}
   .item.over{border-left-color:var(--over);background:var(--over-bg);}
@@ -807,7 +816,7 @@
 <div id="flagsSlot"></div>
 <div id="groups"></div>
 
-<footer>Counts save as you tap. &middot; build v18</footer>
+<footer>Counts save as you tap. &middot; build v19</footer>
 
 <script>
 var JOBS = {
@@ -1868,6 +1877,13 @@ var ES = {
   "Mass planting": "Plantaci\u00f3n en masa",
   "mark the bed edge": "marque la orilla de la cama",
   "\u00b7 rows ": "\u00b7 hileras a ",
+  "Not a separate bed.": "No es una cama aparte.",
+  "This callout covers two planters.": "Esta anotaci\u00f3n cubre dos jardineras.",
+  "Same planter as bed ": "Misma jardinera que la cama ",
+  "One callout stack on the sheet, 86 units together": "Una sola anotaci\u00f3n en el plano, 86 unidades juntas",
+  "walk it as one bed.": "rec\u00f3rrala como una sola cama.",
+  "The dogwood and the tree are on the perimeter; the hair grass is across the parking lot, against the building at the drive-under archway.":
+    "El cornejo y el \u00e1rbol est\u00e1n en el per\u00edmetro; el pasto est\u00e1 al otro lado del estacionamiento, junto al edificio en el arco de entrada.",
   "Marking out": "Marcado",
   "spots to stake individually": "puntos para marcar uno por uno",
   "trees and shrubs, one symbol each": "\u00e1rboles y arbustos, un s\u00edmbolo cada uno",
@@ -2024,6 +2040,31 @@ function setLang(next){
   try{ localStorage.setItem("wolf-lang", lang); }catch(e){}
   renderBeds();
 }
+
+// ---- beds that are not what the callouts imply -----------------------------
+// The sheet's callout stacks do not map one-to-one onto physical planters, and
+// that is how the drawing arrived from Corvus -- not how Titan laid it out.
+// Two failure directions, both confirmed on the ground:
+//
+//   SPLIT   one planter whose callouts got read as two beds. B41 and B44 are
+//           a single stack of eight pills, 86 units, one leader line. Matt ran
+//           short of false spirea and iris "in the same bed" because it IS the
+//           same bed.
+//   SHARED  one callout stack serving two planters in different places. B23 is
+//           the dogwood and tree on the perimeter plus hair grass across the
+//           parking lot at the drive-under archway.
+//
+// Add a pair here as each one is confirmed in the field. Do NOT renumber beds
+// to fix this: the numbers are on printed material and in people's heads, and
+// renumbering mid-job is how the wrong thing gets planted.
+var BED_LINKS = {
+  B41: {kind: "split", other: "44",
+        note: "Same planter as bed 44. One callout stack on the sheet, 86 units together \u2014 walk it as one bed."},
+  B44: {kind: "split", other: "41",
+        note: "Same planter as bed 41. One callout stack on the sheet, 86 units together \u2014 walk it as one bed."},
+  B23: {kind: "shared", other: null,
+        note: "The dogwood and the tree are on the perimeter; the hair grass is across the parking lot, against the building at the drive-under archway."}
+};
 
 function renderBeds(){
   var container = document.getElementById("groups");
@@ -2190,6 +2231,16 @@ function renderBeds(){
       acts.appendChild(btn);
     });
     card.appendChild(acts);
+
+    var link = BED_LINKS[b.bed];
+    if(link){
+      var ln = document.createElement("div");
+      ln.className = "bed-link";
+      ln.innerHTML = "<b>" + (link.kind === "split"
+        ? "Not a separate bed."
+        : "This callout covers two planters.") + "</b> " + link.note;
+      card.appendChild(ln);
+    }
 
     if(isShort){
       var sh = document.createElement("div");
