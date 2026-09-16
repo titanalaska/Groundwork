@@ -816,7 +816,7 @@
 <div id="flagsSlot"></div>
 <div id="groups"></div>
 
-<footer>Counts save as you tap. &middot; build v21</footer>
+<footer>Counts save as you tap. &middot; build v22</footer>
 
 <script>
 var JOBS = {
@@ -1165,25 +1165,45 @@ function renderTabs(){
 }
 
 
-// WSRCC only. Its plants live at the nursery in Anchorage, not at the Home2
-// Suites storage area, and that is right -- it is an Anchorage job. A place to
-// record where material is actually coming from, so nobody goes hunting.
+// Where each job's material physically IS. This has caused a phantom shortage
+// twice now -- iris that had gone to Baxter, and 65 Birchleaf Spirea sitting at
+// the Home2 Suites staging area that were always WSRCC's. Neither was a
+// counting error; both were material in the right company and the wrong place.
+// A count answers "how many". This answers "where", which is the question that
+// actually sends someone driving.
+var MATERIAL_AT = {
+  wsrcc: {
+    head: "Where this material is coming from",
+    body: "Plants are at the <b>nursery in Anchorage</b>, not at the Home2 " +
+          "Suites storage area. That is correct &mdash; WSRCC is an Anchorage " +
+          "job. Nothing to chase.<br><br>The 65 Birchleaf Spirea were staged " +
+          "at Home2 Suites by mistake and moved to the Anchorage nursery on " +
+          "9/14. They were always WSRCC's."
+  },
+  charter: {
+    head: "Where this material is coming from",
+    body: "Everything on hand has already been <b>moved to the Charter site</b>. " +
+          "Do not look for it at the Home2 Suites storage area.<br><br>The Paper " +
+          "Birch and Parkland Pillar Birch are still outstanding &mdash; those " +
+          "have not been bought, so there is nothing to move."
+  }
+};
+
 function renderSourceNote(slot){
-  if(currentJob !== "wsrcc") return;
+  var m = MATERIAL_AT[currentJob];
+  if(!m) return;
   var box = document.createElement("div");
   box.className = "src-box";
-  box.innerHTML = '<div class="src-head">Where this material is coming from</div>' +
-    '<div class="src-note">Plants are at the <b>nursery in Anchorage</b>, not at the ' +
-    "Home2 Suites storage area. That is correct &mdash; WSRCC is an Anchorage job. " +
-    "Nothing to chase.</div>";
+  box.innerHTML = '<div class="src-head">' + m.head + "</div>" +
+    '<div class="src-note">' + m.body + "</div>";
   var ta = document.createElement("textarea");
   ta.className = "notes";
-  ta.id = "source-wsrcc";
+  ta.id = "source-" + currentJob;
   ta.placeholder = "Pickup point, who to call, what has moved...";
-  ta.value = notes["source-wsrcc"] || "";
+  ta.value = notes["source-" + currentJob] || "";
   var t;
   ta.addEventListener("input", function(){
-    notes["source-wsrcc"] = ta.value;
+    notes["source-" + currentJob] = ta.value;
     clearTimeout(t);
     t = setTimeout(scheduleSave, 500);
   });
