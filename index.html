@@ -403,6 +403,14 @@
     touch-action:manipulation;
   }
   .jump-msg{font-size:.8rem;color:var(--danger);font-weight:700;}
+  .lang-wrap{margin-left:auto;display:flex;gap:4px;flex-shrink:0;}
+  .lang-btn{
+    padding:8px 11px;border:1px solid var(--line);border-radius:7px;
+    background:var(--card);color:var(--ink-soft);
+    font-family:inherit;font-weight:700;font-size:.78rem;cursor:pointer;
+    touch-action:manipulation;letter-spacing:.04em;
+  }
+  .lang-btn.on{border-color:var(--green);background:var(--green);color:var(--on-green);}
   /* Landing on a card in a wall of cards needs a tell. */
   .bed-flash{
     animation:bedflash 1.6s ease-out;
@@ -799,7 +807,7 @@
 <div id="flagsSlot"></div>
 <div id="groups"></div>
 
-<footer>Counts save as you tap. &middot; build v16</footer>
+<footer>Counts save as you tap. &middot; build v17</footer>
 
 <script>
 var JOBS = {
@@ -1063,6 +1071,10 @@ function applyPayload(p){
   if(p.staked && typeof p.staked === "object") staked = Object.assign({}, p.staked);
   if(p.planted && typeof p.planted === "object") planted = Object.assign({}, p.planted);
   if(p.measured && typeof p.measured === "object") measured = Object.assign({}, p.measured);
+  try{
+    var savedLang = localStorage.getItem("wolf-lang");
+    if(savedLang === "es" || savedLang === "en") lang = savedLang;
+  }catch(e){}
   // Anything ticked before the staked/planted split meant "done with".
   if(p.loaded && typeof p.loaded === "object"){
     Object.keys(p.loaded).forEach(function(k){
@@ -1834,6 +1846,185 @@ function shortText(list){
   return list.map(function(o){ return o.qty + " " + o.name; }).join(", ");
 }
 
+// ---- Spanish for the field views ------------------------------------------
+// Most of this crew writes their daily logs in Spanish. The bed cards and the
+// layout are what they work from, so those translate; the counting side and
+// everything written for Chris stay in English, because translating those
+// helps nobody.
+//
+// Applied over TEXT NODES only, never attributes, so class names, ids and
+// image paths cannot be caught by a phrase match. Longest phrases replace
+// first so a short key cannot eat part of a longer one. Anything missing from
+// the table simply stays in English -- a gap degrades, it never blanks.
+//
+// Species names are deliberately absent: they are cultivar names printed on
+// the plan ('Miss Kim', 'Karl Foerster'), and a name that is not on the sheet
+// makes matching back to the drawing harder, not easier. The symbol, the code
+// and the botanical name carry that load without a language.
+var lang = "en";
+
+var ES = {
+  // --- marking-out summary
+  "Mass planting": "Plantaci\u00f3n en masa",
+  "mark the bed edge": "marque la orilla de la cama",
+  "\u00b7 rows ": "\u00b7 hileras a ",
+  "Marking out": "Marcado",
+  "spots to stake individually": "puntos para marcar uno por uno",
+  "trees and shrubs, one symbol each": "\u00e1rboles y arbustos, un s\u00edmbolo cada uno",
+  "grasses and perennials &mdash; mark the bed edge and the spacing, not each plant":
+    "pastos y perennes: marque la orilla de la cama y el espaciado, no cada planta",
+  "grasses and perennials \u2014 mark the bed edge and the spacing, not each plant":
+    "pastos y perennes: marque la orilla de la cama y el espaciado, no cada planta",
+  "Flag colours match the drawing:": "Los colores coinciden con el plano:",
+  "massed": "en masa",
+  "trees": "\u00e1rboles", "shrubs": "arbustos",
+  "grasses": "pastos", "perennials": "perennes",
+
+  // --- jump bar
+  "Go to bed": "Ir a la cama",
+  "No bed ": "No existe la cama ",
+  "Go": "Ir",
+
+  // --- bed card chrome
+  "Bed ": "Cama ",
+  " to stake": " para marcar",
+  " units total": " unidades en total",
+  " ft away": " pies de distancia",
+  "Mark staked": "Marcar",
+  "Mark planted": "Marcar plantado",
+  "Staked": "Marcado",
+  "Planted": "Plantado",
+  "Stake each one": "Marcar cada uno",
+  " spots": " puntos",
+  "check plan": "revisar plano",
+
+  // --- short-bed banners
+  "Planted, short ": "Plantado, faltan ",
+  "Still owed here: ": "Todav\u00eda falta aqu\u00ed: ",
+  "Everything else in this bed is in the ground.":
+    "Todo lo dem\u00e1s de esta cama ya est\u00e1 plantado.",
+  "Spots are flagged": "Los puntos ya est\u00e1n marcados",
+  "drop-in when material arrives.": "solo colocar cuando llegue el material.",
+  "Do not re-stake this bed.": "No volver a marcar esta cama.",
+  "Cannot finish this bed yet": "Esta cama no se puede terminar todav\u00eda",
+  "None on hand: ": "No hay en sitio: ",
+  "Stake the spots anyway so it is drop-in when material lands.":
+    "Marque los puntos de todos modos para solo colocar cuando llegue el material.",
+
+  // --- layout block
+  "How to lay it out": "C\u00f3mo distribuirlo",
+  "Nothing to lay out here.": "Aqu\u00ed no hay nada que distribuir.",
+  "Every plant in this bed is a tree or shrub. Those are drawn as individual symbols on the sheet, so stake them off the plan rather than to a spacing. Row layouts only apply to massed grasses and perennials.":
+    "Todas las plantas de esta cama son \u00e1rboles o arbustos. En el plano est\u00e1n dibujados uno por uno, as\u00ed que m\u00e1rquelos seg\u00fan el plano y no por espaciado. Las hileras solo aplican a pastos y perennes en masa.",
+  "Spec spacing fits this bed as drawn.":
+    "El espaciado del plano cabe en esta cama tal como est\u00e1 dibujado.",
+  "Tighter than spec": "M\u00e1s junto que el plano",
+  "of the drawn spacing.": "del espaciado del plano.",
+  "The count does not fit this bed at the spacing on the sheet, so it is packed to hold the full count inside the same footprint.":
+    "La cantidad no cabe en esta cama con el espaciado del plano, as\u00ed que va m\u00e1s junto para que entre todo en la misma \u00e1rea.",
+  " OC as drawn": " centro a centro como en el plano",
+  "spec ": "plano ",
+  "plant at ": "plantar a ",
+  " rows of ": " hileras de ",
+  ", rows ": ", hileras a ",
+  " apart": " de separaci\u00f3n",
+  "drift runs ": "el grupo mide ",
+  " ft &middot; start ": " pies &middot; empezar a ",
+  " in, stagger alternate rows ": " de la orilla, alternar hileras ",
+  "Drifts use ": "Los grupos ocupan ",
+  " ft. The other ": " pies. Los otros ",
+  " ft is mulch or open ground": " pies son mulch o terreno abierto",
+  "do not spread into it.": "no extender ah\u00ed.",
+  "Drifts fill the bed end to end.": "Los grupos llenan la cama de orilla a orilla.",
+  "The rectangle is the spacing pattern, not the bed shape":
+    "El rect\u00e1ngulo es el patr\u00f3n de espaciado, no la forma de la cama",
+  "the plan carries no bed outlines. Follow the real edge.":
+    "el plano no trae contornos. Siga la orilla real.",
+
+  // --- fit box
+  "Check the bed against the count": "Comparar la cama con la cantidad",
+  "Length": "Largo", "Width": "Ancho",
+  "Plan needs": "El plano necesita",
+  "You measured": "Usted midi\u00f3",
+  " sq ft spare": " pies\u00b2 de sobra",
+  " sq ft short": " pies\u00b2 de menos",
+  "it will not all fit": "no cabe todo",
+  "matches the plan": "coincide con el plano",
+  "Pace the bed and put the two numbers in. Beds are rarely a clean rectangle":
+    "Mida la cama a pasos y ponga los dos n\u00fameros. Las camas casi nunca son rect\u00e1ngulos exactos",
+  "use the average length and width, it only has to be close.":
+    "use el largo y el ancho promedio, solo tiene que ser aproximado.",
+  " sq ft": " pies\u00b2",
+
+  // --- spacing line
+  " OC triangular": " centro a centro tresbolillo",
+  "covers about ": "cubre unos ",
+
+  // --- zones and crews
+  "North yard": "Patio norte", "East side": "Lado este",
+  "West side": "Lado oeste", "South frontage": "Frente sur",
+  "Both crews, last": "Ambas cuadrillas, al final",
+  "Both crews": "Ambas cuadrillas",
+  "Crew A": "Cuadrilla A", "Crew B": "Cuadrilla B",
+  "Farthest from Duane Dr. Both crews open it together.":
+    "Lo m\u00e1s lejos de Duane Dr. Ambas cuadrillas lo abren juntas.",
+  "North to south. Narrow corridor - stage ahead of the crew, not beside it.":
+    "De norte a sur. Pasillo angosto: deje el material adelante de la cuadrilla, no a un lado.",
+  "North to south. Gated on the laydown and trailers clearing.":
+    "De norte a sur. Depende de que se despeje el \u00e1rea de material y los remolques.",
+  "Walk out to the road, never back through the job. Keep the gravel access corridor open to Day 10.":
+    "Salga hacia la calle, nunca de regreso por el trabajo. Mantenga abierto el paso de grava hasta el D\u00eda 10.",
+
+  // --- bed locations
+  "North side": "Lado norte", "South side": "Lado sur",
+  "North-east corner": "Esquina noreste", "North-west corner": "Esquina noroeste",
+  "South-east corner": "Esquina sureste", "South-west corner": "Esquina suroeste",
+  "By the building": "Junto al edificio"
+};
+
+// Longest first, so "Both crews" cannot eat the front of "Both crews, last".
+var ES_KEYS = Object.keys(ES).sort(function(a, b){ return b.length - a.length; });
+
+function esc_re(x){ return x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+
+// Substring replacement is not safe here. "Go" -> "Ir" turned "Gold Crinkled
+// Hair Grass" into "Irld Crinkled Hair Grass", because a short key can hide
+// inside a word that must not be touched -- and sorting longest-first does
+// nothing about that. Keys that begin or end on a word character get a \b
+// anchor on that side; keys carrying their own spaces match as written.
+var ES_RE = null;
+function esRules(){
+  if(ES_RE) return ES_RE;
+  ES_RE = ES_KEYS.map(function(k){
+    var pre  = /^[A-Za-z0-9]/.test(k) ? "\\b" : "";
+    var post = /[A-Za-z0-9]$/.test(k) ? "\\b" : "";
+    return {re: new RegExp(pre + esc_re(k) + post, "g"), to: ES[k]};
+  });
+  return ES_RE;
+}
+
+function translateNode(root){
+  if(lang !== "es" || !root) return;
+  var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+  var nodes = [], n;
+  while((n = walker.nextNode())) nodes.push(n);
+  nodes.forEach(function(node){
+    var v = node.nodeValue;
+    if(!v || !v.trim()) return;
+    var rules = esRules();
+    for(var i = 0; i < rules.length; i++){
+      v = v.replace(rules[i].re, rules[i].to);
+    }
+    if(v !== node.nodeValue) node.nodeValue = v;
+  });
+}
+
+function setLang(next){
+  lang = (next === "es") ? "es" : "en";
+  try{ localStorage.setItem("wolf-lang", lang); }catch(e){}
+  renderBeds();
+}
+
 function renderBeds(){
   var container = document.getElementById("groups");
   container.innerHTML = "";
@@ -1847,7 +2038,11 @@ function renderBeds(){
     '<input id="jumpBed" type="number" inputmode="numeric" min="1" max="44" ' +
       'placeholder="39">' +
     '<button id="jumpGo" class="jump-go">Go</button>' +
-    '<span class="jump-msg" id="jumpMsg"></span>';
+    '<span class="jump-msg" id="jumpMsg"></span>' +
+    '<span class="lang-wrap">' +
+      '<button class="lang-btn' + (lang === "en" ? " on" : "") + '" data-lang="en">EN</button>' +
+      '<button class="lang-btn' + (lang === "es" ? " on" : "") + '" data-lang="es">ES</button>' +
+    "</span>";
   container.appendChild(jump);
 
   var stakes = countBy(isStaked);
@@ -2082,6 +2277,14 @@ function renderBeds(){
     setTimeout(function(){ el.classList.remove("bed-flash"); }, 1600);
     jb.blur();
   }
+  Array.prototype.forEach.call(container.querySelectorAll(".lang-btn"),
+    function(b){
+      b.addEventListener("click", function(){ setLang(b.dataset.lang); });
+    });
+  // Everything is built in English, then the field views are translated in
+  // place. One code path builds the cards; the language is a late pass.
+  translateNode(container);
+
   if(jg) jg.addEventListener("click", goToBed);
   if(jb) jb.addEventListener("keydown", function(ev){
     if(ev.key === "Enter"){ ev.preventDefault(); goToBed(); }
