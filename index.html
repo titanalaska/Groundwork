@@ -417,6 +417,13 @@
   }
   .zname{flex:1;font-size:0.9rem;}
   .zcode{font-size:0.7rem;color:var(--ink-soft);letter-spacing:0.05em;}
+  /* Symbol lifted from the L102 schedule. Always on white -- the drawing is
+     black line on white, so it has to stay legible in dark mode too. */
+  .zsym{
+    width:34px;height:34px;flex-shrink:0;align-self:flex-start;
+    background:#fff;border:1px solid var(--line);border-radius:5px;
+    object-fit:contain;padding:1px;
+  }
   .zflag{
     font-size:0.68rem;color:var(--amber);font-weight:700;letter-spacing:0.03em;
     white-space:nowrap;
@@ -759,7 +766,7 @@
 <div id="flagsSlot"></div>
 <div id="groups"></div>
 
-<footer>Counts save as you tap. &middot; build v12</footer>
+<footer>Counts save as you tap. &middot; build v13</footer>
 
 <script>
 var JOBS = {
@@ -1235,6 +1242,12 @@ function renderGroups(){
 // no folder of its own), so every <img> hides itself on error and the lists
 // still work. The installed copy on the phone is the one that shows pictures.
 var BED_IMG = "./beds/";
+// The plant symbols cut straight out of the L102 schedule -- see
+// tools/extract-symbols.py. These are the sheet's own pixels, not
+// redrawn icons, so what shows here is exactly what is printed on the
+// drawing. In the field the lookup was: read the bed list, then go back
+// to the legend to remember the shape. This removes that trip.
+var SYM_IMG = "./symbols/";
 
 // The sheet tints callouts by category. Same four groups here, so a flag colour
 // on the ground can match the colour on the drawing.
@@ -1292,6 +1305,8 @@ function bedRow(code, qty){
     ? '<span class="zspace">' + spacingLine(code, qty) + "</span>" : "";
   var flag = DISCREPANCY[code] ? '<span class="zflag">check plan</span>' : "";
   return '<div class="zrow">' +
+    '<img class="zsym" src="' + SYM_IMG + code + '.png" alt="" ' +
+      'loading="lazy" decoding="async" onerror="this.remove()">' +
     '<span class="zqty">' + qty + "</span>" +
     '<span class="zname">' + SPECIES[code] +
       ' <span class="zcode">' + code + "</span>" + sp + "</span>" +
@@ -1970,7 +1985,9 @@ function renderBeds(){
 
 // Warms the service worker's cache so the pictures are there with no signal.
 function saveMapsOffline(btn){
-  var urls = [BED_IMG + "site-map.jpg"].concat(BEDS.map(function(b){
+  var urls = [BED_IMG + "site-map.jpg"].concat(
+    Object.keys(SPECIES).map(function(c){ return SYM_IMG + c + ".png"; })
+  ).concat(BEDS.map(function(b){
     return BED_IMG + b.bed + ".jpg";
   }));
   var done = 0, failed = 0;

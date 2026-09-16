@@ -40,7 +40,7 @@
  * Bump CACHE_VERSION on deploy.
  */
 
-const CACHE_VERSION = 'v12';
+const CACHE_VERSION = 'v13';
 const SHELL_CACHE = `wolf-shell-${CACHE_VERSION}`;
 
 // Bed crops and the site map: ~17 MB across 45 files, cached as they are viewed
@@ -51,7 +51,10 @@ const SHELL_CACHE = `wolf-shell-${CACHE_VERSION}`;
 // that then had to come back down over cell data. This cache survives deploys;
 // if a picture is ever genuinely replaced, change its filename.
 const BED_CACHE = 'wolf-beds';
-const MAX_BEDS = 60;
+// 44 bed pictures + the site map + 22 schedule symbols = 67 entries. At the
+// old cap of 60 the trim would have started silently deleting bed maps the
+// moment the symbols landed.
+const MAX_BEDS = 100;
 
 // Without these the app cannot open at all. Cached all-or-nothing.
 const CRITICAL = ['./', './index.html'];
@@ -222,7 +225,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  if (url.pathname.indexOf('/beds/') !== -1) {
+  if (url.pathname.indexOf('/beds/') !== -1 ||
+      url.pathname.indexOf('/symbols/') !== -1) {
     event.respondWith(cacheFirst(req).catch(() => safeNetwork(req)));
     return;
   }
