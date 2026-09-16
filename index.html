@@ -771,7 +771,7 @@
 <div id="flagsSlot"></div>
 <div id="groups"></div>
 
-<footer>Counts save as you tap. &middot; build v14</footer>
+<footer>Counts save as you tap. &middot; build v15</footer>
 
 <script>
 var JOBS = {
@@ -1205,7 +1205,11 @@ function renderItem(jobKey, name, target, isAlt){
     sym.className = "item-sym";
     sym.src = SYM_IMG + symCode + ".png";
     sym.alt = "";
-    sym.loading = "lazy";
+    // NOT lazy. These are created detached and inserted, and the lazy-load
+    // observer never fires for them -- the image sits visible in the viewport
+    // with complete=false forever. All 22 symbols together are 120K, so lazy
+    // loading bought nothing and cost correctness.
+    sym.loading = "eager";
     sym.decoding = "async";
     sym.onerror = function(){ this.remove(); };
     wrap.appendChild(sym);
@@ -1343,7 +1347,7 @@ function bedRow(code, qty){
   var flag = DISCREPANCY[code] ? '<span class="zflag">check plan</span>' : "";
   return '<div class="zrow">' +
     '<img class="zsym" src="' + SYM_IMG + code + '.png" alt="" ' +
-      'loading="lazy" decoding="async" onerror="this.remove()">' +
+      'loading="eager" decoding="async" onerror="this.remove()">' +
     '<span class="zqty">' + qty + "</span>" +
     '<span class="zname">' + SPECIES[code] +
       ' <span class="zcode">' + code + "</span>" + sp + "</span>" +
