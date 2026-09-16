@@ -383,6 +383,34 @@
   }
   .vt.active{border-color:var(--green);background:var(--green-bg);color:var(--green-text);}
 
+  .jump-bar{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    margin:14px 16px 0;padding:10px 12px;
+    border:1px solid var(--line);border-radius:10px;background:var(--card);
+  }
+  .jump-bar label{font-size:.82rem;font-weight:700;color:var(--ink-soft);}
+  .jump-bar input{
+    width:74px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;
+    background:var(--bg);color:var(--ink);font-family:inherit;font-size:1rem;
+    font-weight:700;font-variant-numeric:tabular-nums;-moz-appearance:textfield;
+  }
+  .jump-bar input::-webkit-outer-spin-button,
+  .jump-bar input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  .jump-go{
+    padding:9px 16px;border-radius:8px;border:1px solid var(--green);
+    background:var(--green);color:var(--on-green);
+    font-family:inherit;font-weight:700;font-size:.86rem;cursor:pointer;
+    touch-action:manipulation;
+  }
+  .jump-msg{font-size:.8rem;color:var(--danger);font-weight:700;}
+  /* Landing on a card in a wall of cards needs a tell. */
+  .bed-flash{
+    animation:bedflash 1.6s ease-out;
+  }
+  @keyframes bedflash{
+    0%,25%{box-shadow:0 0 0 4px var(--green);}
+    100%{box-shadow:0 0 0 0 rgba(0,0,0,0);}
+  }
   .zone-intro{
     margin:14px 16px 0;font-size:0.8rem;line-height:1.45;color:var(--ink-soft);
   }
@@ -771,7 +799,7 @@
 <div id="flagsSlot"></div>
 <div id="groups"></div>
 
-<footer>Counts save as you tap. &middot; build v15</footer>
+<footer>Counts save as you tap. &middot; build v16</footer>
 
 <script>
 var JOBS = {
@@ -1810,6 +1838,18 @@ function renderBeds(){
   var container = document.getElementById("groups");
   container.innerHTML = "";
 
+  // The 44 beds run in BUILD order, not numeric order, so finding bed 39 means
+  // scrolling past thirty-odd cards hunting for it. Type the number instead.
+  var jump = document.createElement("div");
+  jump.className = "jump-bar";
+  jump.innerHTML =
+    '<label for="jumpBed">Go to bed</label>' +
+    '<input id="jumpBed" type="number" inputmode="numeric" min="1" max="44" ' +
+      'placeholder="39">' +
+    '<button id="jumpGo" class="jump-go">Go</button>' +
+    '<span class="jump-msg" id="jumpMsg"></span>';
+  container.appendChild(jump);
+
   var stakes = countBy(isStaked);
   var massed = countBy(function(c){ return !isStaked(c); });
 
@@ -2022,6 +2062,31 @@ function renderBeds(){
     "exactly. The bed numbers above are what the sheet actually draws &mdash; settle " +
     "the three with Peter Briggs at Corvus, 907.222.2859, before ordering to them.";
   container.appendChild(note);
+  // Bed numbers are padded in the data (B39) but people type 39.
+  var jb = document.getElementById("jumpBed");
+  var jg = document.getElementById("jumpGo");
+  var jm = document.getElementById("jumpMsg");
+  function goToBed(){
+    var n = parseInt(jb.value, 10);
+    if(!n){ jm.textContent = ""; return; }
+    var id = "bed-B" + (n < 10 ? "0" + n : "" + n);
+    var el = document.getElementById(id);
+    if(!el){
+      jm.textContent = "No bed " + n;
+      return;
+    }
+    jm.textContent = "";
+    el.scrollIntoView({block: "start", behavior: "smooth"});
+    // Flash it, or you land on a wall of cards with no idea which one arrived.
+    el.classList.add("bed-flash");
+    setTimeout(function(){ el.classList.remove("bed-flash"); }, 1600);
+    jb.blur();
+  }
+  if(jg) jg.addEventListener("click", goToBed);
+  if(jb) jb.addEventListener("keydown", function(ev){
+    if(ev.key === "Enter"){ ev.preventDefault(); goToBed(); }
+  });
+
 }
 
 // Warms the service worker's cache so the pictures are there with no signal.
