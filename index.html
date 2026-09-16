@@ -474,6 +474,25 @@
     background:#fff;border:1px solid var(--line);border-radius:5px;
     object-fit:contain;padding:1px;
   }
+  /* Per-bed "still owed here" stepper. Only on staked or planted beds. */
+  .owe{
+    display:inline-flex;align-items:center;gap:2px;flex-shrink:0;
+    border:1px solid var(--line);border-radius:7px;background:var(--bg);
+    overflow:hidden;
+  }
+  .owe.on{border-color:#c8922a;background:rgba(200,146,42,0.14);}
+  .owe-b{
+    width:28px;height:28px;border:0;background:transparent;color:var(--ink-soft);
+    font-family:inherit;font-size:1rem;font-weight:700;cursor:pointer;
+    touch-action:manipulation;
+  }
+  .owe-n{
+    font-size:.7rem;font-weight:700;color:var(--ink-soft);
+    min-width:40px;text-align:center;font-variant-numeric:tabular-nums;
+  }
+  .owe.on .owe-n{color:#8a5d00;}
+  @media (prefers-color-scheme:dark){ .owe.on .owe-n{color:#f0c168;} }
+  :root[data-theme="dark"] .owe.on .owe-n{color:#f0c168;}
   .zflag{
     font-size:0.68rem;color:var(--amber);font-weight:700;letter-spacing:0.03em;
     white-space:nowrap;
@@ -816,7 +835,7 @@
 <div id="flagsSlot"></div>
 <div id="groups"></div>
 
-<footer>Counts save as you tap. &middot; build v23</footer>
+<footer>Counts save as you tap. &middot; build v24</footer>
 
 <script>
 var JOBS = {
@@ -1024,6 +1043,13 @@ var notes = {};
 var staked = {};           // bed -> true once its spots are marked out
 var planted = {};          // bed -> true once its plants are actually in
 var measured = {};         // bed -> {l, w} in feet, as paced out on site
+// bed -> {code: qty} still owed IN THAT BED. bedOutstanding() can only infer a
+// shortfall when a species has ZERO received; a partial one is invisible to it.
+// Miss Kim Lilac is 46 of 73, so the app cannot know bed 38 is short 8 while
+// bed 3 got all 5 -- only the person who planted it knows. This is where that
+// goes, and it is what lets a bed read "planted, spots staked, waiting on 8
+// Miss Kim" instead of just "planted".
+var owed = {};
 var dbDoc = null;
 var saveTimer = null;
 var lastSavedAt = 0;
@@ -1070,7 +1096,7 @@ function setOffline(isOffline, msg){
 
 function payload(){
   return {counts: state, notes: notes, staked: staked, planted: planted,
-          measured: measured, updatedAt: new Date().toISOString()};
+          measured: measured, owed: owed, updatedAt: new Date().toISOString()};
 }
 
 function applyPayload(p){
@@ -1080,6 +1106,7 @@ function applyPayload(p){
   if(p.staked && typeof p.staked === "object") staked = Object.assign({}, p.staked);
   if(p.planted && typeof p.planted === "object") planted = Object.assign({}, p.planted);
   if(p.measured && typeof p.measured === "object") measured = Object.assign({}, p.measured);
+  if(p.owed && typeof p.owed === "object") owed = Object.assign({}, p.owed);
   try{
     var savedLang = localStorage.getItem("wolf-lang");
     if(savedLang === "es" || savedLang === "en") lang = savedLang;
@@ -1417,17 +1444,31 @@ function imgOrNothing(src, alt, cls){
          '" loading="lazy" decoding="async" onerror="this.remove()">';
 }
 
-function bedRow(code, qty){
+// Shown only once a bed is staked or planted -- before that there is nothing
+// to be waiting on, and 44 beds of steppers is noise.
+function owedControl(bed, code, qty){
+  var cur = owedIn(bed, code);
+  return '<span class="owe' + (cur ? " on" : "") + '">' +
+    '<button class="owe-b" data-bed="' + bed + '" data-code="' + code +
+      '" data-max="' + qty + '" data-d="-1" aria-label="fewer owed">&minus;</button>' +
+    '<span class="owe-n">' + (cur ? "owe " + cur : "owe") + "</span>" +
+    '<button class="owe-b" data-bed="' + bed + '" data-code="' + code +
+      '" data-max="' + qty + '" data-d="1" aria-label="more owed">+</button>' +
+    "</span>";
+}
+
+function bedRow(code, qty, bed, showOwe){
   var sp = SPACING[code]
     ? '<span class="zspace">' + spacingLine(code, qty) + "</span>" : "";
   var flag = DISCREPANCY[code] ? '<span class="zflag">check plan</span>' : "";
+  var oc = showOwe ? owedControl(bed, code, qty) : "";
   return '<div class="zrow">' +
     '<img class="zsym" src="' + SYM_IMG + code + '.png" alt="" ' +
       'loading="eager" decoding="async" onerror="this.remove()">' +
     '<span class="zqty">' + qty + "</span>" +
     '<span class="zname">' + SPECIES[code] +
       ' <span class="zcode">' + code + "</span>" + sp + "</span>" +
-    flag + "</div>";
+    flag + oc + "</div>";
 }
 
 function bedSplit(items){
@@ -1866,14 +1907,31 @@ function codeRow(code){
 }
 
 // Species in this bed with NOTHING received yet -- they cannot be in the ground.
+function owedIn(bed, code){
+  return (owed[bed] && owed[bed][code]) || 0;
+}
+
+function setOwed(bed, code, qty, max){
+  qty = Math.max(0, Math.min(max, qty));
+  if(!owed[bed]) owed[bed] = {};
+  if(qty) owed[bed][code] = qty; else delete owed[bed][code];
+  if(!Object.keys(owed[bed]).length) delete owed[bed];
+  scheduleSave();
+}
+
 function bedOutstanding(b){
   var out = [];
   Object.keys(b.items).forEach(function(c){
     var row = codeRow(c);
     if(!row) return;
+    // Nothing received at all -- the whole bed's worth is owed, no input needed.
     if((state["h2s:" + slug(row[0])] || 0) === 0){
-      out.push({code: c, name: decode(row[0]), qty: b.items[c]});
+      out.push({code: c, name: decode(row[0]), qty: b.items[c], recorded: false});
+      return;
     }
+    // Partially received: only Matt knows how many this bed is still waiting on.
+    var q = owedIn(b.bed, c);
+    if(q) out.push({code: c, name: decode(row[0]), qty: q, recorded: true});
   });
   return out.sort(function(x, y){ return y.qty - x.qty; });
 }
@@ -1911,6 +1969,8 @@ var ES = {
   "walk it as one bed.": "rec\u00f3rrala como una sola cama.",
   "One is the parking lot planter \u2014 the dogwood and the tree. The other is against the building at the drive-under archway \u2014 the hair grass. They are not next to each other.":
     "Una es la jardinera del estacionamiento \u2014 el cornejo y el \u00e1rbol. La otra est\u00e1 junto al edificio en el arco de entrada \u2014 el pasto. No est\u00e1n una al lado de la otra.",
+  "owe ": "faltan ",
+  "owe": "falta",
   "Marking out": "Marcado",
   "spots to stake individually": "puntos para marcar uno por uno",
   "trees and shrubs, one symbol each": "\u00e1rboles y arbustos, un s\u00edmbolo cada uno",
@@ -2272,6 +2332,7 @@ function renderBeds(){
     if(isShort){
       var sh = document.createElement("div");
       sh.className = "bed-short" + (isPlanted ? " done" : "");
+      var anyRecorded = shortList.some(function(o){ return o.recorded; });
       sh.innerHTML = isPlanted
         ? "<b>Planted, short " + shortList.reduce(function(n, o){ return n + o.qty; }, 0) +
           "</b><br>Still owed here: " + shortText(shortList) +
@@ -2295,13 +2356,17 @@ function renderBeds(){
       card.insertAdjacentHTML("beforeend",
         '<div class="sub-head">Stake each one &mdash; ' + nStake + " spots</div>");
       card.insertAdjacentHTML("beforeend",
-        split.stake.map(function(c){ return bedRow(c, b.items[c]); }).join(""));
+        split.stake.map(function(c){
+          return bedRow(c, b.items[c], b.bed, isStakedDone || isPlanted);
+        }).join(""));
     }
     if(split.mass.length){
       card.insertAdjacentHTML("beforeend",
         '<div class="sub-head">Mass planting &mdash; mark the bed edge</div>');
       card.insertAdjacentHTML("beforeend",
-        split.mass.map(function(c){ return bedRow(c, b.items[c]); }).join(""));
+        split.mass.map(function(c){
+          return bedRow(c, b.items[c], b.bed, isStakedDone || isPlanted);
+        }).join(""));
       card.insertAdjacentHTML("beforeend", renderFit(b, split.mass));
     }
 
@@ -2355,6 +2420,18 @@ function renderBeds(){
     setTimeout(function(){ el.classList.remove("bed-flash"); }, 1600);
     jb.blur();
   }
+  Array.prototype.forEach.call(container.querySelectorAll(".owe-b"),
+    function(btn){
+      btn.addEventListener("click", function(){
+        var bed = btn.dataset.bed, code = btn.dataset.code;
+        var max = parseInt(btn.dataset.max, 10);
+        setOwed(bed, code, owedIn(bed, code) + parseInt(btn.dataset.d, 10), max);
+        renderBeds();
+        var back = document.getElementById("bed-" + bed);
+        if(back) back.scrollIntoView({block: "center"});
+      });
+    });
+
   Array.prototype.forEach.call(container.querySelectorAll(".lang-btn"),
     function(b){
       b.addEventListener("click", function(){ setLang(b.dataset.lang); });
