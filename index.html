@@ -234,6 +234,11 @@
   :root[data-theme="dark"] .bed-short b{color:#f0c168;}
   .item.over{border-left-color:var(--over);background:var(--over-bg);}
 
+  .item-sym{
+    width:32px;height:32px;flex-shrink:0;
+    background:#fff;border:1px solid var(--line);border-radius:5px;
+    object-fit:contain;padding:1px;
+  }
   .item-info{flex:1;min-width:0;}
   .item-name{font-size:0.95rem;font-weight:600;}
   .item-target{font-size:0.78rem;color:var(--ink-soft);margin-top:1px;}
@@ -766,7 +771,7 @@
 <div id="flagsSlot"></div>
 <div id="groups"></div>
 
-<footer>Counts save as you tap. &middot; build v13</footer>
+<footer>Counts save as you tap. &middot; build v14</footer>
 
 <script>
 var JOBS = {
@@ -1168,11 +1173,43 @@ function itemClass(v, target){
   return "item" + (v > target ? " over" : v === target ? " complete" : v > 0 ? " partial" : "");
 }
 
+// The counting list works in species NAMES; the symbols are keyed by the
+// sheet's CODE. codeRow() already resolves code -> checklist row (alias and
+// all), so inverting it gives name -> code without a second hand-built map
+// that could drift out of step.
+//
+// HOME2 SUITES ONLY. These symbols are cut from L102. Charter, Baxter and
+// WSRCC are different drawings with their own legends, and putting an L102
+// symbol beside a WSRCC species would assert something nobody has checked.
+var NAME_CODE = null;
+function codeForName(name){
+  if(!NAME_CODE){
+    NAME_CODE = {};
+    Object.keys(SPECIES).forEach(function(c){
+      var row = codeRow(c);
+      if(row) NAME_CODE[slug(row[0])] = c;
+    });
+  }
+  return NAME_CODE[slug(name)] || null;
+}
+
 function renderItem(jobKey, name, target, isAlt){
   var k = jobKey + ":" + slug(name);
   var received = state[k] || 0;
   var wrap = document.createElement("div");
   wrap.className = itemClass(received, target);
+
+  var symCode = (jobKey === "h2s") ? codeForName(name) : null;
+  if(symCode){
+    var sym = document.createElement("img");
+    sym.className = "item-sym";
+    sym.src = SYM_IMG + symCode + ".png";
+    sym.alt = "";
+    sym.loading = "lazy";
+    sym.decoding = "async";
+    sym.onerror = function(){ this.remove(); };
+    wrap.appendChild(sym);
+  }
 
   var info = document.createElement("div");
   info.className = "item-info";

@@ -40,7 +40,7 @@
  * Bump CACHE_VERSION on deploy.
  */
 
-const CACHE_VERSION = 'v13';
+const CACHE_VERSION = 'v14';
 const SHELL_CACHE = `wolf-shell-${CACHE_VERSION}`;
 
 // Bed crops and the site map: ~17 MB across 45 files, cached as they are viewed
