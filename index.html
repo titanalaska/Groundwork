@@ -993,7 +993,7 @@
 <div id="flagsSlot"></div>
 <div id="groups"></div>
 
-<footer>Counts save as you tap. &middot; build v28</footer>
+<footer>Counts save as you tap. &middot; build v29</footer>
 
 <script>
 var JOBS = {
@@ -1614,10 +1614,12 @@ function renderItem(jobKey, name, target, isAlt){
   plus.textContent = "+";
   plus.setAttribute("aria-label", "increase " + decode(name));
 
-  function commit(newVal){
+  // fromTyping: never write back into the field mid-keystroke, or the caret
+  // jumps on some Android keyboards. The display is normalised on blur instead.
+  function commit(newVal, fromTyping){
     newVal = Math.max(0, parseInt(newVal, 10) || 0);
     state[k] = newVal;
-    input.value = newVal;
+    if(!fromTyping) input.value = newVal;
     wrap.className = itemClass(newVal, target);
     renderTabs();
     scheduleSave();
@@ -1625,7 +1627,14 @@ function renderItem(jobKey, name, target, isAlt){
 
   minus.addEventListener("click", function(){ commit((state[k] || 0) - 1); });
   plus.addEventListener("click", function(){ commit((state[k] || 0) + 1); });
+  // "change" fires only on BLUR. On Android, dismissing the soft keyboard with
+  // the back gesture does not blur the field -- so a number he typed sat in the
+  // DOM, never reached state, and was destroyed the moment anything re-rendered.
+  // Matt lost 65 Karl Foerster to this on 9/16 and reported it as "won't stick".
+  // Commit as he types; keep change/blur for normalising the display.
+  input.addEventListener("input", function(){ commit(input.value, true); });
   input.addEventListener("change", function(){ commit(input.value); });
+  input.addEventListener("blur", function(){ commit(input.value); });
 
   counter.appendChild(minus);
   counter.appendChild(input);
