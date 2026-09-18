@@ -113,3 +113,19 @@ test('every plant row gets a pull control wired to the sheet', () => {
   assert.match(fn, /openPullSheet\(/, 'renderItem must wire a control to openPullSheet');
   assert.match(fn, /pulledTotal/, 'the row must show what has already been pulled');
 });
+
+test('the quantity box ships blank - never pre-filled from need or tally', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  const at = html.indexOf('function openPullSheet(');
+  const fn = html.slice(at, at + 9000);
+  const qtyLine = fn.split('\n').find(l => /qtyInput\.value\s*=/.test(l));
+  assert.ok(qtyLine === undefined || /=\s*""/.test(qtyLine),
+    'the quantity must ship empty: ' + qtyLine);
+});
+
+test('a pull refuses rather than queuing when there is no signal', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  const at = html.indexOf('function openPullSheet(');
+  const fn = html.slice(at, at + 9000);
+  assert.match(fn, /navigator\.onLine/, 'must check for signal before sending');
+});

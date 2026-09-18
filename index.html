@@ -252,6 +252,21 @@
   .item-name{font-size:0.95rem;font-weight:600;}
   .item-target{font-size:0.78rem;color:var(--ink-soft);margin-top:1px;}
 
+  .sheet-back{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;
+    align-items:flex-end;justify-content:center;z-index:50;}
+  .sheet{background:var(--card);border-top:1px solid var(--line);border-radius:14px 14px 0 0;
+    width:100%;max-width:560px;padding:16px;max-height:86vh;overflow:auto;}
+  .sheet h3{margin:0 0 4px;font-size:17px;}
+  .sheet .ref{font-size:13px;opacity:.75;margin-bottom:12px;}
+  .sheet label{display:block;font-size:13px;margin:10px 0 4px;}
+  .sheet input[type=number],.sheet input[type=text],.sheet input[type=password],.sheet select{
+    width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);
+    background:var(--bg);color:var(--fg);font-size:16px;}
+  .sheet .row{display:flex;gap:8px;margin-top:14px;}
+  .sheet .row button{flex:1;padding:12px;border-radius:10px;border:1px solid var(--line);
+    background:none;color:var(--fg);font-size:15px;cursor:pointer;}
+  .sheet .go{background:#2f6b3f;}
+  .sheet .msg{font-size:13px;margin-top:10px;min-height:18px;}
   .pull-btn{
     background:none;border:1px solid var(--line);color:var(--fg);
     border-radius:8px;padding:4px 10px;font-size:13px;margin-left:8px;cursor:pointer;
@@ -3833,9 +3848,254 @@ function invBulkPull(itemId, qty, job){
   });
 }
 
-// Replaced in the next task with the real sheet.
+function closeSheet(){
+  var b = document.getElementById("pullSheetBack");
+  if(b) b.remove();
+}
+
 function openPullSheet(jobKey, name, target){
-  console.log("pull sheet", jobKey, name, target);
+  closeSheet();
+  var sKey = slug(name);
+  var back = document.createElement("div");
+  back.className = "sheet-back";
+  back.id = "pullSheetBack";
+  back.addEventListener("click", function(e){ if(e.target === back) closeSheet(); });
+
+  var sheet = document.createElement("div");
+  sheet.className = "sheet";
+  back.appendChild(sheet);
+  document.body.appendChild(back);
+
+  var msg = document.createElement("div");
+  msg.className = "msg";
+  function say(t){ msg.textContent = t || ""; }
+
+  // ---- step 3: the actual pull -------------------------------------------
+  function showPullStep(){
+    sheet.innerHTML = "";
+    var h = document.createElement("h3");
+    h.textContent = decode(name);
+    var ref = document.createElement("div");
+    ref.className = "ref";
+    var tallied = state[jobKey + ":" + sKey] || 0;
+    ref.textContent = "need " + target + " - tallied " + tallied +
+                      " - mapped to " + (itemMap[sKey] ? itemMap[sKey].itemName : "?");
+
+    var qtyLabel = document.createElement("label");
+    qtyLabel.textContent = "How many actually left the yard?";
+    var qtyInput = document.createElement("input");
+    qtyInput.type = "number";
+    qtyInput.inputMode = "numeric";
+    qtyInput.min = "1";
+    // Deliberately blank. Neither the plan nor the tally is reliably what went
+    // on the truck, and a pre-filled number is one distracted tap from a wrong
+    // deduction that has to be unwound by hand in the Sheet.
+    qtyInput.value = "";
+
+    var jobLabel = document.createElement("label");
+    jobLabel.textContent = "Job";
+    var jobInput = document.createElement("input");
+    jobInput.type = "text";
+    jobInput.value = JOBS[jobKey] ? JOBS[jobKey].label : jobKey;
+
+    var row = document.createElement("div");
+    row.className = "row";
+    var cancel = document.createElement("button");
+    cancel.textContent = "Cancel";
+    cancel.addEventListener("click", closeSheet);
+    var go = document.createElement("button");
+    go.className = "go";
+    go.textContent = "Pull from inventory";
+
+    go.addEventListener("click", function(){
+      var qty = Math.max(0, parseInt(qtyInput.value, 10) || 0);
+      if(qty <= 0){ say("Enter how many left the yard."); return; }
+      if(!navigator.onLine){
+        // No queueing on purpose: applying this later, after the pull has been
+        // written down somewhere else, produces a double count.
+        say("Need signal to pull. Nothing was deducted.");
+        return;
+      }
+      go.disabled = true;
+      say("Pulling...");
+      invBulkPull(itemMap[sKey].itemId, qty, jobInput.value.trim())
+        .then(function(result){
+          var s = summarizePull(result);
+          if(s.ok && s.applied > 0){
+            pulls[sKey] = recordPull(pulls[sKey], {
+              qty: s.applied,
+              job: jobInput.value.trim(),
+              who: (invProfile() && invProfile().name) || "",
+              at: new Date().toISOString()
+            });
+            scheduleSave();
+            renderGroups();
+          }
+          say(s.text);
+          go.disabled = false;
+          if(s.ok) setTimeout(closeSheet, 1600);
+        })
+        .catch(function(err){
+          go.disabled = false;
+          if(err && err.authRequired){ setInvToken("", null); showSignInStep(); return; }
+          say(err && err.message ? err.message : "could not reach inventory");
+        });
+    });
+
+    row.appendChild(cancel);
+    row.appendChild(go);
+    sheet.appendChild(h);
+    sheet.appendChild(ref);
+    sheet.appendChild(qtyLabel);
+    sheet.appendChild(qtyInput);
+    sheet.appendChild(jobLabel);
+    sheet.appendChild(jobInput);
+    sheet.appendChild(row);
+    sheet.appendChild(msg);
+    qtyInput.focus();
+  }
+
+  // ---- step 2: map this species once -------------------------------------
+  function showMapStep(items){
+    sheet.innerHTML = "";
+    var h = document.createElement("h3");
+    h.textContent = "Which inventory item is " + decode(name) + "?";
+    var ref = document.createElement("div");
+    ref.className = "ref";
+    ref.textContent = "Picked once. Everyone on the checklist gets this mapping.";
+
+    var search = document.createElement("input");
+    search.type = "text";
+    search.placeholder = "Type to filter";
+
+    var sel = document.createElement("select");
+    sel.size = 8;
+
+    function fill(){
+      var q = search.value.toLowerCase();
+      sel.innerHTML = "";
+      items.filter(function(it){
+        return !q || String(it.name).toLowerCase().indexOf(q) !== -1;
+      }).slice(0, 200).forEach(function(it){
+        var o = document.createElement("option");
+        o.value = it.id;
+        o.textContent = it.name + "  (" + it.qty + " on hand)";
+        sel.appendChild(o);
+      });
+    }
+    // Seed the filter with the species name; usually right, saves typing. If it
+    // matches nothing, fall back to the full list rather than an empty box.
+    search.value = decode(name);
+    fill();
+    if(!sel.options.length){ search.value = ""; fill(); }
+    search.addEventListener("input", fill);
+
+    var row = document.createElement("div");
+    row.className = "row";
+    var cancel = document.createElement("button");
+    cancel.textContent = "Cancel";
+    cancel.addEventListener("click", closeSheet);
+    var go = document.createElement("button");
+    go.className = "go";
+    go.textContent = "Use this item";
+    go.addEventListener("click", function(){
+      if(!sel.value){ say("Pick an item first."); return; }
+      var chosen = items.filter(function(it){ return String(it.id) === String(sel.value); })[0];
+      var add = {};
+      add[sKey] = { itemId: chosen.id, itemName: chosen.name,
+                    mappedBy: (invProfile() && invProfile().name) || "",
+                    mappedAt: new Date().toISOString() };
+      itemMap = mergeItemMap(itemMap, add);
+      scheduleSave();
+      showPullStep();
+    });
+
+    row.appendChild(cancel);
+    row.appendChild(go);
+    sheet.appendChild(h);
+    sheet.appendChild(ref);
+    sheet.appendChild(search);
+    sheet.appendChild(sel);
+    sheet.appendChild(row);
+    sheet.appendChild(msg);
+  }
+
+  // ---- step 1: sign in ----------------------------------------------------
+  function showSignInStep(){
+    sheet.innerHTML = "";
+    var h = document.createElement("h3");
+    h.textContent = "Sign in to pull stock";
+    var ref = document.createElement("div");
+    ref.className = "ref";
+    ref.textContent = "Same PIN as the Inventory app. The Change Log records who pulled.";
+
+    var sel = document.createElement("select");
+    var pin = document.createElement("input");
+    pin.type = "password";
+    pin.inputMode = "numeric";
+    pin.placeholder = "PIN";
+
+    var row = document.createElement("div");
+    row.className = "row";
+    var cancel = document.createElement("button");
+    cancel.textContent = "Cancel";
+    cancel.addEventListener("click", closeSheet);
+    var go = document.createElement("button");
+    go.className = "go";
+    go.textContent = "Sign in";
+
+    say("Loading...");
+    invBootstrap().then(function(data){
+      var profiles = (data && data.profiles) || [];
+      profiles.filter(function(p){ return String(p.status) === "approved"; })
+              .forEach(function(p){
+        var o = document.createElement("option");
+        o.value = p.id;
+        o.textContent = p.name;
+        sel.appendChild(o);
+      });
+      say(sel.options.length ? "" : "No approved profiles found.");
+      // Held for the mapping step so it does not cost a second round trip.
+      sheet._items = (data && data.items) || [];
+    }).catch(function(){ say("Could not reach inventory."); });
+
+    go.addEventListener("click", function(){
+      if(!sel.value){ say("Pick your name."); return; }
+      go.disabled = true;
+      say("Checking...");
+      invVerifyPin(sel.value, pin.value).then(function(r){
+        go.disabled = false;
+        if(!r || !r.valid){
+          say("Wrong PIN" + (r && r.attemptsLeft !== undefined ? " - " + r.attemptsLeft + " tries left" : ""));
+          return;
+        }
+        if(!r.token){ say("That profile is " + (r.status || "not approved") + "."); return; }
+        setInvToken(r.token, {id: r.id, name: r.name});
+        if(itemMap[sKey]) showPullStep();
+        else showMapStep(sheet._items || []);
+      }).catch(function(){ go.disabled = false; say("Could not reach inventory."); });
+    });
+
+    row.appendChild(cancel);
+    row.appendChild(go);
+    sheet.appendChild(h);
+    sheet.appendChild(ref);
+    sheet.appendChild(sel);
+    sheet.appendChild(pin);
+    sheet.appendChild(row);
+    sheet.appendChild(msg);
+  }
+
+  // Route to the first step that is actually needed.
+  if(!invToken()){ showSignInStep(); return; }
+  if(!itemMap[sKey]){
+    say("Loading inventory...");
+    sheet.appendChild(msg);
+    invBootstrap().then(function(data){ showMapStep((data && data.items) || []); })
+                  .catch(function(){ say("Could not reach inventory."); });
+    return;
+  }
+  showPullStep();
 }
 </script>
 <script>
