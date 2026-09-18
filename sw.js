@@ -40,21 +40,37 @@
  * Bump CACHE_VERSION on deploy.
  */
 
-const CACHE_VERSION = 'v30';
+const CACHE_VERSION = 'v31';
 const SHELL_CACHE = `wolf-shell-${CACHE_VERSION}`;
 
-// Bed crops and the site map: ~17 MB across 45 files, cached as they are viewed
+// Bed crops and site maps: ~17 MB over 45 files for Home2Suites and ~10 MB over
+// 48 for WSRCC, cached as they are viewed
 // and warmed in bulk by the app's "Save all bed maps for offline" button.
 //
 // Deliberately NOT versioned. The pictures never change under a given filename,
 // and tying them to CACHE_VERSION meant every deploy silently threw away 17 MB
 // that then had to come back down over cell data. This cache survives deploys;
 // if a picture is ever genuinely replaced, change its filename.
-const BED_CACHE = 'wolf-beds';
-// 44 bed pictures + the site map + 22 schedule symbols = 67 entries. At the
-// old cap of 60 the trim would have started silently deleting bed maps the
-// moment the symbols landed.
-const MAX_BEDS = 100;
+// BUMPED to -v2 on 2026-09-17. This cache is cache-first and NEVER revalidates,
+// which is right while a picture is immutable under its filename -- but every
+// image was replaced in place that day: all 48 WSRCC maps and crops gained
+// species-coloured callout pills, and all 22 Home2Suites symbols were recoloured
+// and rescaled. Same filenames, new bytes, so an installed phone would have
+// served the old pictures forever. activate() deletes caches outside the keep
+// list, so renaming it is what forces the refetch.
+//
+// The cost is real: roughly 27 MB comes back down, some of it over cell data.
+// That is the documented trade for replacing a picture in place -- the
+// alternative the header suggests is versioning each FILENAME instead. Do not
+// bump this for a code-only change; CACHE_VERSION covers the shell.
+const BED_CACHE = 'wolf-beds-v2';
+// Home2Suites: 44 pictures + site map + 22 symbols = 67.
+// WSRCC:        47 pictures + site map + 15 symbols = 63.
+// 130 together. The cap was 100 when WSRCC landed, which would have silently
+// evicted the job a crew was not currently looking at -- the exact failure the
+// last bump was for. Keep headroom ahead of the next job, and remember the trim
+// deletes oldest-first with no warning.
+const MAX_BEDS = 220;
 
 // Without these the app cannot open at all. Cached all-or-nothing.
 const CRITICAL = ['./', './index.html'];
@@ -225,8 +241,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  if (url.pathname.indexOf('/beds/') !== -1 ||
-      url.pathname.indexOf('/symbols/') !== -1) {
+  // Per-job asset folders: /beds/ + /symbols/ for Home2Suites, /beds-wsrcc/ +
+  // /symbols-wsrcc/ for WSRCC. Matching the bare names missed every WSRCC file,
+  // so none of that job's maps cached for offline -- which is the whole point
+  // of this worker out in the yard.
+  if (/\/(beds|symbols)(-[a-z0-9]+)?\//.test(url.pathname)) {
     event.respondWith(cacheFirst(req).catch(() => safeNetwork(req)));
     return;
   }

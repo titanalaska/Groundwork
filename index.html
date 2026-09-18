@@ -1082,23 +1082,32 @@ var JOBS = {
   wsrcc: {
     label: "WSRCC &mdash; 5800 Boundary Ave",
     short: "WSRCC",
+    // Targets are the L501 Planting Schedule of the 01/29/2026 PERMIT DRAWINGS
+    // (MOA stamp X26-1126, 04/21/26), which superseded the set these were first
+    // built from. Quaking Aspen is gone -- it is not on the current plan at all
+    // -- and Miss Canada Lilac is new. Everything totals 1008.
+    //
+    // "Colorado Green Spruce" keeps its old NAME on purpose: the schedule reads
+    // Picea pungens 'Fat Albert', a BLUE cultivar, and that question is open
+    // with Corvus. Renaming it here would both assert an unanswered question and
+    // orphan the 20 already counted against this key.
     groups: {
       trees: { label: "Trees", items: [
-        ["Columnar Swedish Aspen", 20],
-        ["Helena Maple", 19],
-        ["Paper Birch", 27],
-        ["Quaking Aspen", 35],
-        ["Scotch Pine", 19],
-        ["Colorado Green Spruce", 20]
+        ["Columnar Swedish Aspen", 19],
+        ["Helena Maple", 4],
+        ["Paper Birch", 7],
+        ["Scotch Pine", 16],
+        ["Colorado Green Spruce", 19]
       ]},
       shrubs: { label: "Shrubs", items: [
-        ["Abbottswood Potentilla", 117],
-        ["Goldfinger Potentilla", 97],
-        ["Pink Beauty Potentilla", 120],
+        ["Abbottswood Potentilla", 118],
+        ["Goldfinger Potentilla", 96],
+        ["Pink Beauty Potentilla", 121],
         ["Birchleaf Spirea", 65],
-        ["Ivory Halo Dogwood", 156],
-        ["Red-Twig Dogwood", 116],
-        ["Hedge Cotoneaster", 58]
+        ["Ivory Halo Dogwood", 155],
+        ["Red-Twig Dogwood", 118],
+        ["Hedge Cotoneaster", 59],
+        ["Miss Canada Lilac", 72]
       ]},
       grasses: { label: "Grasses", items: [
         ["Karl Foerster Reed Grass", 65],
@@ -1106,8 +1115,10 @@ var JOBS = {
       ]}
     },
     flags: [
-      "&#9888;&#65039; <strong>Pink Beauty Potentilla</strong> &mdash; 62 sorted, short 58 of 120. 3 additional units were rejected on quality and not counted.",
-      "&#9989; <strong>Red-Twig Dogwood shows 176 against a target of 116 &mdash; that is correct, not a miscount.</strong> Ivory Halo is short and Chris and Todd approved filling that gap with surplus Red-Twig. 116 spec + 60 covering the Ivory Halo shortfall = 176. Total dogwood still lands at 272, same as the drawing."
+      "&#9888;&#65039; <strong>The plan changed and these targets moved.</strong> The current set is dated 01/29/2026 and was approved by the Municipality on 04/21/26; it reached Titan on 09/16/26. <strong>Quaking Aspen is off this job entirely</strong> &mdash; it was 35, it is now not on the drawing. Trees dropped by 75 and shrubs rose by 75, because zone N sits under overhead lines: the revision replaced 71 required trees with 6&#39; utility shrubs.",
+      "&#9888;&#65039; <strong>Miss Canada Lilac &mdash; 72 needed, none sourced.</strong> New to this revision, so it has never been on an order. Spec is <strong>6&#39; minimum height</strong>, and that height is code, not preference: L101 uses these in lieu of 71 required trees in zone N plus 1 in W1. The 9 in the nursery are 5 gal and will not meet it. Long lead &mdash; do not let this sit.",
+      "&#9888;&#65039; <strong>Pink Beauty Potentilla</strong> &mdash; 62 sorted, short 59 of 121. 3 additional units were rejected on quality and not counted.",
+      "&#9989; <strong>Red-Twig Dogwood shows 176 against a target of 118 &mdash; that is correct, not a miscount.</strong> Ivory Halo is short and Chris and Todd approved filling that gap with surplus Red-Twig. 118 spec + 58 covering the Ivory Halo shortfall = 176. Total dogwood lands at 273 &mdash; 155 + 118 &mdash; and 97 + 176 on hand is exactly 273."
     ]
   }
 };
@@ -1191,6 +1202,44 @@ var DISCREPANCY = {
   SBT: "callouts 58 vs schedule 63",
 };
 
+
+// ---- WSRCC 5800 Boundary Ave ------------------------------------------------
+// Built by tools/wsrcc-beds.py from the VECTOR plan (PERMIT DRAWINGS 01/29/2026,
+// MOA stamp X26-1126). Unlike Home2Suites, nothing here was read by eye: every
+// quantity and position comes off the text layer, and the totals reconcile to
+// the L501 schedule. The four rows that do not are the sheet disagreeing with
+// itself, flagged below rather than quietly adjusted.
+//
+// An "area" is a callout stack plus a spatial merge, because WSRCC places many
+// shrubs individually along the perimeter instead of massing them. The merge
+// radius is a JUDGEMENT (80pt -> 47 areas); it is not off the drawing. Re-run
+// the tool to change it, and re-bake the map, because MAP_XY must keep matching.
+var WSRCC_BEDS = [{"bed":"B01","where":"North side","units":90,"items":{"CA":46,"CS":44},"zone":"North"},{"bed":"B02","where":"North side","units":33,"items":{"CA":12,"CS":14,"PFP":6,"SP":1},"zone":"North"},{"bed":"B03","where":"North side","units":130,"items":{"CA":61,"CS":62,"PS":3,"SP":4},"zone":"North"},{"bed":"B04","where":"North side","units":1,"items":{"BP":1},"zone":"North"},{"bed":"B05","where":"West side","units":37,"items":{"PP":13,"PS":6,"SP":18},"zone":"North"},{"bed":"B06","where":"North side","units":26,"items":{"PP":6,"PS":7,"SP":13},"zone":"North"},{"bed":"B07","where":"West side","units":14,"items":{"PFA":6,"PFG":6,"SP":2},"zone":"North"},{"bed":"B08","where":"Interior","units":98,"items":{"CA":8,"CAK":21,"CAO":32,"SB":37},"zone":"North"},{"bed":"B09","where":"East side","units":19,"items":{"BP":1,"CA":7,"CL":10,"PT":1},"zone":"North"},{"bed":"B10","where":"East side","units":6,"items":{"CA":2,"CL":3,"PT":1},"zone":"North"},{"bed":"B11","where":"West side","units":30,"items":{"CL":20,"PFP":6,"SP":4},"zone":"Middle"},{"bed":"B12","where":"East side","units":15,"items":{"BP":2,"CA":5,"CL":7,"PT":1},"zone":"Middle"},{"bed":"B13","where":"Interior","units":106,"items":{"CAK":44,"CAO":34,"SB":28},"zone":"Middle"},{"bed":"B14","where":"East side","units":17,"items":{"BP":1,"CA":6,"CL":9,"PT":1},"zone":"Middle"},{"bed":"B15","where":"West side","units":14,"items":{"PFG":6,"PFP":6,"SP":2},"zone":"Middle"},{"bed":"B16","where":"West side","units":7,"items":{"PFA":6,"SP":1},"zone":"Middle"},{"bed":"B17","where":"Interior","units":2,"items":{"PTE":2},"zone":"Middle"},{"bed":"B18","where":"Interior","units":2,"items":{"PTE":2},"zone":"Middle"},{"bed":"B19","where":"Interior","units":33,"items":{"BP":2,"CAO":8,"PFA":6,"PFG":6,"PFP":10,"PTE":1},"zone":"Middle"},{"bed":"B20","where":"Interior","units":1,"items":{"PTE":1},"zone":"Middle"},{"bed":"B21","where":"West side","units":11,"items":{"PFA":4,"PFG":2,"PFP":3,"PTE":2},"zone":"South"},{"bed":"B22","where":"Interior","units":32,"items":{"PFA":18,"PFG":4,"PFP":6,"PTE":4},"zone":"South"},{"bed":"B23","where":"East side","units":13,"items":{"PFA":5,"PFG":2,"PFP":3,"PTE":3},"zone":"Middle"},{"bed":"B24","where":"East side","units":10,"items":{"AP":1,"CA":4,"CL":5},"zone":"Middle"},{"bed":"B25","where":"West side","units":14,"items":{"PFG":6,"PFP":6,"SP":2},"zone":"South"},{"bed":"B26","where":"East side","units":18,"items":{"AP":3,"CA":4,"CL":5,"PFG":6},"zone":"South"},{"bed":"B27","where":"South frontage","units":15,"items":{"PFA":14,"SP":1},"zone":"South"},{"bed":"B28","where":"Interior","units":11,"items":{"PFG":4,"PFP":7},"zone":"South"},{"bed":"B29","where":"Interior","units":19,"items":{"PFG":8,"PFP":11},"zone":"South"},{"bed":"B30","where":"Interior","units":10,"items":{"PFA":4,"PFP":6},"zone":"South"},{"bed":"B31","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B32","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B33","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B34","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B35","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B36","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B37","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B38","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B39","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B40","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B41","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B42","where":"South frontage","units":6,"items":{"PFA":5,"SP":1},"zone":"South"},{"bed":"B43","where":"South frontage","units":32,"items":{"PFA":7,"PFG":9,"PFP":16},"zone":"South"},{"bed":"B44","where":"South frontage","units":29,"items":{"PFA":12,"PFG":9,"PFP":8},"zone":"South"},{"bed":"B45","where":"South frontage","units":35,"items":{"PFA":11,"PFG":10,"PFP":14},"zone":"South"},{"bed":"B46","where":"South frontage","units":31,"items":{"PFA":10,"PFG":12,"PFP":9},"zone":"South"},{"bed":"B47","where":"South frontage","units":19,"items":{"PFA":9,"PFG":6,"PFP":4},"zone":"South"}];
+var WSRCC_SPECIES = {"AP":"Helena Maple","BP":"Paper Birch","PTE":"Columnar Swedish Aspen","PP":"Fat Albert Colorado Blue Spruce","PS":"Scotch Pine","CS":"Red-twig Dogwood","CA":"'Ivory Halo' Dogwood","CL":"Hedge Cotoneaster","PFA":"Abbottswood Potentilla","PFG":"Goldfinger Potentilla","PFP":"Pink Beauty Potentilla","SB":"Birch-Leaved Spirea","SP":"'Miss Canada' Lilac","CAK":"Karl Foerster Feather Reed Grass","CAO":"Overdam Variegated Reed Grass","PT":"UNSCHEDULED - confirm with Corvus"};
+var WSRCC_SPACING = {"CAK":"18\" OC triangular","CAO":"18\" OC triangular"};
+// Geometric bands only. There is no build order or crew split for this job yet
+// -- Wolf's came from the precon deck, and inventing one here would read as
+// authoritative later. Crew is deliberately blank until Matt sets it.
+var WSRCC_ZONES = {
+  North:  {name: "North - Boundary Ave frontage", crew: "", order: 1,
+           note: "Geometric band, not a build order. No crew split set for this job yet."},
+  Middle: {name: "Middle - around the training center", crew: "", order: 2,
+           note: "Geometric band, not a build order. No crew split set for this job yet."},
+  South:  {name: "South - back frontage", crew: "", order: 3,
+           note: "Geometric band, not a build order. No crew split set for this job yet."}
+};
+var WSRCC_MAP_PLAN = [4014, 2944];
+var WSRCC_MAP_XY = {"B01":[2499,319],"B02":[58,498],"B03":[557,499],"B04":[3703,507],"B05":[628,698],"B06":[2487,645],"B07":[58,766],"B08":[2145,730],"B09":[3341,743],"B10":[3341,953],"B11":[50,1016],"B12":[3341,1155],"B13":[1111,1390],"B14":[3341,1461],"B15":[58,1584],"B16":[58,1832],"B17":[1008,1827],"B18":[1551,1835],"B19":[2203,1783],"B20":[2772,1821],"B21":[569,1992],"B22":[2097,1995],"B23":[3145,1963],"B24":[3412,1958],"B25":[58,2050],"B26":[3401,2175],"B27":[62,2310],"B28":[1060,2258],"B29":[1457,2243],"B30":[2634,2240],"B31":[389,2475],"B32":[664,2474],"B33":[939,2473],"B34":[1215,2472],"B35":[1490,2471],"B36":[1763,2470],"B37":[2040,2469],"B38":[2315,2468],"B39":[2590,2467],"B40":[2866,2466],"B41":[3141,2466],"B42":[3464,2606],"B43":[385,2670],"B44":[1022,2670],"B45":[1700,2670],"B46":[2376,2670],"B47":[3076,2670]};
+// Where the plan's own callouts disagree with its own schedule. PT is worse than
+// a count mismatch: 4 callouts carry a label with NO schedule row at all.
+var WSRCC_DISCREPANCY = {
+  PTE: "callouts 15 vs schedule 19",
+  CS: "callouts 120 vs schedule 118",
+  PFA: "callouts 117 vs schedule 118",
+  SP: "callouts 71 vs schedule 72",
+  PT: "4 on the plan, no schedule row - open with Corvus"
+};
+
 var LOCAL_KEY = "wolf-field-checklist-v1";
 var DOC_PATH = "checklist/wolf";
 
@@ -1208,6 +1257,13 @@ var measured = {};         // bed -> {l, w} in feet, as paced out on site
 // goes, and it is what lets a bed read "planted, spots staked, waiting on 8
 // Miss Kim" instead of just "planted".
 var owed = {};
+
+// Bed ids repeat across jobs -- Home2Suites numbers B01-B44 and WSRCC B01-B47 --
+// so these per-bed maps MUST be namespaced or one job's marks appear on the
+// other. Home2Suites deliberately keeps the bare id: every checklist already
+// saved on a crew's phone uses it, and re-keying would strand their work.
+function bedKeyFor(job, bed){ return job === "h2s" ? bed : job + ":" + bed; }
+function bedKey(bed){ return bedKeyFor(currentJob, bed); }
 // The state as it stood when Matt last posted a daily log. The draft is a DIFF
 // against this, so without it there is nothing to draft. See draftDailyLog().
 var lastLogged = null;
@@ -1455,9 +1511,10 @@ function renderTabs(){
       if(jobKey === currentJob) return;
       goto(function(){
         currentJob = jobKey;
-        // The zone pull list only exists for Home2Suites; leaving that tab
-        // drops back to the species view so the toggle never lies.
-        if(jobKey !== "h2s") view = "species";
+        applyJobData();
+        // The zone pull list exists for Home2Suites and WSRCC; leaving for a tab
+        // without one drops back to the species view so the toggle never lies.
+        if(!hasBedView(jobKey)) view = "species";
       });
     });
     tabsEl.appendChild(btn);
@@ -1554,13 +1611,18 @@ function itemClass(v, target){
 // all), so inverting it gives name -> code without a second hand-built map
 // that could drift out of step.
 //
-// HOME2 SUITES ONLY. These symbols are cut from L102. Charter, Baxter and
-// WSRCC are different drawings with their own legends, and putting an L102
-// symbol beside a WSRCC species would assert something nobody has checked.
-var NAME_CODE = null;
+// Only for jobs with their OWN symbol set. Charter and Baxter are different
+// drawings with their own legends, and putting an L102 symbol beside one of
+// their species would assert something nobody has checked. WSRCC qualifies now:
+// its symbols are cut from its own L501, not borrowed.
+//
+// Cached PER JOB -- the map is built from whichever SPECIES is loaded, so one
+// shared cache would serve Home2Suites' codes to WSRCC after a tab switch.
+var NAME_CODE = null, NAME_CODE_JOB = null;
 function codeForName(name){
-  if(!NAME_CODE){
+  if(!NAME_CODE || NAME_CODE_JOB !== currentJob){
     NAME_CODE = {};
+    NAME_CODE_JOB = currentJob;
     Object.keys(SPECIES).forEach(function(c){
       var row = codeRow(c);
       if(row) NAME_CODE[slug(row[0])] = c;
@@ -1575,7 +1637,7 @@ function renderItem(jobKey, name, target, isAlt){
   var wrap = document.createElement("div");
   wrap.className = itemClass(received, target);
 
-  var symCode = (jobKey === "h2s") ? codeForName(name) : null;
+  var symCode = hasBedView(jobKey) ? codeForName(name) : null;
   if(symCode){
     var sym = document.createElement("img");
     sym.className = "item-sym";
@@ -1675,6 +1737,7 @@ var BED_IMG = "./beds/";
 // to the legend to remember the shape. This removes that trip.
 var SYM_IMG = "./symbols/";
 
+
 // The sheet tints callouts by category. Same four groups here, so a flag colour
 // on the ground can match the colour on the drawing.
 var CATEGORY = {
@@ -1682,6 +1745,11 @@ var CATEGORY = {
   CS: "shrubs", JH: "shrubs", JS: "shrubs", RSA: "shrubs",
   SBG: "shrubs", SBT: "shrubs", SPA: "shrubs", SV: "shrubs",
   CAK: "grasses", DFA: "grasses",
+  // WSRCC-only. No key collides with a Wolf code, so one shared table is safe.
+  PP: "trees", PS: "trees",
+  CA: "shrubs", CL: "shrubs", PFA: "shrubs", PFG: "shrubs", PFP: "shrubs",
+  SB: "shrubs", SP: "shrubs",
+  CAO: "grasses",
   A: "perennials", AD: "perennials", APV: "perennials",
   G: "perennials", H: "perennials", IS: "perennials",
 };
@@ -1745,8 +1813,12 @@ function bedRow(code, qty, bed, showOwe){
   var flag = DISCREPANCY[code] ? '<span class="zflag">check plan</span>' : "";
   var oc = showOwe ? owedControl(bed, code, qty) : "";
   return '<div class="zrow">' +
-    '<img class="zsym" src="' + SYM_IMG + code + '.png" alt="" ' +
-      'loading="eager" decoding="async" onerror="this.remove()">' +
+    // Codes in NO_SYM have no symbol on the sheet at all, so do not request one:
+    // onerror hides it, but the phone still pays for four 404s every render.
+    (NO_SYM.indexOf(code) === -1
+      ? '<img class="zsym" src="' + SYM_IMG + code + '.png" alt="" ' +
+          'loading="eager" decoding="async" onerror="this.remove()">'
+      : '') +
     '<span class="zqty">' + qty + "</span>" +
     '<span class="zname">' + SPECIES[code] +
       ' <span class="zcode">' + code + "</span>" + sp + "</span>" +
@@ -2140,6 +2212,7 @@ window.addEventListener("popstate", function(ev){
   var s = ev.state || {job: "h2s", view: "species", lb: null};
   restoring = true;
   currentJob = s.job || "h2s";
+  applyJobData();
   view = s.view || "species";
   showLightbox(s.lb || null, s.lbTitle || "");
   renderAll();
@@ -2179,8 +2252,8 @@ var MAP_LABEL = {open: "Not started", staked: "Staked out",
                  short: "Planted, still owed", done: "Planted, complete"};
 
 function bedMapState(b){
-  if(planted[b.bed]) return bedOutstanding(b).length ? "short" : "done";
-  if(staked[b.bed]) return "staked";
+  if(planted[bedKey(b.bed)]) return bedOutstanding(b).length ? "short" : "done";
+  if(staked[bedKey(b.bed)]) return "staked";
   return "open";
 }
 
@@ -2224,16 +2297,36 @@ function mapLegendHTML(){
 //
 // So the shortfall is DERIVED from the counts, never tracked by hand. It cannot
 // go stale, and it is the same number Chris and Todd see on the report.
-var SPECIES_ALIAS = {
+var H2S_SPECIES_ALIAS = {
   // The bed callouts and the sort list name this one differently. It is the
   // biggest species on the job (338), so it is pinned rather than fuzzy-matched.
   IS: "Alaska Flag Iris"
 };
-var CODE_ROW = null;
+// WSRCC's schedule names and its checklist names differ on seven species. All
+// pinned rather than fuzzy-matched: the prefix fallback below silently picks the
+// first row that merely STARTS the same, which is how a code ends up resolving
+// to the wrong plant. PT is absent on purpose -- it has no checklist row because
+// it is not on the schedule.
+var WSRCC_SPECIES_ALIAS = {
+  PP: "Colorado Green Spruce",      // schedule says 'Fat Albert' BLUE -- open with Corvus
+  SB: "Birchleaf Spirea",
+  CS: "Red-Twig Dogwood",
+  CA: "Ivory Halo Dogwood",
+  SP: "Miss Canada Lilac",
+  CAK: "Karl Foerster Reed Grass",
+  CAO: "Overdam Reed Grass"
+};
+var SPECIES_ALIAS = H2S_SPECIES_ALIAS;
+// Keyed per job. It was pinned to JOBS.h2s.groups and cached globally, so every
+// WSRCC code was resolved against Home2Suites' checklist -- which silently fed
+// the wrong row to bedOutstanding, the "still owed here" logic, as well as the
+// symbols.
+var CODE_ROW = null, CODE_ROW_JOB = null;
 function codeRow(code){
-  if(!CODE_ROW){
+  if(!CODE_ROW || CODE_ROW_JOB !== currentJob){
     CODE_ROW = {};
-    var rows = [], g = JOBS.h2s.groups;
+    CODE_ROW_JOB = currentJob;
+    var rows = [], g = JOBS[currentJob].groups;
     Object.keys(g).forEach(function(gk){
       g[gk].items.forEach(function(r){ rows.push(r); });
     });
@@ -2255,19 +2348,21 @@ function codeRow(code){
 }
 
 // Species in this bed with NOTHING received yet -- they cannot be in the ground.
-function owedIn(bed, code){
-  return (owed[bed] && owed[bed][code]) || 0;
+function owedIn(bed, code, job){
+  var k = bedKeyFor(job || currentJob, bed);
+  return (owed[k] && owed[k][code]) || 0;
 }
 
 function setOwed(bed, code, qty, max){
   qty = Math.max(0, Math.min(max, qty));
-  if(!owed[bed]) owed[bed] = {};
-  if(qty) owed[bed][code] = qty; else delete owed[bed][code];
-  if(!Object.keys(owed[bed]).length) delete owed[bed];
+  var k = bedKey(bed);
+  if(!owed[k]) owed[k] = {};
+  if(qty) owed[k][code] = qty; else delete owed[k][code];
+  if(!Object.keys(owed[k]).length) delete owed[k];
   scheduleSave();
 }
 
-function bedOutstanding(b){
+function bedOutstanding(b, job){
   var out = [];
   Object.keys(b.items).forEach(function(c){
     var row = codeRow(c);
@@ -2278,7 +2373,7 @@ function bedOutstanding(b){
       return;
     }
     // Partially received: only Matt knows how many this bed is still waiting on.
-    var q = owedIn(b.bed, c);
+    var q = owedIn(b.bed, c, job);
     if(q) out.push({code: c, name: decode(row[0]), qty: q, recorded: true});
   });
   return out.sort(function(x, y){ return y.qty - x.qty; });
@@ -2492,7 +2587,8 @@ function setLang(next){
 // Add a pair here as each one is confirmed in the field. Do NOT renumber beds
 // to fix this: the numbers are on printed material and in people's heads, and
 // renumbering mid-job is how the wrong thing gets planted.
-var BED_LINKS = {
+var WSRCC_BED_LINKS = {};   // no linked beds on this job
+var H2S_BED_LINKS = {
   B41: {kind: "split", other: "44",
         note: "Same planter as bed 44. One callout stack on the sheet, 86 units together \u2014 walk it as one bed."},
   B44: {kind: "split", other: "41",
@@ -2500,6 +2596,43 @@ var BED_LINKS = {
   B23: {kind: "shared", other: null,
         note: "One is the parking lot planter \u2014 the dogwood and the tree. The other is against the building at the drive-under archway \u2014 the hair grass. They are not next to each other."}
 };
+
+// Placed here on purpose: this block captures Home2Suites' globals into H2S,
+// and BEDS/SPECIES/SPACING/ZONES/DISCREPANCY/MAP_PLAN/MAP_XY/BED_LINKS are
+// declared at various points ABOVE. Defining it any earlier captures undefined
+// for whichever ones have not run yet -- which is a crash the moment a tab
+// switch calls applyJobData(). Keep it below the last declaration it reads.
+// Home2Suites' data stays in the globals the rest of this file already reads;
+// applyJobData() just points those globals at whichever job is on screen. Doing
+// it this way rather than threading a job argument through every call site keeps
+// the change small on a file crews depend on.
+var BED_LINKS = {};
+var H2S = {beds: BEDS, species: SPECIES, spacing: SPACING, zones: ZONES,
+           disc: DISCREPANCY, mapPlan: MAP_PLAN, mapXY: MAP_XY,
+           bedImg: "./beds/", symImg: "./symbols/", offlineMB: 17,
+           links: H2S_BED_LINKS, noSym: []};
+var WSRCC = {beds: WSRCC_BEDS, species: WSRCC_SPECIES, spacing: WSRCC_SPACING,
+             zones: WSRCC_ZONES, disc: WSRCC_DISCREPANCY,
+             mapPlan: WSRCC_MAP_PLAN, mapXY: WSRCC_MAP_XY,
+             bedImg: "./beds-wsrcc/", symImg: "./symbols-wsrcc/", offlineMB: 10,
+             links: WSRCC_BED_LINKS,
+             // PT has callouts on L102 but no row in the L501 schedule, so
+             // there is no symbol on the sheet to cut. Not a missing file.
+             noSym: ["PT"]};
+// WSRCC codes collide with Wolf's (CS, AP, BP, PTE, CAK are in both jobs and are
+// different drawings), which is why the symbol folders are separate.
+function applyJobData(){
+  var d = (currentJob === "wsrcc") ? WSRCC : H2S;
+  BEDS = d.beds; SPECIES = d.species; SPACING = d.spacing; ZONES = d.zones;
+  DISCREPANCY = d.disc; MAP_PLAN = d.mapPlan; MAP_XY = d.mapXY;
+  BED_IMG = d.bedImg; SYM_IMG = d.symImg; OFFLINE_MB = d.offlineMB;
+  BED_LINKS = d.links; NO_SYM = d.noSym;
+  SPECIES_ALIAS = (currentJob === "wsrcc") ? WSRCC_SPECIES_ALIAS : H2S_SPECIES_ALIAS;
+  CODE_ROW = null; NAME_CODE = null;   // rebuilt against the job now loaded
+}
+var OFFLINE_MB = 17;
+var NO_SYM = [];
+function hasBedView(job){ return job === "h2s" || job === "wsrcc"; }
 
 function renderBeds(){
   var container = document.getElementById("groups");
@@ -2511,8 +2644,8 @@ function renderBeds(){
   jump.className = "jump-bar";
   jump.innerHTML =
     '<label for="jumpBed">Go to bed</label>' +
-    '<input id="jumpBed" type="number" inputmode="numeric" min="1" max="44" ' +
-      'placeholder="39">' +
+    '<input id="jumpBed" type="number" inputmode="numeric" min="1" max="' +
+      BEDS.length + '" placeholder="' + Math.min(39, BEDS.length) + '">' +
     '<button id="jumpGo" class="jump-go">Go</button>' +
     '<span class="jump-msg" id="jumpMsg"></span>' +
     '<span class="lang-wrap">' +
@@ -2591,10 +2724,13 @@ function renderBeds(){
   var offline = document.createElement("button");
   offline.className = "offline-btn";
   offline.id = "offlineBtn";
-  offline.textContent = "Save all bed maps for offline (17 MB)";
+  offline.textContent = "Save all bed maps for offline (" + OFFLINE_MB + " MB)";
   offline.addEventListener("click", function(){ saveMapsOffline(offline); });
   container.appendChild(offline);
 
+  // "Where am I?" needs per-bed lat/lon. Wolf's beds carry them; WSRCC's are not
+  // georeferenced yet, so the button is hidden rather than shown doing nothing.
+  var hasGeo = BEDS.some(function(b){ return b.lat; });
   var locWrap = document.createElement("div");
   locWrap.className = "loc-wrap";
   var locBtn = document.createElement("button");
@@ -2605,7 +2741,7 @@ function renderBeds(){
   locBtn.addEventListener("click", function(){ locateMe(locBtn, locOut); });
   locWrap.appendChild(locBtn);
   locWrap.appendChild(locOut);
-  container.appendChild(locWrap);
+  if(hasGeo) container.appendChild(locWrap);
 
   var lastZone = null;
   BEDS.forEach(function(b){
@@ -2630,8 +2766,8 @@ function renderBeds(){
     }
     var split = bedSplit(b.items);
     var nStake = split.stake.reduce(function(n, c){ return n + b.items[c]; }, 0);
-    var isStakedDone = !!staked[b.bed];
-    var isPlanted = !!planted[b.bed];
+    var isStakedDone = !!staked[bedKey(b.bed)];
+    var isPlanted = !!planted[bedKey(b.bed)];
 
     var shortList = bedOutstanding(b);
     var isShort = shortList.length > 0;
@@ -2664,7 +2800,7 @@ function renderBeds(){
       btn.className = "act-btn" + (t[2] ? " on" : "");
       btn.textContent = t[2] ? t[0] : "Mark " + t[0].toLowerCase();
       btn.addEventListener("click", function(){
-        t[1][b.bed] = !t[1][b.bed];
+        t[1][bedKey(b.bed)] = !t[1][bedKey(b.bed)];
         scheduleSave();
         renderBeds();
       });
@@ -2672,7 +2808,7 @@ function renderBeds(){
     });
     card.appendChild(acts);
 
-    var link = BED_LINKS[b.bed];
+    var link = BED_LINKS[b.bed];   // per-job; see applyJobData
     if(link){
       var ln = document.createElement("div");
       ln.className = "bed-link";
@@ -2802,8 +2938,13 @@ function renderBeds(){
 
 // Warms the service worker's cache so the pictures are there with no signal.
 function saveMapsOffline(btn){
+  // Skip species the sheet has no symbol for, or the save reports a failure
+  // and tells a crew to retry over cell data for a file that does not exist.
+  var symCodes = Object.keys(SPECIES).filter(function(c){
+    return NO_SYM.indexOf(c) === -1;
+  });
   var urls = [BED_IMG + "site-map.jpg"].concat(
-    Object.keys(SPECIES).map(function(c){ return SYM_IMG + c + ".png"; })
+    symCodes.map(function(c){ return SYM_IMG + c + ".png"; })
   ).concat(BEDS.map(function(b){
     return BED_IMG + b.bed + ".jpg";
   }));
@@ -2827,7 +2968,7 @@ function saveMapsOffline(btn){
 
 function renderAll(){
   renderTabs();
-  var showZones = (currentJob === "h2s");
+  var showZones = hasBedView(currentJob);
   var toggle = document.getElementById("viewToggle");
   toggle.classList.toggle("on", showZones);
   document.getElementById("vtSpecies").classList.toggle("active", view === "species");
@@ -2855,10 +2996,12 @@ function generateReport(){
     lines.push(decode(job.label).toUpperCase() + " (" + p.complete + "/" + p.total + " complete)");
     if(jobKey === "h2s"){
       var doneShort = [], owed = {};
-      BEDS.forEach(function(b){
-        var o = bedOutstanding(b);
+      // Explicitly Home2Suites' beds and keys: this block is inside a
+      // jobKey === "h2s" branch, but the globals follow the open tab.
+      H2S.beds.forEach(function(b){
+        var o = bedOutstanding(b, "h2s");
         if(!o.length) return;
-        if(planted[b.bed]) doneShort.push(b.bed.replace("B", ""));
+        if(planted[bedKeyFor("h2s", b.bed)]) doneShort.push(b.bed.replace("B", ""));
         o.forEach(function(x){ owed[x.name] = (owed[x.name] || 0) + x.qty; });
       });
       if(doneShort.length){
@@ -2920,8 +3063,8 @@ function generateReport(){
     }
     lines.push("Bed " + b.bed.replace("B", "") + " -- " + b.where +
                " (" + b.units + " units)" +
-               (staked[b.bed] ? " [STAKED]" : "") +
-               (planted[b.bed]
+               (staked[bedKey(b.bed)] ? " [STAKED]" : "") +
+               (planted[bedKey(b.bed)]
                   ? (bedOutstanding(b).length ? " [PLANTED - SHORT]" : " [PLANTED]")
                   : ""));
     var bShort = bedOutstanding(b);
@@ -2996,8 +3139,9 @@ function draftDailyLog(){
   // the stronger fact, and both lines would say the same day of work twice.
   var nowPlanted = [], nowStaked = [], wasUnplanted = [];
   BEDS.forEach(function(b){
-    var wasP = !!prev.planted[b.bed], isP = !!planted[b.bed];
-    var wasS = !!prev.staked[b.bed], isS = !!staked[b.bed];
+    var k = bedKey(b.bed);
+    var wasP = !!prev.planted[k], isP = !!planted[k];
+    var wasS = !!prev.staked[k], isS = !!staked[k];
     if(isP && !wasP) nowPlanted.push(bedNo(b.bed));
     else if(wasP && !isP) wasUnplanted.push(bedNo(b.bed));
     if(isS && !wasS && !(isP && !wasP)) nowStaked.push(bedNo(b.bed));
