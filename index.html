@@ -252,6 +252,12 @@
   .item-name{font-size:0.95rem;font-weight:600;}
   .item-target{font-size:0.78rem;color:var(--ink-soft);margin-top:1px;}
 
+  .pull-btn{
+    background:none;border:1px solid var(--line);color:var(--fg);
+    border-radius:8px;padding:4px 10px;font-size:13px;margin-left:8px;cursor:pointer;
+  }
+  .pull-btn:active{background:var(--line);}
+  .pull-note{font-size:12px;opacity:.75;margin-top:2px;}
   .counter{
     display:flex;
     align-items:center;
@@ -1721,6 +1727,16 @@ function renderItem(jobKey, name, target, isAlt){
   info.innerHTML = '<div class="item-name">' + name + '</div><div class="item-target">need ' +
     target + (isAlt ? " (alt / optional)" : "") + "</div>";
 
+  // What this tool has already sent to Inventory for this species. Shown so
+  // nobody has to remember at 6am whether they already pulled these.
+  var already = pulledTotal(pulls[slug(name)]);
+  if(already > 0){
+    var note = document.createElement("div");
+    note.className = "pull-note";
+    note.textContent = "pulled " + already + " so far";
+    info.appendChild(note);
+  }
+
   var counter = document.createElement("div");
   counter.className = "counter";
 
@@ -1764,6 +1780,13 @@ function renderItem(jobKey, name, target, isAlt){
   counter.appendChild(minus);
   counter.appendChild(input);
   counter.appendChild(plus);
+
+  var pullBtn = document.createElement("button");
+  pullBtn.className = "pull-btn";
+  pullBtn.textContent = "Pull";
+  pullBtn.setAttribute("aria-label", "record a yard pull of " + decode(name));
+  pullBtn.addEventListener("click", function(){ openPullSheet(jobKey, name, target); });
+  counter.appendChild(pullBtn);
   wrap.appendChild(info);
   wrap.appendChild(counter);
   return wrap;

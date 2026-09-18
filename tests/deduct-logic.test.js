@@ -106,3 +106,10 @@ test('the checklist never reads the Inventory app storage keys', () => {
   assert.ok(!/titan_token|titan_profile/.test(html), 'different origin - must not assume Inventory localStorage');
   assert.match(html, /wolf-inv-token/);
 });
+
+test('every plant row gets a pull control wired to the sheet', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  const fn = html.slice(html.indexOf('function renderItem('), html.indexOf('function renderGroups('));
+  assert.match(fn, /openPullSheet\(/, 'renderItem must wire a control to openPullSheet');
+  assert.match(fn, /pulledTotal/, 'the row must show what has already been pulled');
+});
