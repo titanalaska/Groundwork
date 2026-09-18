@@ -3749,6 +3749,71 @@ function init(){
 }
 
 init();
+
+// ---- the Inventory deployment --------------------------------------------
+// A SECOND, separate Apps Script app from the checklist's own sync store above.
+// Different URL, different credential. They must never share either: the sync
+// key writes checklist counts, this token moves real stock.
+var INV_URL = "https://script.google.com/macros/s/AKfycbyudFaJ0dsSYMo_uO8KF5WTvJrB-l3eppbTHenmbcPRO19qhcVg8_YJR5boDIsCU1QC/exec";
+var INV_TOKEN_STORE = "wolf-inv-token";
+var INV_PROFILE_STORE = "wolf-inv-profile";
+
+function invToken(){
+  try{ return localStorage.getItem(INV_TOKEN_STORE) || ""; }catch(e){ return ""; }
+}
+
+function invProfile(){
+  try{ return JSON.parse(localStorage.getItem(INV_PROFILE_STORE) || "null"); }catch(e){ return null; }
+}
+
+function setInvToken(tok, profile){
+  try{
+    if(tok){ localStorage.setItem(INV_TOKEN_STORE, tok); }
+    else { localStorage.removeItem(INV_TOKEN_STORE); }
+    if(profile){ localStorage.setItem(INV_PROFILE_STORE, JSON.stringify(profile)); }
+    else { localStorage.removeItem(INV_PROFILE_STORE); }
+  }catch(e){}
+}
+
+// One open call gives both the item list for the picker and the profile list
+// for the sign-in sheet. Apps Script has a ~2s floor per request, so two calls
+// would double the wait before anything appears.
+function invBootstrap(){
+  return fetch(INV_URL + "?action=bootstrap&t=" + Date.now(), {cache: "no-store"})
+    .then(function(r){ return r.json(); });
+}
+
+function invVerifyPin(id, pin){
+  return fetch(INV_URL + "?action=verifyPin&id=" + encodeURIComponent(id) +
+               "&pin=" + encodeURIComponent(pin) + "&t=" + Date.now(), {cache: "no-store"})
+    .then(function(r){ return r.json(); });
+}
+
+// Resolves with the single per-item result, or rejects. An expired session
+// rejects with .authRequired so the caller can re-prompt rather than showing a
+// meaningless failure.
+function invBulkPull(itemId, qty, job){
+  return fetch(INV_URL, {
+    method: "POST",
+    headers: {"Content-Type": "text/plain;charset=utf-8"},
+    body: JSON.stringify({
+      action: "bulkPull",
+      items: [{id: Number(itemId), qty: Number(qty)}],
+      job: job,
+      kind: "plants",
+      token: invToken()
+    })
+  }).then(function(r){ return r.json(); }).then(function(j){
+    if(j && j.authRequired){ var e = new Error(j.error || "sign in again"); e.authRequired = true; throw e; }
+    if(!j || !j.results || !j.results.length){ throw new Error((j && j.error) || "no result from inventory"); }
+    return j.results[0];
+  });
+}
+
+// Replaced in the next task with the real sheet.
+function openPullSheet(jobKey, name, target){
+  console.log("pull sheet", jobKey, name, target);
+}
 </script>
 <script>
 if('serviceWorker' in navigator){

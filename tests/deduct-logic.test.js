@@ -91,3 +91,18 @@ test('index.html round-trips itemMap and pulls through the shared payload', () =
   const applyFn = html.slice(html.indexOf('function applyPayload'), html.indexOf('function applyPayload') + 1500);
   assert.match(applyFn, /mergeItemMap/, 'applyPayload() must merge rather than overwrite itemMap');
 });
+
+test('the Inventory client uses the text/plain content type Apps Script needs', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  const at = html.indexOf('function invBulkPull');
+  assert.ok(at !== -1, 'invBulkPull must exist');
+  const fn = html.slice(at, at + 900);
+  assert.match(fn, /text\/plain;charset=utf-8/, 'must post as text/plain or Apps Script CORS rejects it');
+  assert.match(fn, /action:\s*['"]bulkPull['"]/);
+});
+
+test('the checklist never reads the Inventory app storage keys', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.ok(!/titan_token|titan_profile/.test(html), 'different origin - must not assume Inventory localStorage');
+  assert.match(html, /wolf-inv-token/);
+});
