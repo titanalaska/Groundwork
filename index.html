@@ -1281,6 +1281,61 @@ function slug(name){
   return decode(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
+// ---- PURE: testable, no DOM ----
+// Everything between these sentinels must stay free of document, window, fetch
+// and localStorage. tests/deduct-logic.test.js extracts this exact region and
+// runs it in node. Reaching for the DOM in here breaks that test with a
+// confusing error rather than an obvious one.
+
+// Two phones can map the same species before either syncs. Newest stamp wins;
+// neither side's unique species is dropped.
+function mergeItemMap(base, incoming){
+  var out = {};
+  var k;
+  for(k in (base || {})) if(Object.prototype.hasOwnProperty.call(base, k)) out[k] = base[k];
+  for(k in (incoming || {})){
+    if(!Object.prototype.hasOwnProperty.call(incoming, k)) continue;
+    var mine = out[k], theirs = incoming[k];
+    if(!mine){ out[k] = theirs; continue; }
+    var mineAt = Date.parse(mine.mappedAt || "") || 0;
+    var theirsAt = Date.parse(theirs.mappedAt || "") || 0;
+    out[k] = theirsAt >= mineAt ? theirs : mine;
+  }
+  return out;
+}
+
+// Returns a NEW array. The caller's copy is never mutated, because the shared
+// payload is serialised straight from these structures and an in-place push has
+// bitten this app before.
+function recordPull(list, entry){
+  var out = [entry].concat(list || []);
+  return out.slice(0, 20);
+}
+
+// One per-item result from bulkPull, turned into something a row can say out loud.
+function summarizePull(result){
+  if(!result || !result.ok){
+    return { ok: false, applied: 0,
+             text: "not pulled - " + ((result && result.reason) || "unknown reason") };
+  }
+  var requested = Number(result.requested) || 0;
+  var applied = Number(result.applied) || 0;
+  var after = Number(result.after) || 0;
+  if(applied < requested){
+    return { ok: true, applied: applied,
+             text: "asked " + requested + ", got " + applied + " - " + after + " left" };
+  }
+  return { ok: true, applied: applied,
+           text: "pulled " + applied + " - " + after + " left" };
+}
+
+function pulledTotal(list){
+  var total = 0;
+  (list || []).forEach(function(e){ total += Number(e && e.qty) || 0; });
+  return total;
+}
+// ---- /PURE ----
+
 function readLocal(){
   try{
     var raw = localStorage.getItem(LOCAL_KEY);
