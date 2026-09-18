@@ -81,3 +81,13 @@ test('pulledTotal sums what this tool has sent for a species', () => {
   assert.strictEqual(pulledTotal([{ qty: 40 }, { qty: 18 }]), 58);
   assert.strictEqual(pulledTotal([]), 0);
 });
+
+test('index.html round-trips itemMap and pulls through the shared payload', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  const payloadFn = html.slice(html.indexOf('function payload()'), html.indexOf('function applyPayload'));
+  assert.match(payloadFn, /itemMap:\s*itemMap/, 'payload() must send itemMap');
+  assert.match(payloadFn, /pulls:\s*pulls/, 'payload() must send pulls');
+
+  const applyFn = html.slice(html.indexOf('function applyPayload'), html.indexOf('function applyPayload') + 1500);
+  assert.match(applyFn, /mergeItemMap/, 'applyPayload() must merge rather than overwrite itemMap');
+});

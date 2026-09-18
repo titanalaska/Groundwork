@@ -1241,6 +1241,8 @@ var WSRCC_DISCREPANCY = {
 };
 
 var LOCAL_KEY = "wolf-field-checklist-v1";
+var itemMap = {};   // species slug -> {itemId, itemName, mappedBy, mappedAt}
+var pulls = {};     // species slug -> [{qty, job, who, at}], newest first
 var DOC_PATH = "checklist/wolf";
 
 var currentJob = "h2s";
@@ -1473,6 +1475,7 @@ function setOffline(isOffline, msg){
 function payload(){
   return {counts: state, notes: notes, staked: staked, planted: planted,
           measured: measured, owed: owed, lastLogged: lastLogged,
+          itemMap: itemMap, pulls: pulls,
           updatedAt: new Date().toISOString()};
 }
 
@@ -1485,6 +1488,11 @@ function applyPayload(p){
   if(p.measured && typeof p.measured === "object") measured = Object.assign({}, p.measured);
   if(p.owed && typeof p.owed === "object") owed = Object.assign({}, p.owed);
   if(p.lastLogged && typeof p.lastLogged === "object") lastLogged = p.lastLogged;
+  // Merged, not replaced: another phone may have mapped a species this device
+  // has never seen, and a straight assignment would throw that away on the next
+  // save from here.
+  itemMap = mergeItemMap(itemMap, p.itemMap);
+  if(p.pulls && typeof p.pulls === "object") pulls = p.pulls;
   try{
     var savedLang = localStorage.getItem("wolf-lang");
     if(savedLang === "es" || savedLang === "en") lang = savedLang;
