@@ -1,7 +1,7 @@
 # Inline accept-and-deduct on the Wolf checklist
 
 **Date:** 2026-09-17
-**Author:** Matt Bevins, Nursery & Field Ops Manager (design assisted by Claude)
+**Author:** Matt Walsh, Nursery & Field Operations Manager (design assisted by Claude)
 **Status:** Approved for implementation
 
 ## Why
