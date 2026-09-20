@@ -32,7 +32,7 @@
  *     safe worker could never take over.
  *   - Old caches are deleted only AFTER the new shell is verified to hold the
  *     page. No verification, no cleanup.
- *   - On a miss, every other wolf-shell-* cache is tried before giving up.
+ *   - On a miss, every other groundwork-shell-* cache is tried before giving up.
  *
  * ?nosw=1 bypasses the worker entirely, so there is always one link that
  * settles whether the worker is at fault.
@@ -40,8 +40,28 @@
  * Bump CACHE_VERSION on deploy.
  */
 
-const CACHE_VERSION = 'v34';
-const SHELL_CACHE = `wolf-shell-${CACHE_VERSION}`;
+// ---- PURE: testable, no SW globals ----
+// The prefix lives INSIDE the sentinels on purpose: tests/cache-ownership.test.js
+// extracts exactly this region and runs it with no other globals, so a function
+// here that reached outside for a constant would not be extractable at all.
+const CACHE_PREFIX = 'groundwork-shell-';
+
+// Which caches are OURS to remove.
+//
+// The Cache API is scoped to the ORIGIN, and titanalaska.github.io carries
+// Wolf Checklist and Titan Inventory as well. The old version of this filter
+// matched anything starting with "wolf-", which from here would delete the
+// shell of an app somebody is still using. Never widen this beyond our own
+// prefix, and never add wolf-beds-v2 to a delete path -- both apps read it.
+function cachesToDelete(names, keep){
+  return (names || []).filter(function(n){
+    return n.indexOf(CACHE_PREFIX) === 0 && keep.indexOf(n) === -1;
+  });
+}
+// ---- /PURE ----
+
+const CACHE_VERSION = 'v1';
+const SHELL_CACHE = `${CACHE_PREFIX}${CACHE_VERSION}`;
 
 // Bed crops and site maps: ~17 MB over 45 files for Home2Suites and ~10 MB over
 // 48 for WSRCC, cached as they are viewed
@@ -128,10 +148,7 @@ self.addEventListener('activate', (event) => {
     if (await shellIsUsable()) {
       const keep = [SHELL_CACHE, BED_CACHE];
       const names = await caches.keys();
-      await Promise.all(
-        names.filter(n => n.startsWith('wolf-') && !keep.includes(n))
-             .map(n => caches.delete(n))
-      );
+      await Promise.all(cachesToDelete(names, keep).map(n => caches.delete(n)));
     }
     await self.clients.claim();
   })());
@@ -142,7 +159,7 @@ self.addEventListener('activate', (event) => {
 // is empty for any reason.
 async function anyShellMatch(request) {
   try {
-    const names = (await caches.keys()).filter(n => n.startsWith('wolf-shell-'));
+    const names = (await caches.keys()).filter(n => n.indexOf(CACHE_PREFIX) === 0);
     for (const n of names.reverse()) {
       const c = await caches.open(n);
       const hit = await c.match(request) ||

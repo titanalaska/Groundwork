@@ -300,15 +300,14 @@ Expected: FAIL — `PURE sentinels not found in sw.js`.
 Change the two cache constants (leave `BED_CACHE` alone):
 
 ```js
-const CACHE_VERSION = 'v1';
-const CACHE_PREFIX = 'groundwork-shell-';
-const SHELL_CACHE = `${CACHE_PREFIX}${CACHE_VERSION}`;
-```
-
-Add the pure function immediately above the `activate` listener:
-
-```js
 // ---- PURE: testable, no SW globals ----
+// The prefix lives INSIDE the sentinels on purpose: the test extracts exactly
+// this region and runs it with no other globals, so a function here that
+// reached outside for a constant would not be extractable at all. (Found the
+// hard way during execution -- the first version put CACHE_PREFIX below and
+// every test failed with "CACHE_PREFIX is not defined".)
+const CACHE_PREFIX = 'groundwork-shell-';
+
 // Which caches are OURS to remove.
 //
 // The Cache API is scoped to the ORIGIN, and titanalaska.github.io carries
@@ -322,9 +321,13 @@ function cachesToDelete(names, keep){
   });
 }
 // ---- /PURE ----
+
+const CACHE_VERSION = 'v1';
+const SHELL_CACHE = `${CACHE_PREFIX}${CACHE_VERSION}`;
 ```
 
-Replace the filter inside `activate()`:
+This whole block replaces the old `CACHE_VERSION` / `SHELL_CACHE` pair near the
+top of the file. Then replace the filter inside `activate()`:
 
 ```js
       const keep = [SHELL_CACHE, BED_CACHE];
