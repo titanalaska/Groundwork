@@ -202,7 +202,7 @@ Expected: both PASS. The guards passing is the point — the rename touched only
 - [ ] **Step 5: Run the whole suite**
 
 Run: `npm test`
-Expected: 14 node + 24 Playwright (22 + the 2 new ones).
+Expected: 19 node (14 + Task 1's 5) + 24 Playwright (22 + the 2 new ones).
 
 - [ ] **Step 6: Commit**
 

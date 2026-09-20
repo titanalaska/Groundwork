@@ -1,7 +1,7 @@
 {
-  "name": "Wolf Architect Jobs",
-  "short_name": "Wolf Jobs",
-  "description": "Plant sort counts across the four Wolf Architects jobs — Home2Suites, Charter, Baxter and WSRCC. Tap to count against each species target, flag what needs Chris, and generate the status report.",
+  "name": "Groundwork",
+  "short_name": "Groundwork",
+  "description": "Job checklists for Titan Alaska. Bed-by-bed plant lists, live counts against each species target, what is still owed, and the status report for the office.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
