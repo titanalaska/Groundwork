@@ -53,6 +53,29 @@ test('Palmer and Raspberry are in the app with their proposal counts', async ({ 
   expect(jobs.raspberry.total, 'Raspberry Townhomes Lot 4, proposal of 7/7/26').toBe(494);
 });
 
+test('Lady Fern stays under Shrubs, where the proposal filed it', async ({ page }) => {
+  // This looks like a mistake and is not one. A fern is a perennial -- it dies
+  // back and grows new every year -- but the proposal is the document Palmer
+  // gets ordered and reconciled against, so the app matches it. Without this
+  // test somebody eventually "fixes" it and the app stops lining up with the
+  // paperwork.
+  await loadApp(page);
+  const where = await page.evaluate(() => {
+    const groupOf = (name) => Object.keys(JOBS.palmer.groups)
+      .find((g) => JOBS.palmer.groups[g].items.some((row) => row[0] === name));
+    return {
+      ladyFern: groupOf('Lady Fern'),
+      grassLabel: JOBS.palmer.groups.grasses.label,
+      grassItems: JOBS.palmer.groups.grasses.items.map((r) => r[0]),
+    };
+  });
+
+  expect(where.ladyFern, 'the proposal lists Lady Fern under Shrubs').toBe('shrubs');
+  expect(where.grassItems, 'what is left really is just grasses')
+    .toEqual(['Feather Reed Grass', 'Gold Crinkled Hair Grass']);
+  expect(where.grassLabel).toBe('Grasses');
+});
+
 test('both new jobs start at zero, because nothing has arrived', async ({ page }) => {
   await loadApp(page);
 
