@@ -218,6 +218,14 @@
     border-radius:8px;
     margin-bottom:8px;
     border-left:8px solid var(--gray-bg);
+    /* Wraps rather than clips. On a phone the name, the flag and the counter
+       plus the Pull button do not fit on one line -- the Pull button used to
+       hang 18px off the right edge, unreachable. Shrinking the controls was the
+       wrong answer: they are tapped outdoors, often with gloves. So the counter
+       drops to its own line and keeps full size. Rows on a wide screen still
+       fit on one line, so nothing wraps there. */
+    flex-wrap:wrap;
+    row-gap:8px;
   }
   /* Ordinal by urgency -- see itemRank(). The two states that need somebody to
      act are the loud ones; the two that need nothing sit back. This used to run
@@ -269,7 +277,7 @@
     background:#fff;border:1px solid var(--line);border-radius:5px;
     object-fit:contain;padding:1px;
   }
-  .item-info{flex:1;min-width:0;}
+  .item-info{flex:1 1 auto;min-width:0;}
   .item-name{font-size:0.95rem;font-weight:600;}
   .item-target{font-size:0.78rem;color:var(--ink-soft);margin-top:1px;}
 
@@ -299,6 +307,7 @@
     align-items:center;
     gap:6px;
     flex-shrink:0;
+    margin-left:auto;   /* sits right, on whichever line it lands */
   }
   .counter button{
     width:34px;

@@ -135,6 +135,14 @@ const MUTATIONS = [
     caughtBy: 'from the species view still translates',
   },
   {
+    // The bug that actually happened when two branches met: the flag and the
+    // Pull button each fitted alone, and together pushed Pull off the edge.
+    name: 'stop the plant row wrapping, so Pull hangs off the edge on a phone',
+    find: '    flex-wrap:wrap;\n    row-gap:8px;',
+    replace: '    row-gap:8px;',
+    caughtBy: 'hangs off the edge on a phone',
+  },
+  {
     name: 'stop the flag updating as somebody counts',
     find: '    flag.textContent = flagText(newVal);',
     replace: '    ;',
