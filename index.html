@@ -1813,20 +1813,25 @@ function renderGroups(){
     title.className = "group-title";
     title.innerHTML = g.label;
     section.appendChild(title);
-    // Worst first, then biggest shortfall, then plan order. This list gets
-    // read off the office TV from across the room, and in plan order the
-    // shortages were scattered through it -- somebody had to narrate which
-    // rows mattered. Now they are the top of the list and the loudest colour.
+    // BIGGEST SHORTFALL FIRST. This list gets read off the office TV from
+    // across the room, and in plan order the shortages were scattered through
+    // it -- somebody had to narrate which rows mattered.
+    //
+    // Sorting by state first was tried and rejected: it floated a species with
+    // none yet above one short by more, which is not the order the number
+    // argues for. status.html has always ranked by size, and the two have to
+    // agree or moving between them means re-reading the list. Rank only breaks
+    // a tie, which in practice orders the zero-shortfall rows: spare, then done.
     //
     // Sorted on RENDER only, never on a tap. Re-sorting as somebody counts
     // would slide the row out from under their finger mid-count.
     var ordered = g.items.slice().sort(function(a, b){
       var av = state[currentJob + ":" + slug(a[0])] || 0;
       var bv = state[currentJob + ":" + slug(b[0])] || 0;
-      var ar = itemRank(av, a[1]), br = itemRank(bv, b[1]);
-      if(ar !== br) return ar - br;
       var ashort = Math.max(0, a[1] - av), bshort = Math.max(0, b[1] - bv);
       if(ashort !== bshort) return bshort - ashort;
+      var ar = itemRank(av, a[1]), br = itemRank(bv, b[1]);
+      if(ar !== br) return ar - br;
       return g.items.indexOf(a) - g.items.indexOf(b);
     });
     ordered.forEach(function(row){

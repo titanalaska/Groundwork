@@ -70,7 +70,7 @@ const SEED_MIX = `
   renderAll();
 `;
 
-test('the list is ordered worst first, then biggest shortfall', async ({ page }) => {
+test('the list leads with the biggest number outstanding', async ({ page }) => {
   const groups = await page.evaluate((seed) => {
     // eslint-disable-next-line no-eval
     eval(seed);
@@ -88,27 +88,37 @@ test('the list is ordered worst first, then biggest shortfall', async ({ page })
       rows: [...section.querySelectorAll('.item')].map((el) => {
         const cls = el.className.replace('item', '').trim() || 'none';
         const flag = el.querySelector('.item-flag');
-        const m = /SHORT (\d+)/.exec(flag ? flag.textContent : '');
-        return { state: cls, short: m ? Number(m[1]) : null };
+        const txt = flag ? flag.textContent : '';
+        const short = /SHORT (\d+)/.exec(txt);
+        const none = /NONE YET \D*(\d+)/.exec(txt);
+        // A row with nothing received is short by the whole target, and the
+        // sort treats it that way -- so the test has to as well.
+        return { state: cls, short: short ? Number(short[1]) : (none ? Number(none[1]) : 0) };
       }),
     }));
   }, SEED_MIX);
 
-  const order = { none: 0, partial: 1, over: 2, complete: 3 };
-
   for (const g of groups) {
-    const ranks = g.rows.map((r) => order[r.state]);
-    const sorted = [...ranks].sort((a, b) => a - b);
+    // Biggest shortfall first, whatever state it is in. A species with none
+    // yet does NOT jump above one that is short by more -- status.html has
+    // always ranked by size and the two surfaces have to agree.
+    const shortfalls = g.rows.map((r) => r.short);
     expect(
-      ranks,
-      `rows came out as ${JSON.stringify(g.rows.map((r) => r.state))}. Shortages ` +
-      `must sit above finished rows or somebody has to narrate the list.`
-    ).toEqual(sorted);
+      shortfalls,
+      `rows came out as ${JSON.stringify(g.rows)}. The biggest number ` +
+      `outstanding has to lead, or somebody has to narrate the list.`
+    ).toEqual([...shortfalls].sort((a, b) => b - a));
 
-    // Within the short rows, the biggest shortfall leads.
-    const shorts = g.rows.filter((r) => r.state === 'partial').map((r) => r.short);
-    expect(shorts, `short rows came out as ${JSON.stringify(shorts)}`)
-      .toEqual([...shorts].sort((a, b) => b - a));
+    // Everything still outstanding sits above everything that is not.
+    const lastOutstanding = shortfalls.lastIndexOf(
+      shortfalls.filter((s) => s > 0).slice(-1)[0]
+    );
+    const settled = g.rows.slice(lastOutstanding + 1).map((r) => r.state);
+    expect(
+      settled.every((s) => s === 'over' || s === 'complete'),
+      `rows after the last outstanding one were ${JSON.stringify(settled)} -- ` +
+      `only spare and finished rows belong down there`
+    ).toBe(true);
   }
 });
 

@@ -84,13 +84,31 @@ const MUTATIONS = [
     name: 'put the species list back in plan order, shortages scattered through it',
     find: '    ordered.forEach(function(row){',
     replace: '    g.items.forEach(function(row){',
-    caughtBy: 'ordered worst first',
+    caughtBy: 'biggest number outstanding',
   },
   {
     name: 'leave nothing-received with no class again, so it cannot be coloured',
     find: '  return "item" + (v > target ? " over" : v === target ? " complete" : v > 0 ? " partial" : " none");',
     replace: '  return "item" + (v > target ? " over" : v === target ? " complete" : v > 0 ? " partial" : "");',
     caughtBy: 'every state carries a class',
+  },
+  {
+    // The ordering Matt rejected: state ahead of size, which floats a species
+    // with none yet above one that is short by more.
+    name: 'sort by state before size, floating none-yet above a bigger shortfall',
+    edits: [
+      {
+        find: '      var ashort = Math.max(0, a[1] - av), bshort = Math.max(0, b[1] - bv);\n' +
+              '      if(ashort !== bshort) return bshort - ashort;\n' +
+              '      var ar = itemRank(av, a[1]), br = itemRank(bv, b[1]);\n' +
+              '      if(ar !== br) return ar - br;',
+        replace: '      var ashort = Math.max(0, a[1] - av), bshort = Math.max(0, b[1] - bv);\n' +
+                 '      var ar = itemRank(av, a[1]), br = itemRank(bv, b[1]);\n' +
+                 '      if(ar !== br) return ar - br;\n' +
+                 '      if(ashort !== bshort) return bshort - ashort;',
+      },
+    ],
+    caughtBy: 'biggest number outstanding',
   },
   {
     name: 'rank nothing-received as least urgent instead of most',
