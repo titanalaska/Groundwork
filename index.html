@@ -217,13 +217,21 @@
     background:var(--card);
     border-radius:8px;
     margin-bottom:8px;
-    border-left:4px solid var(--gray-bg);
+    border-left:8px solid var(--gray-bg);
   }
-  .item.partial{border-left-color:var(--amber);}
-  .item.complete{border-left-color:var(--green);background:var(--green-bg);}
+  /* Ordinal by urgency -- see itemRank(). The two states that need somebody to
+     act are the loud ones; the two that need nothing sit back. This used to run
+     the other way round, which is how a list of shortages read as plain white
+     rows on the office TV. The left bar is 8px because at TV distance 4px is
+     not a colour, it is a hairline. */
+  .item.none{border-left-color:var(--danger);background:var(--danger-bg);}
+  .item.partial{border-left-color:var(--amber);background:var(--amber-bg);}
+  .item.complete{border-left-color:var(--green);background:var(--green-bg);opacity:0.7;}
   /* A bed that is planted but still owed material. Deliberately NOT green:
-     it must never look finished at a glance. */
-  .zone.short{border-left-color:#c8922a;}
+     it must never look finished at a glance.
+     The rules that do that work live further down, after .zone.done -- they
+     have to, because a short bed carries BOTH classes and whichever is
+     declared last wins. See ".zone.short" near .zone.partdone. */
   .bed-short{
     margin:10px 0 0;padding:10px 12px;border-radius:8px;
     background:rgba(200,146,42,0.14);border:1px solid rgba(200,146,42,0.45);
@@ -241,7 +249,20 @@
   :root[data-theme="dark"] .bed-link b{color:#7fb0e8;}
   @media (prefers-color-scheme:dark){ .bed-short b{color:#f0c168;} }
   :root[data-theme="dark"] .bed-short b{color:#f0c168;}
-  .item.over{border-left-color:var(--over);background:var(--over-bg);}
+  .item.over{border-left-color:var(--over);background:var(--over-bg);opacity:0.85;}
+
+  /* The number, in words, so nobody has to subtract "have" from "need" across
+     a room -- and so the state survives being read by someone who does not
+     separate these colours. */
+  .item-flag{
+    flex-shrink:0;align-self:center;
+    font-size:0.72rem;font-weight:800;letter-spacing:0.04em;
+    padding:4px 9px;border-radius:999px;white-space:nowrap;
+  }
+  .item.none .item-flag{background:var(--danger);color:#fff;}
+  .item.partial .item-flag{background:var(--amber);color:#fff;}
+  .item.over .item-flag{background:var(--over);color:#fff;}
+  .item.complete .item-flag{display:none;}
 
   .item-sym{
     width:32px;height:32px;flex-shrink:0;
@@ -469,6 +490,10 @@
     touch-action:manipulation;
   }
   .jump-msg{font-size:.8rem;color:var(--danger);font-weight:700;}
+  /* Title left, language right, on one line at the very top of the sticky
+     header so it is in reach the moment the app opens, in either view. */
+  .head-row{display:flex;align-items:flex-start;gap:12px;}
+  .head-row h1{flex:1;min-width:0;}
   .lang-wrap{margin-left:auto;display:flex;gap:4px;flex-shrink:0;}
   .lang-btn{
     padding:8px 11px;border:1px solid var(--line);border-radius:7px;
@@ -513,6 +538,10 @@
   }
   .zone.done .zone-head{background:var(--green);}
   .zone.done .zone-name,.zone.done .zone-count{color:var(--on-green);}
+  /* .zone-place was left on --ink-soft here, which is dark grey on dark green:
+     1.12:1, unreadable. Kept a step down from the name so the hierarchy still
+     reads, but legibly -- about 6:1. */
+  .zone.done .zone-place{color:var(--on-green);opacity:0.82;}
   .zone.done .loaded-btn{background:var(--on-green);color:var(--green);}
   .zrow{
     display:flex;align-items:baseline;gap:10px;padding:9px 14px;
@@ -682,6 +711,34 @@
   }
   .zone.partdone{border-color:var(--green);}
   .zone.partdone .zone-head{background:var(--green-bg);}
+
+  /* ---- Planted but still owed -------------------------------------------
+     A short bed carries BOTH .done and .short, so it was inheriting the
+     finished green header and differed only by a 1px amber edge. On site that
+     is invisible -- a short bed went unnoticed, which is the whole thing this
+     state exists to prevent.
+     These rules sit AFTER .zone.done on purpose: equal specificity, so source
+     order decides. Moving them back up the file silently undoes all of it.
+     The amber is var(--amber), the SAME colour the map paints "planted, still
+     owed", so the card and the map finally agree. Light mode gives a dark
+     orange ground with white type; dark mode flips to salmon with near-black.
+     The badge is there so this does not rest on colour alone. */
+  .zone.short{border-color:var(--amber);border-left-width:6px;}
+  .zone.short .zone-head{background:var(--amber);border-bottom-color:var(--amber);}
+  .zone.short .zone-name,
+  .zone.short .zone-count{color:var(--on-green);}
+  .zone.short .zone-place{color:var(--on-green);opacity:0.82;}
+  .zone.short .bed-no{background:var(--on-green);color:var(--amber);}
+  .zone.short .loaded-btn{
+    background:var(--on-green);color:var(--amber);border-color:var(--on-green);
+  }
+  .zone.short .zone-name::after{
+    content:"STILL OWED";
+    display:inline-block;margin-left:8px;vertical-align:2px;
+    background:var(--on-green);color:var(--amber);
+    font-size:0.6rem;font-weight:800;letter-spacing:0.05em;
+    padding:2px 7px;border-radius:999px;white-space:nowrap;
+  }
 
   .how-box{
     margin:14px 16px 0;border:1px solid var(--line);border-radius:10px;
@@ -876,7 +933,16 @@
 <body>
 
 <header>
-  <h1>Wolf Architect Jobs</h1>
+  <div class="head-row">
+    <h1>Wolf Architect Jobs</h1>
+    <!-- Language sits in the sticky header, not down in the bed view's jump
+         bar where it used to live. The crew that needs it should not have to
+         find the right view and scroll to reach it. -->
+    <span class="lang-wrap" id="langWrap">
+      <button class="lang-btn" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="es">ES</button>
+    </span>
+  </div>
   <p class="subhead" id="dateLine"></p>
   <p class="asof">Plant sort counts &middot; four active jobs</p>
   <p class="savenote" id="saveNote">Loading your counts&hellip;</p>
@@ -1602,8 +1668,23 @@ function renderFlags(){
   });
 }
 
+// Four states, and they are ORDINAL -- see itemRank(). "none" used to be the
+// empty string, which left the worst state with no class and so no colour.
 function itemClass(v, target){
-  return "item" + (v > target ? " over" : v === target ? " complete" : v > 0 ? " partial" : "");
+  return "item" + (v > target ? " over" : v === target ? " complete" : v > 0 ? " partial" : " none");
+}
+
+// How badly a row wants attention. Lower sorts first.
+//
+// This is the order the colours follow too. It ran backwards until 2026-09-19:
+// "nothing received" and "short" were plain white rows while "complete" and
+// "over" were the only tinted ones -- so on the office TV the two states that
+// need somebody to do something were the least visible things on the screen.
+function itemRank(v, target){
+  if(v === 0) return 0;        // nothing has arrived
+  if(v < target) return 1;     // some here, still short
+  if(v > target) return 2;     // more than called for -- worth a look, not a worry
+  return 3;                    // done
 }
 
 // The counting list works in species NAMES; the symbols are keyed by the
@@ -1658,6 +1739,18 @@ function renderItem(jobKey, name, target, isAlt){
   info.innerHTML = '<div class="item-name">' + name + '</div><div class="item-target">need ' +
     target + (isAlt ? " (alt / optional)" : "") + "</div>";
 
+  // "SHORT 88" rather than leaving somebody to subtract 30 from 118 in their
+  // head, across an office, while being talked at.
+  var flag = document.createElement("span");
+  flag.className = "item-flag";
+  function flagText(v){
+    if(v === 0) return "NONE YET · " + target;
+    if(v < target) return "SHORT " + (target - v);
+    if(v > target) return "+" + (v - target) + " SPARE";
+    return "";
+  }
+  flag.textContent = flagText(received);
+
   var counter = document.createElement("div");
   counter.className = "counter";
 
@@ -1683,6 +1776,7 @@ function renderItem(jobKey, name, target, isAlt){
     state[k] = newVal;
     if(!fromTyping) input.value = newVal;
     wrap.className = itemClass(newVal, target);
+    flag.textContent = flagText(newVal);
     renderTabs();
     scheduleSave();
   }
@@ -1702,6 +1796,7 @@ function renderItem(jobKey, name, target, isAlt){
   counter.appendChild(input);
   counter.appendChild(plus);
   wrap.appendChild(info);
+  wrap.appendChild(flag);
   wrap.appendChild(counter);
   return wrap;
 }
@@ -1718,7 +1813,23 @@ function renderGroups(){
     title.className = "group-title";
     title.innerHTML = g.label;
     section.appendChild(title);
-    g.items.forEach(function(row){
+    // Worst first, then biggest shortfall, then plan order. This list gets
+    // read off the office TV from across the room, and in plan order the
+    // shortages were scattered through it -- somebody had to narrate which
+    // rows mattered. Now they are the top of the list and the loudest colour.
+    //
+    // Sorted on RENDER only, never on a tap. Re-sorting as somebody counts
+    // would slide the row out from under their finger mid-count.
+    var ordered = g.items.slice().sort(function(a, b){
+      var av = state[currentJob + ":" + slug(a[0])] || 0;
+      var bv = state[currentJob + ":" + slug(b[0])] || 0;
+      var ar = itemRank(av, a[1]), br = itemRank(bv, b[1]);
+      if(ar !== br) return ar - br;
+      var ashort = Math.max(0, a[1] - av), bshort = Math.max(0, b[1] - bv);
+      if(ashort !== bshort) return bshort - ashort;
+      return g.items.indexOf(a) - g.items.indexOf(b);
+    });
+    ordered.forEach(function(row){
       section.appendChild(renderItem(currentJob, row[0], row[1], row[2]));
     });
     container.appendChild(section);
@@ -2321,17 +2432,29 @@ var SPECIES_ALIAS = H2S_SPECIES_ALIAS;
 // WSRCC code was resolved against Home2Suites' checklist -- which silently fed
 // the wrong row to bedOutstanding, the "still owed here" logic, as well as the
 // symbols.
-var CODE_ROW = null, CODE_ROW_JOB = null;
-function codeRow(code){
-  if(!CODE_ROW || CODE_ROW_JOB !== currentJob){
-    CODE_ROW = {};
-    CODE_ROW_JOB = currentJob;
-    var rows = [], g = JOBS[currentJob].groups;
+// Cached PER JOB, in a map rather than one shared slot, and resolvable for a
+// named job instead of only the open tab.
+//
+// One shared slot was the original bug: every WSRCC code was answered with a
+// Home2Suites row. Re-pointing that slot on each tab switch fixed the common
+// case but not generateReport(), which walks BOTH jobs in one pass while
+// currentJob can only be one of them -- so 17 Home2Suites codes resolved to
+// nothing and were dropped from the report Chris reads, across 36 of 44 beds.
+// Keying by job removes the class of bug instead of the instance.
+var CODE_ROW_BY_JOB = {};
+function codeRow(code, job){
+  var forJob = job || currentJob;
+  if(!CODE_ROW_BY_JOB[forJob]){
+    var map = {};
+    var d = (forJob === "wsrcc") ? WSRCC : H2S;
+    var species = d.species;
+    var alias = (forJob === "wsrcc") ? WSRCC_SPECIES_ALIAS : H2S_SPECIES_ALIAS;
+    var rows = [], g = JOBS[forJob].groups;
     Object.keys(g).forEach(function(gk){
       g[gk].items.forEach(function(r){ rows.push(r); });
     });
-    Object.keys(SPECIES).forEach(function(c){
-      var want = slug(SPECIES_ALIAS[c] || SPECIES[c]), hit = null, i;
+    Object.keys(species).forEach(function(c){
+      var want = slug(alias[c] || species[c]), hit = null, i;
       for(i = 0; i < rows.length; i++){
         if(slug(rows[i][0]) === want){ hit = rows[i]; break; }
       }
@@ -2341,10 +2464,11 @@ function codeRow(code){
           if(rs.indexOf(want) === 0 || want.indexOf(rs) === 0){ hit = rows[i]; break; }
         }
       }
-      if(hit) CODE_ROW[c] = hit;
+      if(hit) map[c] = hit;
     });
+    CODE_ROW_BY_JOB[forJob] = map;
   }
-  return CODE_ROW[code] || null;
+  return CODE_ROW_BY_JOB[forJob][code] || null;
 }
 
 // Species in this bed with NOTHING received yet -- they cannot be in the ground.
@@ -2364,11 +2488,23 @@ function setOwed(bed, code, qty, max){
 
 function bedOutstanding(b, job){
   var out = [];
+  // Counts are keyed "<job>:<row>". This read was pinned to "h2s:" and so
+  // answered every WSRCC bed with Home2Suites' stock -- the same mistake the
+  // CODE_ROW cache above had, one line further down. It went both ways: a
+  // WSRCC-only species (Ivory Halo) has no h2s key at all, so 97 received read
+  // as zero and the bed claimed all 46 were owed; and a species in both jobs
+  // (Columnar Swedish Aspen, 0 at WSRCC and 14 at Home2Suites) read as
+  // partially received, fell through to the manual owed map, and reported
+  // NOTHING owed for a bed with no material on site. 43 of 47 WSRCC beds were
+  // affected. Tests in tests/outstanding.spec.js.
+  var jk = job || currentJob;
   Object.keys(b.items).forEach(function(c){
-    var row = codeRow(c);
+    // Resolve against the SAME job the counts come from. Letting this follow
+    // the open tab is what dropped Home2Suites species out of the report.
+    var row = codeRow(c, jk);
     if(!row) return;
     // Nothing received at all -- the whole bed's worth is owed, no input needed.
-    if((state["h2s:" + slug(row[0])] || 0) === 0){
+    if((state[jk + ":" + slug(row[0])] || 0) === 0){
       out.push({code: c, name: decode(row[0]), qty: b.items[c], recorded: false});
       return;
     }
@@ -2568,7 +2704,33 @@ function translateNode(root){
 function setLang(next){
   lang = (next === "es") ? "es" : "en";
   try{ localStorage.setItem("wolf-lang", lang); }catch(e){}
-  renderBeds();
+  paintLangButtons();
+  // renderAll, not renderBeds: the buttons are in the header and reachable
+  // from either view, so whichever one is open has to be the one rebuilt.
+  renderAll();
+}
+
+// The header is static markup, so the active state is painted rather than
+// rebuilt with the view.
+function paintLangButtons(){
+  var wrap = document.getElementById("langWrap");
+  if(!wrap) return;
+  Array.prototype.forEach.call(wrap.querySelectorAll(".lang-btn"), function(b){
+    var on = b.dataset.lang === lang;
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+}
+
+// Bound once at start up. Re-binding per render is what the old placement in
+// the jump bar required, and it only existed while the bed view was open.
+function wireLangButtons(){
+  var wrap = document.getElementById("langWrap");
+  if(!wrap) return;
+  Array.prototype.forEach.call(wrap.querySelectorAll(".lang-btn"), function(b){
+    b.addEventListener("click", function(){ setLang(b.dataset.lang); });
+  });
+  paintLangButtons();
 }
 
 // ---- beds that are not what the callouts imply -----------------------------
@@ -2628,7 +2790,9 @@ function applyJobData(){
   BED_IMG = d.bedImg; SYM_IMG = d.symImg; OFFLINE_MB = d.offlineMB;
   BED_LINKS = d.links; NO_SYM = d.noSym;
   SPECIES_ALIAS = (currentJob === "wsrcc") ? WSRCC_SPECIES_ALIAS : H2S_SPECIES_ALIAS;
-  CODE_ROW = null; NAME_CODE = null;   // rebuilt against the job now loaded
+  NAME_CODE = null;   // rebuilt against the SPECIES now loaded
+  // CODE_ROW_BY_JOB is deliberately NOT cleared: it is keyed by job, so each
+  // job's map stays valid and generateReport() can ask about either one.
 }
 var OFFLINE_MB = 17;
 var NO_SYM = [];
@@ -2647,11 +2811,10 @@ function renderBeds(){
     '<input id="jumpBed" type="number" inputmode="numeric" min="1" max="' +
       BEDS.length + '" placeholder="' + Math.min(39, BEDS.length) + '">' +
     '<button id="jumpGo" class="jump-go">Go</button>' +
-    '<span class="jump-msg" id="jumpMsg"></span>' +
-    '<span class="lang-wrap">' +
-      '<button class="lang-btn' + (lang === "en" ? " on" : "") + '" data-lang="en">EN</button>' +
-      '<button class="lang-btn' + (lang === "es" ? " on" : "") + '" data-lang="es">ES</button>' +
-    "</span>";
+    '<span class="jump-msg" id="jumpMsg"></span>';
+  // EN/ES used to sit here, at the end of the jump bar. It moved to the
+  // sticky header: the crew that needs Spanish should not have to find the
+  // bed view and scroll to a toolbar to reach it.
   container.appendChild(jump);
 
   var stakes = countBy(isStaked);
@@ -2921,10 +3084,9 @@ function renderBeds(){
       });
     });
 
-  Array.prototype.forEach.call(container.querySelectorAll(".lang-btn"),
-    function(b){
-      b.addEventListener("click", function(){ setLang(b.dataset.lang); });
-    });
+  // The EN/ES buttons live in the header now, so they are bound once at start
+  // up rather than re-bound on every render. See wireLangButtons().
+  //
   // Everything is built in English, then the field views are translated in
   // place. One code path builds the cards; the language is a late pass.
   translateNode(container);
@@ -3621,6 +3783,7 @@ function init(){
   try{ history.replaceState(viewState(), ""); }catch(e){}
 
   renderAll();
+  wireLangButtons();
   wireReportUI();
   wireDailyLogUI();
   wireBackupUI();

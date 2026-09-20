@@ -1,0 +1,19 @@
+{
+  "name": "wolf-checklist",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Per-job planting checklists. The app is index.html; this manifest exists only to run the tests.",
+  "scripts": {
+    "test": "playwright test",
+    "verify-tests": "node tests/mutation-check.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/titanalaska/Wolf-Checklist.git"
+  },
+  "license": "UNLICENSED",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.63.0"
+  }
+}

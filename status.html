@@ -2,7 +2,12 @@
 <style>
 :root{--ink:#20261f;--mut:#5c6357;--line:#dcded5;--bg:#f6f7f1;--card:#fff;
  --green:#2f5233;--greenbg:#eaf2e9;--amber:#8a5d00;--amberbg:#fbf1dc;
- --amberline:#e3c98d;--red:#8c2f2f;--redbg:#f7e9e9}
+ --amberline:#e3c98d;--red:#8c2f2f;--redbg:#f7e9e9;
+ /* Solid fills for the two states that need somebody to act. These match the
+    app's --danger and --amber exactly, so the page Chris and Todd open and the
+    app Matt carries speak one colour language. Kept as their own variables so
+    the softer --amber/--red stay put for callout text and the jump links. */
+ --nonefill:#b3261e;--shortfill:#a6461d}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);line-height:1.6;
  font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
@@ -34,11 +39,23 @@ th{text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.07e
 td{padding:9px 10px 9px 0;border-bottom:1px solid var(--line);vertical-align:baseline}
 tr:last-child td{border-bottom:none}
 th.n,td.n{text-align:right;font-variant-numeric:tabular-nums;padding-right:0}
-.pill{display:inline-block;border-radius:99px;padding:2px 9px;font-size:.78rem;
- font-weight:600}
-.ok{background:var(--greenbg);color:var(--green)}
-.sh{background:var(--amberbg);color:var(--amber)}
-.no{background:var(--redbg);color:var(--red)}
+.pill{display:inline-block;border-radius:99px;padding:3px 11px;font-size:.79rem;
+ font-weight:800;letter-spacing:.02em;white-space:nowrap}
+/* Ranked by urgency, same as the app. "Complete" needs nothing from anybody, so
+   it stays a quiet tint; the two that need action are solid blocks that read
+   across a room. This page gets reviewed on the office TV. */
+.ok{background:var(--greenbg);color:var(--green);font-weight:600}
+.sh{background:var(--shortfill);color:#fff}
+.no{background:var(--nonefill);color:#fff}
+/* Tint the whole row so the eye lands on the problem lines, not just the pill.
+   :has() is the only reason this needs no per-row markup across 71 rows; where
+   it is unsupported the row simply stays white and the pills still carry it. */
+tr:has(.pill.no) td{background:var(--redbg)}
+tr:has(.pill.sh) td{background:var(--amberbg)}
+tr:has(.pill.no) td:first-child{box-shadow:inset 5px 0 0 var(--nonefill)}
+tr:has(.pill.sh) td:first-child{box-shadow:inset 5px 0 0 var(--shortfill)}
+tr:has(.pill.no) td:first-child,tr:has(.pill.sh) td:first-child{padding-left:12px}
+tr:has(.pill.no) td.n b,tr:has(.pill.sh) td.n b{font-size:1.06rem}
 .nt{display:block;font-size:.78rem;color:var(--mut);margin-top:3px;max-width:60ch}
 .amber{background:var(--amberbg);border:1px solid var(--amberline);border-radius:10px;
  padding:13px 16px;margin:0 0 16px;font-size:.92rem}
