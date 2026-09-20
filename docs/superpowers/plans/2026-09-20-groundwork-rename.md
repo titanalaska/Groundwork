@@ -387,8 +387,13 @@ gh repo create titanalaska/Groundwork --public --description "Job checklists for
 
 ```bash
 git remote add groundwork https://github.com/titanalaska/Groundwork.git
-git push groundwork main
+git push groundwork groundwork-rename:main
 ```
+
+**Not `git push groundwork main`.** The rename lives on the `groundwork-rename`
+branch; `main` in this repo is still the OLD, Wolf-named app and must stay that
+way so the old URL keeps working. Pushing `main` would put the Wolf-named app
+in the Groundwork repo. (Caught during execution.)
 
 - [ ] **Step 3: Enable Pages**
 
