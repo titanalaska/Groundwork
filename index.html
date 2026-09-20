@@ -974,7 +974,7 @@
     </span>
   </div>
   <p class="subhead" id="dateLine"></p>
-  <p class="asof">Plant sort counts &middot; four active jobs</p>
+  <p class="asof" id="jobsLine">Plant sort counts</p>
   <p class="savenote" id="saveNote">Loading your counts&hellip;</p>
   <div class="tabs" id="tabs"></div>
 </header>
@@ -1215,6 +1215,65 @@ var JOBS = {
       "&#9888;&#65039; <strong>Miss Canada Lilac &mdash; 72 needed, none sourced.</strong> New to this revision, so it has never been on an order. Spec is <strong>6&#39; minimum height</strong>, and that height is code, not preference: L101 uses these in lieu of 71 required trees in zone N plus 1 in W1. The 9 in the nursery are 5 gal and will not meet it. Long lead &mdash; do not let this sit.",
       "&#9888;&#65039; <strong>Pink Beauty Potentilla</strong> &mdash; 62 sorted, short 59 of 121. 3 additional units were rejected on quality and not counted.",
       "&#9989; <strong>Red-Twig Dogwood shows 176 against a target of 118 &mdash; that is correct, not a miscount.</strong> Ivory Halo is short and Chris and Todd approved filling that gap with surplus Red-Twig. 118 spec + 58 covering the Ivory Halo shortfall = 176. Total dogwood lands at 273 &mdash; 155 + 118 &mdash; and 97 + 176 on hand is exactly 273."
+    ]
+  },
+
+  // Palmer and Raspberry come off BuilderTrend PROPOSALS, not plan sets. There
+  // are no bed callouts for either, so both are species-only -- hasBedView()
+  // covers that automatically by listing only h2s and wsrcc. Neither appears in
+  // SEED, so every count starts at zero, which is the truth: nothing has
+  // arrived for either job.
+  palmer: {
+    label: "Palmer Public Library",
+    short: "Palmer",
+    groups: {
+      trees: { label: "Trees", items: [
+        ["Paper Birch", 24],
+        ["Columnar Swedish Aspen", 9],
+        ["Quaking Aspen", 7],
+        ["Helena Maple", 3],
+        ["Subalpine Fir Arizonica", 1]
+      ]},
+      shrubs: { label: "Shrubs", items: [
+        ["Rugosa Rose", 37],
+        ["Birchleaf Spirea", 28],
+        ["Alpine Currant", 24],
+        ["Vanhoutte Spirea", 19]
+      ]},
+      grasses: { label: "Perennials &amp; grasses", items: [
+        ["Feather Reed Grass", 224],
+        ["Gold Crinkled Hair Grass", 76],
+        ["Lady Fern", 74]
+      ]}
+    },
+    flags: [
+      "&#128209; <strong>These counts come from the proposal</strong> printed 2/9/26, not from a plan set. There are no bed callouts, so there is no bed view for this job yet. Ask Chris for the planting plan and the plant schedule &mdash; WSRCC only reconciled because it had both.",
+      "&#127807; <strong>Gold Crinkled Hair Grass, 76</strong> &mdash; the same species Home2Suites is substituting with Tufted through Chris. Expect the same call here before ordering."
+    ]
+  },
+  raspberry: {
+    label: "Raspberry Townhomes &mdash; Lot 4",
+    short: "Raspberry",
+    groups: {
+      trees: { label: "Trees", items: [
+        ["Paper Birch", 31],
+        ["Colorado Green Spruce", 22],
+        ["Helena Maple", 15],
+        ["Columnar Swedish Aspen", 13],
+        ["Lodgepole Pine", 13]
+      ]},
+      shrubs: { label: "Shrubs", items: [
+        ["Hedge Cotoneaster", 111],
+        ["Froebelii Spirea", 83],
+        ["Gold Drop Potentilla", 81],
+        ["Pink Beauty Potentilla", 71],
+        ["Alpine Currant", 42],
+        ["Flowering Raspberry", 12]
+      ]}
+    },
+    flags: [
+      "&#128209; <strong>These counts come from the proposal</strong> printed 7/7/26, not from a plan set. It cites drawings dated 1.21.25 and sheet <strong>L503-1</strong>, so a set exists &mdash; ask Chris for the planting plan and the plant schedule before treating these as final.",
+      "&#9888;&#65039; <strong>94 trees at 2&quot; caliper.</strong> That is the size wall in the 2027 sourcing work, where Martin is the only vendor breaking it. Raise availability before this job is scheduled, not after."
     ]
   }
 };
@@ -3249,6 +3308,13 @@ function saveMapsOffline(btn){
 
 function renderAll(){
   renderTabs();
+  // Derived, never typed. This line read "four active jobs" while jobs were
+  // being added, which is how a true sentence quietly becomes a false one.
+  var jobsLine = document.getElementById("jobsLine");
+  if(jobsLine){
+    var n = Object.keys(JOBS).length;
+    jobsLine.innerHTML = "Plant sort counts &middot; " + n + " active jobs";
+  }
   var showZones = hasBedView(currentJob);
   var toggle = document.getElementById("viewToggle");
   toggle.classList.toggle("on", showZones);
