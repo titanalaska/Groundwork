@@ -120,3 +120,36 @@ test('both new jobs say where their numbers came from', async ({ page }) => {
   expect(flags.palmer).toContain('proposal');
   expect(flags.raspberry).toContain('proposal');
 });
+
+test('the pull note answers for this job only, not every job at once', async ({ page }) => {
+  // Paper Birch is on all six jobs. Before this was filtered, pulling 40 for
+  // Home2Suites made every other job's row claim 40 had been pulled for it --
+  // and that note exists specifically to stop a double pull at 6am.
+  await loadApp(page);
+
+  const notes = await page.evaluate(() => {
+    pulls[slug('Paper Birch')] = [
+      { qty: 40, job: 'Home2Suites', who: 'Matthew', at: new Date().toISOString() },
+      { qty: 5, job: 'Palmer Public Library', who: 'Matthew', at: new Date().toISOString() },
+    ];
+    const noteOn = (job) => {
+      currentJob = job; applyJobData(); view = 'species'; renderAll();
+      const row = [...document.querySelectorAll('.item')]
+        .find((r) => r.querySelector('.item-name').textContent.trim() === 'Paper Birch');
+      const n = row && row.querySelector('.pull-note');
+      return n ? n.textContent : '';
+    };
+    const out = {
+      h2s: noteOn('h2s'),
+      palmer: noteOn('palmer'),
+      raspberry: noteOn('raspberry'),
+    };
+    delete pulls[slug('Paper Birch')];
+    return out;
+  });
+
+  expect(notes.h2s, '40 really did go to Home2Suites').toContain('40');
+  expect(notes.palmer, 'and 5 to Palmer').toContain('5');
+  expect(notes.palmer, 'but Palmer must not claim Home2Suites\' 40').not.toContain('40');
+  expect(notes.raspberry, 'nothing was pulled for Raspberry, so it says nothing').toBe('');
+});

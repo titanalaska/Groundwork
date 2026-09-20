@@ -143,6 +143,12 @@ const MUTATIONS = [
     caughtBy: 'hangs off the edge on a phone',
   },
   {
+    name: 'let the pull note read across every job again',
+    find: '  var already = pulledTotal(pulledForJob(pulls[slug(name)], JOBS[jobKey] ? JOBS[jobKey].label : jobKey));',
+    replace: '  var already = pulledTotal(pulls[slug(name)]);',
+    caughtBy: 'this job only',
+  },
+  {
     name: 'stop the flag updating as somebody counts',
     find: '    flag.textContent = flagText(newVal);',
     replace: '    ;',

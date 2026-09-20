@@ -16,7 +16,8 @@ function loadPure() {
   new Function('exports', src + '\nexports.mergeItemMap = mergeItemMap;'
     + '\nexports.recordPull = recordPull;'
     + '\nexports.summarizePull = summarizePull;'
-    + '\nexports.pulledTotal = pulledTotal;')(sandbox);
+    + '\nexports.pulledTotal = pulledTotal;'
+    + '\nexports.pulledForJob = pulledForJob;')(sandbox);
   return sandbox;
 }
 
@@ -128,4 +129,41 @@ test('a pull refuses rather than queuing when there is no signal', () => {
   const at = html.indexOf('function openPullSheet(');
   const fn = html.slice(at, at + 9000);
   assert.match(fn, /navigator\.onLine/, 'must check for signal before sending');
+});
+
+// --- pulledForJob ----------------------------------------------------------
+// The pull list is keyed by species alone, which is right for itemMap -- a
+// species maps to one Inventory item whatever job it is for. It is wrong for
+// the row note, which has to answer "did I already pull these for THIS job".
+// Paper Birch is on all six jobs, so an unfiltered note was true on one row
+// and false on the other five.
+
+test('pulledForJob keeps only the entries for the job asked about', () => {
+  const { pulledForJob } = loadPure();
+  const list = [
+    { qty: 40, job: 'Home2Suites' },
+    { qty: 5, job: 'Palmer Public Library' },
+    { qty: 2, job: 'Home2Suites' },
+  ];
+  assert.deepStrictEqual(pulledForJob(list, 'Home2Suites').map(e => e.qty), [40, 2]);
+  assert.deepStrictEqual(pulledForJob(list, 'Palmer Public Library').map(e => e.qty), [5]);
+});
+
+test('pulledForJob returns nothing for a job with no pulls', () => {
+  const { pulledForJob } = loadPure();
+  assert.deepStrictEqual(pulledForJob([{ qty: 40, job: 'Home2Suites' }], 'Charter'), []);
+});
+
+test('pulledForJob is not upset by spacing or case', () => {
+  // The job field is a text input somebody can edit, so it will not always
+  // come back exactly as the label was written.
+  const { pulledForJob } = loadPure();
+  const list = [{ qty: 9, job: '  home2suites ' }];
+  assert.strictEqual(pulledForJob(list, 'Home2Suites').length, 1);
+});
+
+test('pulledForJob copes with a missing list or job', () => {
+  const { pulledForJob } = loadPure();
+  assert.deepStrictEqual(pulledForJob(null, 'Charter'), []);
+  assert.deepStrictEqual(pulledForJob([{ qty: 1 }], 'Charter'), []);
 });

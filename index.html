@@ -1497,6 +1497,26 @@ function pulledTotal(list){
   (list || []).forEach(function(e){ total += Number(e && e.qty) || 0; });
   return total;
 }
+
+// Pulls recorded against ONE job.
+//
+// The list is keyed by species alone, which is right for itemMap -- a species
+// maps to one Inventory item whatever job it is for, so mapping it once serves
+// every job. It is wrong for the note on a row, which has to answer "have I
+// already pulled these FOR THIS JOB". Paper Birch is on all six jobs, so an
+// unfiltered note read true on one row and false on the other five, and got
+// worse with every job added.
+//
+// Matched loosely on purpose: the job field in the pull sheet is a text input
+// somebody can edit, so it will not always come back exactly as the label was
+// written.
+function pulledForJob(list, jobLabel){
+  var want = String(jobLabel || "").trim().toLowerCase();
+  if(!want) return [];
+  return (list || []).filter(function(e){
+    return String((e && e.job) || "").trim().toLowerCase() === want;
+  });
+}
 // ---- /PURE ----
 
 function readLocal(){
@@ -1899,7 +1919,7 @@ function renderItem(jobKey, name, target, isAlt){
 
   // What this tool has already sent to Inventory for this species. Shown so
   // nobody has to remember at 6am whether they already pulled these.
-  var already = pulledTotal(pulls[slug(name)]);
+  var already = pulledTotal(pulledForJob(pulls[slug(name)], JOBS[jobKey] ? JOBS[jobKey].label : jobKey));
   if(already > 0){
     var note = document.createElement("div");
     note.className = "pull-note";
