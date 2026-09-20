@@ -4,8 +4,10 @@
   "private": true,
   "description": "Per-job planting checklists. The app is index.html; this manifest exists only to run the tests.",
   "scripts": {
-    "test": "playwright test",
-    "verify-tests": "node tests/mutation-check.js"
+    "test": "node --test \"tests/*.test.js\" && playwright test",
+    "verify-tests": "node tests/mutation-check.js",
+    "test:logic": "node --test \"tests/*.test.js\"",
+    "test:ui": "playwright test"
   },
   "repository": {
     "type": "git",

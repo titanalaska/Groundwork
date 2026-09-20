@@ -160,7 +160,13 @@ test('counting a species up changes its state without re-sorting under you', asy
     const name = el.querySelector('.item-name').textContent;
     const before = { state: el.className, flag: el.querySelector('.item-flag').textContent };
 
-    el.querySelector('.counter button:last-child').click();  // plus
+    // By intent, not by position. The counter gained a Pull button after this
+    // test was written, which made button:last-child the wrong control -- it
+    // opened the pull sheet instead of adding one, and the test failed with a
+    // confusing message about the row's state.
+    const plus = el.querySelector('.counter button[aria-label^="increase"]');
+    if (!plus) throw new Error('no increase button on the row -- the counter markup has changed');
+    plus.click();
 
     const after = { state: el.className, flag: el.querySelector('.item-flag').textContent };
     const rowsAfter = [...document.querySelectorAll('.item-name')].map((n) => n.textContent);

@@ -218,6 +218,14 @@
     border-radius:8px;
     margin-bottom:8px;
     border-left:8px solid var(--gray-bg);
+    /* Wraps rather than clips. On a phone the name, the flag and the counter
+       plus the Pull button do not fit on one line -- the Pull button used to
+       hang 18px off the right edge, unreachable. Shrinking the controls was the
+       wrong answer: they are tapped outdoors, often with gloves. So the counter
+       drops to its own line and keeps full size. Rows on a wide screen still
+       fit on one line, so nothing wraps there. */
+    flex-wrap:wrap;
+    row-gap:8px;
   }
   /* Ordinal by urgency -- see itemRank(). The two states that need somebody to
      act are the loud ones; the two that need nothing sit back. This used to run
@@ -269,15 +277,37 @@
     background:#fff;border:1px solid var(--line);border-radius:5px;
     object-fit:contain;padding:1px;
   }
-  .item-info{flex:1;min-width:0;}
+  .item-info{flex:1 1 auto;min-width:0;}
   .item-name{font-size:0.95rem;font-weight:600;}
   .item-target{font-size:0.78rem;color:var(--ink-soft);margin-top:1px;}
 
+  .sheet-back{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;
+    align-items:flex-end;justify-content:center;z-index:50;}
+  .sheet{background:var(--card);border-top:1px solid var(--line);border-radius:14px 14px 0 0;
+    width:100%;max-width:560px;padding:16px;max-height:86vh;overflow:auto;}
+  .sheet h3{margin:0 0 4px;font-size:17px;}
+  .sheet .ref{font-size:13px;opacity:.75;margin-bottom:12px;}
+  .sheet label{display:block;font-size:13px;margin:10px 0 4px;}
+  .sheet input[type=number],.sheet input[type=text],.sheet input[type=password],.sheet select{
+    width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);
+    background:var(--bg);color:var(--fg);font-size:16px;}
+  .sheet .row{display:flex;gap:8px;margin-top:14px;}
+  .sheet .row button{flex:1;padding:12px;border-radius:10px;border:1px solid var(--line);
+    background:none;color:var(--fg);font-size:15px;cursor:pointer;}
+  .sheet .go{background:#2f6b3f;}
+  .sheet .msg{font-size:13px;margin-top:10px;min-height:18px;}
+  .pull-btn{
+    background:none;border:1px solid var(--line);color:var(--fg);
+    border-radius:8px;padding:4px 10px;font-size:13px;margin-left:8px;cursor:pointer;
+  }
+  .pull-btn:active{background:var(--line);}
+  .pull-note{font-size:12px;opacity:.75;margin-top:2px;}
   .counter{
     display:flex;
     align-items:center;
     gap:6px;
     flex-shrink:0;
+    margin-left:auto;   /* sits right, on whichever line it lands */
   }
   .counter button{
     width:34px;
@@ -1307,6 +1337,8 @@ var WSRCC_DISCREPANCY = {
 };
 
 var LOCAL_KEY = "wolf-field-checklist-v1";
+var itemMap = {};   // species slug -> {itemId, itemName, mappedBy, mappedAt}
+var pulls = {};     // species slug -> [{qty, job, who, at}], newest first
 var DOC_PATH = "checklist/wolf";
 
 var currentJob = "h2s";
@@ -1346,6 +1378,61 @@ function decode(html){
 function slug(name){
   return decode(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
+
+// ---- PURE: testable, no DOM ----
+// Everything between these sentinels must stay free of document, window, fetch
+// and localStorage. tests/deduct-logic.test.js extracts this exact region and
+// runs it in node. Reaching for the DOM in here breaks that test with a
+// confusing error rather than an obvious one.
+
+// Two phones can map the same species before either syncs. Newest stamp wins;
+// neither side's unique species is dropped.
+function mergeItemMap(base, incoming){
+  var out = {};
+  var k;
+  for(k in (base || {})) if(Object.prototype.hasOwnProperty.call(base, k)) out[k] = base[k];
+  for(k in (incoming || {})){
+    if(!Object.prototype.hasOwnProperty.call(incoming, k)) continue;
+    var mine = out[k], theirs = incoming[k];
+    if(!mine){ out[k] = theirs; continue; }
+    var mineAt = Date.parse(mine.mappedAt || "") || 0;
+    var theirsAt = Date.parse(theirs.mappedAt || "") || 0;
+    out[k] = theirsAt >= mineAt ? theirs : mine;
+  }
+  return out;
+}
+
+// Returns a NEW array. The caller's copy is never mutated, because the shared
+// payload is serialised straight from these structures and an in-place push has
+// bitten this app before.
+function recordPull(list, entry){
+  var out = [entry].concat(list || []);
+  return out.slice(0, 20);
+}
+
+// One per-item result from bulkPull, turned into something a row can say out loud.
+function summarizePull(result){
+  if(!result || !result.ok){
+    return { ok: false, applied: 0,
+             text: "not pulled - " + ((result && result.reason) || "unknown reason") };
+  }
+  var requested = Number(result.requested) || 0;
+  var applied = Number(result.applied) || 0;
+  var after = Number(result.after) || 0;
+  if(applied < requested){
+    return { ok: true, applied: applied,
+             text: "asked " + requested + ", got " + applied + " - " + after + " left" };
+  }
+  return { ok: true, applied: applied,
+           text: "pulled " + applied + " - " + after + " left" };
+}
+
+function pulledTotal(list){
+  var total = 0;
+  (list || []).forEach(function(e){ total += Number(e && e.qty) || 0; });
+  return total;
+}
+// ---- /PURE ----
 
 function readLocal(){
   try{
@@ -1484,6 +1571,7 @@ function setOffline(isOffline, msg){
 function payload(){
   return {counts: state, notes: notes, staked: staked, planted: planted,
           measured: measured, owed: owed, lastLogged: lastLogged,
+          itemMap: itemMap, pulls: pulls,
           updatedAt: new Date().toISOString()};
 }
 
@@ -1496,6 +1584,11 @@ function applyPayload(p){
   if(p.measured && typeof p.measured === "object") measured = Object.assign({}, p.measured);
   if(p.owed && typeof p.owed === "object") owed = Object.assign({}, p.owed);
   if(p.lastLogged && typeof p.lastLogged === "object") lastLogged = p.lastLogged;
+  // Merged, not replaced: another phone may have mapped a species this device
+  // has never seen, and a straight assignment would throw that away on the next
+  // save from here.
+  itemMap = mergeItemMap(itemMap, p.itemMap);
+  if(p.pulls && typeof p.pulls === "object") pulls = p.pulls;
   try{
     var savedLang = localStorage.getItem("wolf-lang");
     if(savedLang === "es" || savedLang === "en") lang = savedLang;
@@ -1739,8 +1832,22 @@ function renderItem(jobKey, name, target, isAlt){
   info.innerHTML = '<div class="item-name">' + name + '</div><div class="item-target">need ' +
     target + (isAlt ? " (alt / optional)" : "") + "</div>";
 
+  // What this tool has already sent to Inventory for this species. Shown so
+  // nobody has to remember at 6am whether they already pulled these.
+  var already = pulledTotal(pulls[slug(name)]);
+  if(already > 0){
+    var note = document.createElement("div");
+    note.className = "pull-note";
+    note.textContent = "pulled " + already + " so far";
+    info.appendChild(note);
+  }
+
   // "SHORT 88" rather than leaving somebody to subtract 30 from 118 in their
   // head, across an office, while being talked at.
+  //
+  // Sits beside the pull note above, not instead of it: one says what is still
+  // owed to the job, the other what has already left the yard for it. They
+  // answer different questions and a row can honestly need both.
   var flag = document.createElement("span");
   flag.className = "item-flag";
   function flagText(v){
@@ -1795,6 +1902,13 @@ function renderItem(jobKey, name, target, isAlt){
   counter.appendChild(minus);
   counter.appendChild(input);
   counter.appendChild(plus);
+
+  var pullBtn = document.createElement("button");
+  pullBtn.className = "pull-btn";
+  pullBtn.textContent = "Pull";
+  pullBtn.setAttribute("aria-label", "record a yard pull of " + decode(name));
+  pullBtn.addEventListener("click", function(){ openPullSheet(jobKey, name, target); });
+  counter.appendChild(pullBtn);
   wrap.appendChild(info);
   wrap.appendChild(flag);
   wrap.appendChild(counter);
@@ -3854,6 +3968,316 @@ function init(){
 }
 
 init();
+
+// ---- the Inventory deployment --------------------------------------------
+// A SECOND, separate Apps Script app from the checklist's own sync store above.
+// Different URL, different credential. They must never share either: the sync
+// key writes checklist counts, this token moves real stock.
+var INV_URL = "https://script.google.com/macros/s/AKfycbyudFaJ0dsSYMo_uO8KF5WTvJrB-l3eppbTHenmbcPRO19qhcVg8_YJR5boDIsCU1QC/exec";
+var INV_TOKEN_STORE = "wolf-inv-token";
+var INV_PROFILE_STORE = "wolf-inv-profile";
+
+function invToken(){
+  try{ return localStorage.getItem(INV_TOKEN_STORE) || ""; }catch(e){ return ""; }
+}
+
+function invProfile(){
+  try{ return JSON.parse(localStorage.getItem(INV_PROFILE_STORE) || "null"); }catch(e){ return null; }
+}
+
+function setInvToken(tok, profile){
+  try{
+    if(tok){ localStorage.setItem(INV_TOKEN_STORE, tok); }
+    else { localStorage.removeItem(INV_TOKEN_STORE); }
+    if(profile){ localStorage.setItem(INV_PROFILE_STORE, JSON.stringify(profile)); }
+    else { localStorage.removeItem(INV_PROFILE_STORE); }
+  }catch(e){}
+}
+
+// One open call gives both the item list for the picker and the profile list
+// for the sign-in sheet. Apps Script has a ~2s floor per request, so two calls
+// would double the wait before anything appears.
+function invBootstrap(){
+  return fetch(INV_URL + "?action=bootstrap&t=" + Date.now(), {cache: "no-store"})
+    .then(function(r){ return r.json(); });
+}
+
+function invVerifyPin(id, pin){
+  return fetch(INV_URL + "?action=verifyPin&id=" + encodeURIComponent(id) +
+               "&pin=" + encodeURIComponent(pin) + "&t=" + Date.now(), {cache: "no-store"})
+    .then(function(r){ return r.json(); });
+}
+
+// Resolves with the single per-item result, or rejects. An expired session
+// rejects with .authRequired so the caller can re-prompt rather than showing a
+// meaningless failure.
+function invBulkPull(itemId, qty, job){
+  return fetch(INV_URL, {
+    method: "POST",
+    headers: {"Content-Type": "text/plain;charset=utf-8"},
+    body: JSON.stringify({
+      action: "bulkPull",
+      items: [{id: Number(itemId), qty: Number(qty)}],
+      job: job,
+      kind: "plants",
+      token: invToken()
+    })
+  }).then(function(r){ return r.json(); }).then(function(j){
+    if(j && j.authRequired){ var e = new Error(j.error || "sign in again"); e.authRequired = true; throw e; }
+    if(!j || !j.results || !j.results.length){ throw new Error((j && j.error) || "no result from inventory"); }
+    return j.results[0];
+  });
+}
+
+function closeSheet(){
+  var b = document.getElementById("pullSheetBack");
+  if(b) b.remove();
+}
+
+function openPullSheet(jobKey, name, target){
+  closeSheet();
+  var sKey = slug(name);
+  var back = document.createElement("div");
+  back.className = "sheet-back";
+  back.id = "pullSheetBack";
+  back.addEventListener("click", function(e){ if(e.target === back) closeSheet(); });
+
+  var sheet = document.createElement("div");
+  sheet.className = "sheet";
+  back.appendChild(sheet);
+  document.body.appendChild(back);
+
+  var msg = document.createElement("div");
+  msg.className = "msg";
+  function say(t){ msg.textContent = t || ""; }
+
+  // ---- step 3: the actual pull -------------------------------------------
+  function showPullStep(){
+    sheet.innerHTML = "";
+    var h = document.createElement("h3");
+    h.textContent = decode(name);
+    var ref = document.createElement("div");
+    ref.className = "ref";
+    var tallied = state[jobKey + ":" + sKey] || 0;
+    ref.textContent = "need " + target + " - tallied " + tallied +
+                      " - mapped to " + (itemMap[sKey] ? itemMap[sKey].itemName : "?");
+
+    var qtyLabel = document.createElement("label");
+    qtyLabel.textContent = "How many actually left the yard?";
+    var qtyInput = document.createElement("input");
+    qtyInput.type = "number";
+    qtyInput.inputMode = "numeric";
+    qtyInput.min = "1";
+    // Deliberately blank. Neither the plan nor the tally is reliably what went
+    // on the truck, and a pre-filled number is one distracted tap from a wrong
+    // deduction that has to be unwound by hand in the Sheet.
+    qtyInput.value = "";
+
+    var jobLabel = document.createElement("label");
+    jobLabel.textContent = "Job";
+    var jobInput = document.createElement("input");
+    jobInput.type = "text";
+    jobInput.value = JOBS[jobKey] ? JOBS[jobKey].label : jobKey;
+
+    var row = document.createElement("div");
+    row.className = "row";
+    var cancel = document.createElement("button");
+    cancel.textContent = "Cancel";
+    cancel.addEventListener("click", closeSheet);
+    var go = document.createElement("button");
+    go.className = "go";
+    go.textContent = "Pull from inventory";
+
+    go.addEventListener("click", function(){
+      var qty = Math.max(0, parseInt(qtyInput.value, 10) || 0);
+      if(qty <= 0){ say("Enter how many left the yard."); return; }
+      if(!navigator.onLine){
+        // No queueing on purpose: applying this later, after the pull has been
+        // written down somewhere else, produces a double count.
+        say("Need signal to pull. Nothing was deducted.");
+        return;
+      }
+      go.disabled = true;
+      say("Pulling...");
+      invBulkPull(itemMap[sKey].itemId, qty, jobInput.value.trim())
+        .then(function(result){
+          var s = summarizePull(result);
+          if(s.ok && s.applied > 0){
+            pulls[sKey] = recordPull(pulls[sKey], {
+              qty: s.applied,
+              job: jobInput.value.trim(),
+              who: (invProfile() && invProfile().name) || "",
+              at: new Date().toISOString()
+            });
+            scheduleSave();
+            renderGroups();
+          }
+          say(s.text);
+          go.disabled = false;
+          if(s.ok) setTimeout(closeSheet, 1600);
+        })
+        .catch(function(err){
+          go.disabled = false;
+          if(err && err.authRequired){ setInvToken("", null); showSignInStep(); return; }
+          say(err && err.message ? err.message : "could not reach inventory");
+        });
+    });
+
+    row.appendChild(cancel);
+    row.appendChild(go);
+    sheet.appendChild(h);
+    sheet.appendChild(ref);
+    sheet.appendChild(qtyLabel);
+    sheet.appendChild(qtyInput);
+    sheet.appendChild(jobLabel);
+    sheet.appendChild(jobInput);
+    sheet.appendChild(row);
+    sheet.appendChild(msg);
+    qtyInput.focus();
+  }
+
+  // ---- step 2: map this species once -------------------------------------
+  function showMapStep(items){
+    sheet.innerHTML = "";
+    var h = document.createElement("h3");
+    h.textContent = "Which inventory item is " + decode(name) + "?";
+    var ref = document.createElement("div");
+    ref.className = "ref";
+    ref.textContent = "Picked once. Everyone on the checklist gets this mapping.";
+
+    var search = document.createElement("input");
+    search.type = "text";
+    search.placeholder = "Type to filter";
+
+    var sel = document.createElement("select");
+    sel.size = 8;
+
+    function fill(){
+      var q = search.value.toLowerCase();
+      sel.innerHTML = "";
+      items.filter(function(it){
+        return !q || String(it.name).toLowerCase().indexOf(q) !== -1;
+      }).slice(0, 200).forEach(function(it){
+        var o = document.createElement("option");
+        o.value = it.id;
+        o.textContent = it.name + "  (" + it.qty + " on hand)";
+        sel.appendChild(o);
+      });
+    }
+    // Seed the filter with the species name; usually right, saves typing. If it
+    // matches nothing, fall back to the full list rather than an empty box.
+    search.value = decode(name);
+    fill();
+    if(!sel.options.length){ search.value = ""; fill(); }
+    search.addEventListener("input", fill);
+
+    var row = document.createElement("div");
+    row.className = "row";
+    var cancel = document.createElement("button");
+    cancel.textContent = "Cancel";
+    cancel.addEventListener("click", closeSheet);
+    var go = document.createElement("button");
+    go.className = "go";
+    go.textContent = "Use this item";
+    go.addEventListener("click", function(){
+      if(!sel.value){ say("Pick an item first."); return; }
+      var chosen = items.filter(function(it){ return String(it.id) === String(sel.value); })[0];
+      var add = {};
+      add[sKey] = { itemId: chosen.id, itemName: chosen.name,
+                    mappedBy: (invProfile() && invProfile().name) || "",
+                    mappedAt: new Date().toISOString() };
+      itemMap = mergeItemMap(itemMap, add);
+      scheduleSave();
+      showPullStep();
+    });
+
+    row.appendChild(cancel);
+    row.appendChild(go);
+    sheet.appendChild(h);
+    sheet.appendChild(ref);
+    sheet.appendChild(search);
+    sheet.appendChild(sel);
+    sheet.appendChild(row);
+    sheet.appendChild(msg);
+  }
+
+  // ---- step 1: sign in ----------------------------------------------------
+  function showSignInStep(){
+    sheet.innerHTML = "";
+    var h = document.createElement("h3");
+    h.textContent = "Sign in to pull stock";
+    var ref = document.createElement("div");
+    ref.className = "ref";
+    ref.textContent = "Same PIN as the Inventory app. The Change Log records who pulled.";
+
+    var sel = document.createElement("select");
+    var pin = document.createElement("input");
+    pin.type = "password";
+    pin.inputMode = "numeric";
+    pin.placeholder = "PIN";
+
+    var row = document.createElement("div");
+    row.className = "row";
+    var cancel = document.createElement("button");
+    cancel.textContent = "Cancel";
+    cancel.addEventListener("click", closeSheet);
+    var go = document.createElement("button");
+    go.className = "go";
+    go.textContent = "Sign in";
+
+    say("Loading...");
+    invBootstrap().then(function(data){
+      var profiles = (data && data.profiles) || [];
+      profiles.filter(function(p){ return String(p.status) === "approved"; })
+              .forEach(function(p){
+        var o = document.createElement("option");
+        o.value = p.id;
+        o.textContent = p.name;
+        sel.appendChild(o);
+      });
+      say(sel.options.length ? "" : "No approved profiles found.");
+      // Held for the mapping step so it does not cost a second round trip.
+      sheet._items = (data && data.items) || [];
+    }).catch(function(){ say("Could not reach inventory."); });
+
+    go.addEventListener("click", function(){
+      if(!sel.value){ say("Pick your name."); return; }
+      go.disabled = true;
+      say("Checking...");
+      invVerifyPin(sel.value, pin.value).then(function(r){
+        go.disabled = false;
+        if(!r || !r.valid){
+          say("Wrong PIN" + (r && r.attemptsLeft !== undefined ? " - " + r.attemptsLeft + " tries left" : ""));
+          return;
+        }
+        if(!r.token){ say("That profile is " + (r.status || "not approved") + "."); return; }
+        setInvToken(r.token, {id: r.id, name: r.name});
+        if(itemMap[sKey]) showPullStep();
+        else showMapStep(sheet._items || []);
+      }).catch(function(){ go.disabled = false; say("Could not reach inventory."); });
+    });
+
+    row.appendChild(cancel);
+    row.appendChild(go);
+    sheet.appendChild(h);
+    sheet.appendChild(ref);
+    sheet.appendChild(sel);
+    sheet.appendChild(pin);
+    sheet.appendChild(row);
+    sheet.appendChild(msg);
+  }
+
+  // Route to the first step that is actually needed.
+  if(!invToken()){ showSignInStep(); return; }
+  if(!itemMap[sKey]){
+    say("Loading inventory...");
+    sheet.appendChild(msg);
+    invBootstrap().then(function(data){ showMapStep((data && data.items) || []); })
+                  .catch(function(){ say("Could not reach inventory."); });
+    return;
+  }
+  showPullStep();
+}
 </script>
 <script>
 if('serviceWorker' in navigator){
