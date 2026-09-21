@@ -1127,7 +1127,13 @@ var JOBS = {
         ["Creeping Juniper", 70],
         ["Savin Juniper", 34],
         ["Red-Twig Dogwood", 41],
-        ["Miss Kim Lilac", 73],
+        // The plan draws 73 Miss Kim (code SPA). 46 were on hand and are in;
+        // the balance goes in as common purple, which is a different plant to
+        // pull, so it gets its own row rather than hiding inside a 73. The BED
+        // callouts still say SPA 73 -- that is what the sheet draws and the bed
+        // view reports the drawing, not the substitution.
+        ["Miss Kim Lilac", 46],
+        ["Hardy Purple Common Lilac", 27],
         ["Late Lilac", 44],
         ["Rugosa Rose", 33]
       ]},
@@ -1143,11 +1149,14 @@ var JOBS = {
       ]}
     },
     flags: [
-      "&#9888;&#65039; <strong>Miss Kim Lilac</strong> &mdash; the bed callouts total <strong>73</strong> but the plant schedule on the same sheet says 45. Material was ordered to the schedule, 46 are on hand, so the beds are <strong>27 short</strong>. Ran out mid-install 9/12. Raised with Chris and Jeremi.",
-      "&#9888;&#65039; <strong>False Spirea</strong> &mdash; same problem, not hit yet. Callouts 252 vs schedule 226, and 226 are on hand. Expect to come up <strong>26 short</strong> when those beds are reached.",
-      "&#127807; <strong>Hair grass</strong> &mdash; <strong>Tufted Hair Grass is the APPROVED substitute</strong> for Gold Crinkled, routed through Chris. 68 on hand of 132, <strong>64 still to come</strong>. The species question is closed &mdash; order the balance as Tufted.",
-      "&#128666; <strong>Bron&#39;s last load of the season closed Friday 9/11.</strong> There is no record in BuilderTrend of what went on it. Confirm with Chris before assuming any trees are coming from that truck. Birch and aspen are sitting at the pit but not released.",
-      "&#128230; Bron order number on file (#723699) does not match the number on Chris&#39;s Wolf checklist doc (#137198) &mdash; still unconfirmed, probably just reissued."
+      // Four of these closed out 9/20. Miss Kim and False Spirea were the two
+      // schedule-vs-callout shortages; both are settled now, so only Miss Kim
+      // keeps a line and only because the substitute is worth recording.
+      // Bron's last load and the order-number mismatch are gone -- the crew
+      // knows about the load, and the number was only ever "probably reissued".
+      // A note nobody still needs is the reason this panel grew.
+      "&#9989; <strong>Miss Kim Lilac &mdash; handled.</strong> Callouts total 73 against a schedule of 45. The 46 on hand went in; the remaining <strong>27</strong> are going in as <strong>common purple lilac</strong>.",
+      "&#127807; <strong>Hair grass</strong> &mdash; <strong>Tufted Hair Grass is the APPROVED substitute</strong> for Gold Crinkled, routed through Chris. 68 on hand of 132, <strong>64 still to come</strong>. The species question is closed &mdash; order the balance as Tufted."
     ]
   },
   charter: {
@@ -1373,9 +1382,12 @@ var SPECIES = {
 };
 
 // Where the plan's own callouts disagree with the plan's own schedule.
+// SPA (Miss Kim, 73 vs 45) and AD (False Spirea, 252 vs 226) both carried a
+// "check plan" badge until 9/20. Both are settled now -- Miss Kim's balance
+// goes in as common purple, False Spirea's shortfall came off nursery stock --
+// so the badge was asking a planter to chase a question that has an answer.
+// Birchleaf is the one still open.
 var DISCREPANCY = {
-  SPA: "callouts 73 vs schedule 45",
-  AD: "callouts 252 vs schedule 226",
   SBT: "callouts 58 vs schedule 63",
 };
 
@@ -3305,11 +3317,13 @@ function renderBeds(){
 
   var note = document.createElement("div");
   note.className = "zone-note";
-  note.innerHTML = "<b>Three species do not add up.</b> Across the whole job the " +
-    "callouts total 73 Miss Kim Lilac against a schedule of 45, 252 False Spirea " +
-    "against 226, and 58 Birchleaf Spirea against 63. Every other species matches " +
-    "exactly. The bed numbers above are what the sheet actually draws &mdash; settle " +
-    "the three with Peter Briggs at Corvus, 907.222.2859, before ordering to them.";
+  note.innerHTML = "<b>One species still does not add up.</b> The callouts total " +
+    "58 Birchleaf Spirea against a schedule of 63. The bed numbers above are what " +
+    "the sheet actually draws &mdash; settle it with Peter Briggs at Corvus, " +
+    "907.222.2859, before ordering to them.<br><br>Miss Kim Lilac (73 vs 45) and " +
+    "False Spirea (252 vs 226) were the other two and are <b>settled</b>: Miss " +
+    "Kim's balance goes in as common purple, False Spirea's shortfall came off " +
+    "nursery stock.";
   container.appendChild(note);
   // Bed numbers are padded in the data (B39) but people type 39.
   var jb = document.getElementById("jumpBed");
