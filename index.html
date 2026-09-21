@@ -126,41 +126,54 @@
     font-variant-numeric:tabular-nums;
   }
 
+  /* The six jobs were a 2-up grid of tiles: three rows, about 190px of screen
+     gone before any bed showed. On a phone that is most of what you can see at
+     arm's length in daylight. One dropdown does the same job in about 45px.
+     The progress numbers moved into the option text rather than being dropped,
+     so opening the list still answers "which job is behind". */
   .tabs{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:8px;
     padding-bottom:12px;
   }
-  .tab{
+  /* Reachable by a screen reader, off the screen for everyone else. The select
+     needs a label and there is no room to show one. */
+  .visually-hidden{
+    position:absolute;
+    width:1px;
+    height:1px;
+    margin:-1px;
+    padding:0;
+    overflow:hidden;
+    clip:rect(0 0 0 0);
+    white-space:nowrap;
+    border:0;
+  }
+  .job-select{
+    display:block;
+    width:100%;
+    /* 44px is the floor for a gloved thumb. Do not shrink this to save space --
+       the space was already won by removing two rows of tiles. */
+    min-height:44px;
     border:1px solid var(--line);
-    background:var(--card);
     border-radius:9px;
-    padding:9px 6px;
-    text-align:center;
+    background:var(--card);
+    color:var(--ink);
     font-family:inherit;
-    cursor:pointer;
-    color:var(--ink);
-  }
-  .tab .tab-name{
-    display:block;
-    font-size:0.86rem;
+    font-size:0.95rem;
     font-weight:700;
-    color:var(--ink);
-  }
-  .tab .tab-progress{
-    display:block;
-    font-size:0.72rem;
-    color:var(--ink-soft);
-    margin-top:2px;
     font-variant-numeric:tabular-nums;
+    padding:9px 34px 9px 12px;
+    cursor:pointer;
+    /* Android renders its own arrow on top of ours unless the native
+       appearance is cleared first. */
+    -webkit-appearance:none;
+    -moz-appearance:none;
+    appearance:none;
+    background-image:url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%236b7280' d='M4.2 6.1h7.6L8 10.5z'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 12px center;
+    background-size:16px 16px;
   }
-  .tab.active{
-    border-color:var(--green);
-    background:var(--green-bg);
-  }
-  .tab.active .tab-name{color:var(--green-text);}
-  .tab:focus-visible,.counter button:focus-visible,.report-btn:focus-visible,
+  .job-select:focus-visible,.counter button:focus-visible,.report-btn:focus-visible,
   .report-copy:focus-visible,.report-close:focus-visible,
   .counter input:focus-visible,textarea:focus-visible{
     outline:2px solid var(--green);
@@ -976,7 +989,10 @@
   <p class="subhead" id="dateLine"></p>
   <p class="asof" id="jobsLine">Plant sort counts</p>
   <p class="savenote" id="saveNote">Loading your counts&hellip;</p>
-  <div class="tabs" id="tabs"></div>
+  <div class="tabs" id="tabs">
+    <label class="visually-hidden" for="jobSelect">Job</label>
+    <select class="job-select" id="jobSelect"></select>
+  </div>
 </header>
 
 <div id="saveWarning" class="save-warning">
@@ -1742,26 +1758,65 @@ function jobProgress(jobKey){
   return {complete: complete, total: total};
 }
 
+// The job picker. It was six tiles in a 2-up grid -- three rows, roughly 190px
+// of a phone screen spent before the first bed appeared. It is one dropdown
+// now. The per-job progress was the thing worth keeping, so it rides in the
+// option text: open the list and every job still says how far along it is.
+//
+// renderAll() calls this on every render, so it must be safe to run constantly.
+// It rebuilds the options only when the set of jobs actually changes and
+// otherwise just refreshes the text -- rebuilding innerHTML under an open
+// native picker on Android closes it, which on a phone reads as the app
+// throwing away your tap.
+// The tiles set innerHTML, so "Iris, perennials &amp; grasses" came out as an
+// ampersand. An <option> renders no markup at all -- setting innerHTML on one
+// is not a way round it -- so an entity would sit there raw on the screen. No
+// job's `short` carries one today, but every other label in this file is
+// written that way, so the next job added would be the one to find out.
+function decodeEntities(str){
+  var el = document.createElement("textarea");
+  el.innerHTML = String(str);
+  return el.value;
+}
+
 function renderTabs(){
-  var tabsEl = document.getElementById("tabs");
-  tabsEl.innerHTML = "";
-  Object.keys(JOBS).forEach(function(jobKey){
-    var p = jobProgress(jobKey);
-    var btn = document.createElement("button");
-    btn.className = "tab" + (jobKey === currentJob ? " active" : "");
-    btn.innerHTML = '<span class="tab-name">' + JOBS[jobKey].short +
-      '</span><span class="tab-progress">' + p.complete + "/" + p.total + " complete</span>";
-    btn.addEventListener("click", function(){
-      if(jobKey === currentJob) return;
-      goto(function(){
-        currentJob = jobKey;
-        applyJobData();
-        // The zone pull list exists for Home2Suites and WSRCC; leaving for a tab
-        // without one drops back to the species view so the toggle never lies.
-        if(!hasBedView(jobKey)) view = "species";
-      });
+  var sel = document.getElementById("jobSelect");
+  if(!sel) return;
+  var keys = Object.keys(JOBS);
+
+  var sameJobs = sel.options.length === keys.length;
+  if(sameJobs){
+    for(var i = 0; i < keys.length; i++){
+      if(sel.options[i].value !== keys[i]){ sameJobs = false; break; }
+    }
+  }
+  if(!sameJobs){
+    sel.innerHTML = "";
+    keys.forEach(function(jobKey){
+      var opt = document.createElement("option");
+      opt.value = jobKey;
+      sel.appendChild(opt);
     });
-    tabsEl.appendChild(btn);
+  }
+
+  keys.forEach(function(jobKey, i){
+    var p = jobProgress(jobKey);
+    sel.options[i].textContent = decodeEntities(JOBS[jobKey].short) +
+      " — " + p.complete + "/" + p.total + " complete";
+  });
+
+  sel.value = currentJob;
+}
+
+function onJobSelect(){
+  var jobKey = document.getElementById("jobSelect").value;
+  if(jobKey === currentJob) return;
+  goto(function(){
+    currentJob = jobKey;
+    applyJobData();
+    // The zone pull list exists for Home2Suites and WSRCC; leaving for a job
+    // without one drops back to the species view so the toggle never lies.
+    if(!hasBedView(jobKey)) view = "species";
   });
 }
 
@@ -3971,6 +4026,9 @@ function init(){
   var local = readLocal();
   applyPayload(local);
   fillMissingFromSeed();
+  // Bound once, on the static element. renderTabs() rewrites the option text on
+  // every render, so a listener attached in there would stack up.
+  document.getElementById("jobSelect").addEventListener("change", onJobSelect);
   document.getElementById("vtSpecies").addEventListener("click", function(){
     if(view === "species") return;
     goto(function(){ view = "species"; });
