@@ -3315,16 +3315,28 @@ function renderBeds(){
     });
   });
 
-  var note = document.createElement("div");
-  note.className = "zone-note";
-  note.innerHTML = "<b>One species still does not add up.</b> The callouts total " +
-    "58 Birchleaf Spirea against a schedule of 63. The bed numbers above are what " +
-    "the sheet actually draws &mdash; settle it with Peter Briggs at Corvus, " +
-    "907.222.2859, before ordering to them.<br><br>Miss Kim Lilac (73 vs 45) and " +
-    "False Spirea (252 vs 226) were the other two and are <b>settled</b>: Miss " +
-    "Kim's balance goes in as common purple, False Spirea's shortfall came off " +
-    "nursery stock.";
-  container.appendChild(note);
+  // This note used to be typed out, and it named Home2Suites species -- so the
+  // WSRCC bed view showed a WSRCC PM the Home2Suites callout problem and never
+  // showed them their own three (PTE 15 vs 19, CS 120 vs 118, PFA 117 vs 118).
+  // Same shape as the h2s-prefix bugs: job-specific content on a screen that
+  // serves two jobs. It is derived from the open job's own DISCREPANCY now,
+  // which applyJobData() has already pointed at the right one, so it cannot go
+  // back to naming the wrong job's plants.
+  var discCodes = Object.keys(DISCREPANCY || {});
+  if(discCodes.length){
+    var parts = discCodes.map(function(c){
+      return "<b>" + decode((SPECIES && SPECIES[c]) || c) + "</b> (" + DISCREPANCY[c] + ")";
+    });
+    var note = document.createElement("div");
+    note.className = "zone-note";
+    note.innerHTML = "<b>" + (parts.length === 1
+        ? "One species does not add up."
+        : parts.length + " species do not add up.") +
+      "</b> " + parts.join("; ") + ". The bed numbers above are what the sheet " +
+      "actually draws &mdash; settle " + (parts.length === 1 ? "it" : "them") +
+      " with Peter Briggs at Corvus, 907.222.2859, before ordering to them.";
+    container.appendChild(note);
+  }
   // Bed numbers are padded in the data (B39) but people type 39.
   var jb = document.getElementById("jumpBed");
   var jg = document.getElementById("jumpGo");
