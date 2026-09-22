@@ -1133,7 +1133,14 @@ var JOBS = {
         // callouts still say SPA 73 -- that is what the sheet draws and the bed
         // view reports the drawing, not the substitution.
         ["Miss Kim Lilac", 46],
-        ["Hardy Purple Common Lilac", 27],
+        // "(#2 sub)" is in the NAME, following the "Gold Crinkled Hair Grass
+        // (sub)" convention, so the substitution and the pot exception are both
+        // visible on the office TV without opening the notes. The name is the
+        // storage key -- slug() makes this "hardy-purple-common-lilac-2-sub" --
+        // so it must not be edited again once counts exist against it. Renamed
+        // the same day the row was added, while it was still 0 and no backup
+        // referenced it. That window is closed now.
+        ["Hardy Purple Common Lilac (#2 sub)", 27],
         ["Late Lilac", 44],
         ["Rugosa Rose", 33]
       ]},
@@ -1155,7 +1162,7 @@ var JOBS = {
       // Bron's last load and the order-number mismatch are gone -- the crew
       // knows about the load, and the number was only ever "probably reissued".
       // A note nobody still needs is the reason this panel grew.
-      "&#9989; <strong>Miss Kim Lilac &mdash; handled.</strong> Callouts total 73 against a schedule of 45. The 46 on hand went in; the remaining <strong>27</strong> are going in as <strong>common purple lilac</strong>.",
+      "&#9989; <strong>Miss Kim Lilac &mdash; handled.</strong> Callouts total 73 against a schedule of 45. The 46 on hand went in; the remaining <strong>27</strong> go in as <strong>common purple lilac in #2 containers</strong>. The shrub spec on this job is <strong>#5, 18&quot; minimum at planting</strong>, so that is a size exception and it has been <strong>accepted</strong> &mdash; written down here because a smaller pot is the kind of thing that gets raised at walkthrough, and the answer should not have to be remembered.",
       "&#127807; <strong>Hair grass</strong> &mdash; <strong>Tufted Hair Grass is the APPROVED substitute</strong> for Gold Crinkled, routed through Chris. 68 on hand of 132, <strong>64 still to come</strong>. The species question is closed &mdash; order the balance as Tufted."
     ]
   },
