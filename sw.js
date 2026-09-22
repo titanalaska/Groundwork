@@ -60,7 +60,7 @@ function cachesToDelete(names, keep){
 }
 // ---- /PURE ----
 
-const CACHE_VERSION = 'v10';
+const CACHE_VERSION = 'v11';
 const SHELL_CACHE = `${CACHE_PREFIX}${CACHE_VERSION}`;
 
 // Bed crops and site maps: ~17 MB over 45 files for Home2Suites and ~10 MB over
