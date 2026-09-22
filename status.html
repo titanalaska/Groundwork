@@ -68,98 +68,30 @@ footer{color:var(--mut);font-size:.82rem;margin-top:24px;border-top:1px solid va
  padding-top:14px}
 @media print{body{background:#fff}.card{break-inside:avoid}.jump{display:none}}
 </style>
+<style>
+/* Added 9/21 when this page stopped being typed by hand. */
+.state{border-radius:10px;padding:13px 16px;margin:0 0 20px;font-size:.92rem}
+/* Short and Status ran together once the table was rendered rather than typed. */
+th:last-child{padding-left:10px}
+.state.load{background:#eef1ea;color:var(--mut)}
+.state.err{background:var(--redbg);border:1px solid var(--nonefill);color:var(--ink)}
+.state.err b{color:var(--nonefill)}
+.live{display:inline-block;width:7px;height:7px;border-radius:99px;
+ background:var(--green);margin-right:7px;vertical-align:middle}
+</style>
 <div class="wrap">
-<div class="eyebrow">Titan Alaska &middot; four active jobs</div>
+<div class="eyebrow">Titan Alaska &middot; <span id="jobCount">&hellip;</span></div>
 <h1>Plant status</h1>
 <div class="by">Field record maintained by <b>Matt Walsh</b>, Nursery &amp; Field Operations Manager</div>
-<div class="stamp">Counts as of Monday, September 21 2026 &nbsp;&middot;&nbsp; read-only</div>
-<div class="big">
-<div><b>35<span style="font-size:1rem">/53</span></b><span>species fully on site</span></div>
-<div><b>559</b><span>plants still needed</span></div>
-<div><b>9<span style="font-size:1rem">/44</span></b><span>Home2 Suites beds planted</span></div>
-</div>
-<div class="jump">
-<a href="#h2s">Home2Suites &nbsp;<b>101</b></a>
-<a href="#charter">Wasilla Charter Academy &nbsp;<b>2</b></a>
-<a href="#baxter">Baxter Family Housing &nbsp;<b>80</b></a>
-<a href="#wsrcc">WSRCC — 5800 Boundary Ave &nbsp;<b>376</b></a>
-</div>
-<section id="h2s"><h2>Home2Suites</h2>
-<div class="sub">19 of 23 species complete &middot; <b>101 plants still needed</b></div>
-<div class="card"><div class="scroll"><table>
-<tr><th>Species</th><th class="n">Plan</th><th class="n">On site</th><th class="n">Short</th><th>Status</th></tr>
-<tr><td>Gold Crinkled Hair Grass (sub)<span class="nt">Tufted Hair Grass is the approved substitute, routed through Chris. Order the balance as Tufted.</span></td><td class='n'>132</td><td class='n'>68</td><td class='n'><b>64</b></td><td><span class='pill sh'>short 64</span></td></tr>
-<tr><td>Paper Birch</td><td class='n'>15</td><td class='n'>0</td><td class='n'><b>15</b></td><td><span class='pill no'>none yet</span></td></tr>
-<tr><td>Columnar Swedish Aspen<span class="nt">14 on hand as of 9/16 - 5 from Danny and 9 from Titan&#x27;s own nursery.</span></td><td class='n'>28</td><td class='n'>14</td><td class='n'><b>14</b></td><td><span class='pill sh'>short 14</span></td></tr>
-<tr><td>Quaking Aspen</td><td class='n'>8</td><td class='n'>0</td><td class='n'><b>8</b></td><td><span class='pill no'>none yet</span></td></tr>
-<tr><td>Miss Kim Lilac<span class="nt">Settled. The plan schedule says 45 and 46 were ordered to it; all 46 are in the ground. The bed callouts ask for 73 &mdash; the remaining 27 are covered by common purple, on the next line.</span></td><td class='n'>46</td><td class='n'>46</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Hardy Purple Common Lilac (#2 sub)<span class="nt">Covers the Miss Kim shortfall, and is on site. Bed callouts total 73 Miss Kim against a schedule of 45; the 46 ordered to the schedule are in, and these 27 were pulled from the nursery and delivered to Home2 Suites to make up the balance. Supersedes the 9/16 plan to use Donald Wyman, of which the nursery counted 17 on 9/21 &mdash; not enough for 27. These are #2 containers against a #5, 18&quot; minimum shrub spec: a size exception, accepted.</span></td><td class='n'>27</td><td class='n'>27</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>False Spirea<span class="nt">Settled. Bed callouts total 252 against a schedule of 226; the shortfall was pulled from the nursery rather than ordered.</span></td><td class='n'>252</td><td class='n'>252</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Helena Maple</td><td class='n'>22</td><td class='n'>22</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Amur Maple</td><td class='n'>3</td><td class='n'>3</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Siberian Crabapple</td><td class='n'>9</td><td class='n'>9</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Goldmound Spirea</td><td class='n'>61</td><td class='n'>61</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Creeping Juniper</td><td class='n'>70</td><td class='n'>70</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Savin Juniper</td><td class='n'>34</td><td class='n'>34</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Red-Twig Dogwood</td><td class='n'>41</td><td class='n'>41</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Late Lilac</td><td class='n'>44</td><td class='n'>44</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Rugosa Rose</td><td class='n'>33</td><td class='n'>33</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Alaska Flag Iris</td><td class='n'>338</td><td class='n'>338</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Karl Foerster Reed Grass</td><td class='n'>164</td><td class='n'>164</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Bishop&#x27;s Weed (Goutweed)</td><td class='n'>305</td><td class='n'>305</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Hosta Patriot</td><td class='n'>83</td><td class='n'>83</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Goatsbeard</td><td class='n'>10</td><td class='n'>10</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Sweet Woodruff</td><td class='n'>67</td><td class='n'>68</td><td class='n'>&mdash;</td><td><span class='pill ok'>1 spare</span></td></tr>
-<tr><td>Birchleaf Spirea<span class="nt">Bed callouts total 58, the plant schedule says 63. Surplus, not a shortfall.</span></td><td class='n'>58</td><td class='n'>62</td><td class='n'>&mdash;</td><td><span class='pill ok'>4 spare</span></td></tr>
-</table></div></div></section>
-<section id="charter"><h2>Wasilla Charter Academy</h2>
-<div class="sub">4 of 5 species complete &middot; <b>2 plants still needed</b></div>
-<div class="card"><div class="scroll"><table>
-<tr><th>Species</th><th class="n">Plan</th><th class="n">On site</th><th class="n">Short</th><th>Status</th></tr>
-<tr><td>Parkland Pillar Birch<span class="nt">The 2 on site are WEEPING BIRCH, not Parkland Pillar. Substitution is being worked but is NOT approved yet, so this job is not closed out. Note the form difference: Parkland Pillar is a narrow upright columnar birch, roughly 6-7 ft spread; a weeping birch is broad and draping and can run several times that. If these are going somewhere tight, the spread is the thing to raise.</span></td><td class='n'>2</td><td class='n'>0</td><td class='n'><b>2</b></td><td><span class='pill no'>awaiting approval &mdash; short 2</span></td></tr>
-<tr><td>Paper Birch</td><td class='n'>6</td><td class='n'>6</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Goldflame Spirea</td><td class='n'>28</td><td class='n'>28</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Hedge Cotoneaster</td><td class='n'>34</td><td class='n'>34</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Karl Foerster Reed Grass</td><td class='n'>134</td><td class='n'>134</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-</table></div></div></section>
-<section id="baxter"><h2>Baxter Family Housing</h2>
-<div class="sub">6 of 10 species complete &middot; <b>80 plants still needed</b></div>
-<div class="card"><div class="scroll"><table>
-<tr><th>Species</th><th class="n">Plan</th><th class="n">On site</th><th class="n">Short</th><th>Status</th></tr>
-<tr><td>Yellow Potentilla</td><td class='n'>55</td><td class='n'>0</td><td class='n'><b>55</b></td><td><span class='pill no'>none yet</span></td></tr>
-<tr><td>White Spruce</td><td class='n'>9</td><td class='n'>0</td><td class='n'><b>9</b></td><td><span class='pill no'>none yet</span></td></tr>
-<tr><td>Paper Birch</td><td class='n'>8</td><td class='n'>0</td><td class='n'><b>8</b></td><td><span class='pill no'>none yet</span></td></tr>
-<tr><td>Prairiefire Crabapple</td><td class='n'>8</td><td class='n'>0</td><td class='n'><b>8</b></td><td><span class='pill no'>none yet</span></td></tr>
-<tr><td>Hardy Purple Common Lilac</td><td class='n'>2</td><td class='n'>2</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Birchleaf Spirea</td><td class='n'>26</td><td class='n'>26</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Creeping Juniper</td><td class='n'>11</td><td class='n'>11</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Dwarf American Cranberry</td><td class='n'>14</td><td class='n'>14</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Rugosa Rose</td><td class='n'>38</td><td class='n'>38</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Alaska Flag Iris</td><td class='n'>36</td><td class='n'>36</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-</table></div></div></section>
-<section id="wsrcc"><h2>WSRCC — 5800 Boundary Ave</h2>
-<div class="sub">6 of 15 species complete &middot; <b>376 plants still needed</b></div>
-<div class="card"><div class="scroll"><table>
-<tr><th>Species</th><th class="n">Plan</th><th class="n">On site</th><th class="n">Short</th><th>Status</th></tr>
-<tr><td>Abbottswood Potentilla</td><td class='n'>118</td><td class='n'>30</td><td class='n'><b>88</b></td><td><span class='pill sh'>short 88</span></td></tr>
-<tr><td>Overdam Reed Grass</td><td class='n'>74</td><td class='n'>0</td><td class='n'><b>74</b></td><td><span class='pill no'>none yet</span></td></tr>
-<tr><td>Miss Canada Lilac</td><td class='n'>72</td><td class='n'>0</td><td class='n'><b>72</b></td><td><span class='pill no'>none yet</span></td></tr>
-<tr><td>Pink Beauty Potentilla</td><td class='n'>121</td><td class='n'>62</td><td class='n'><b>59</b></td><td><span class='pill sh'>short 59</span></td></tr>
-<tr><td>Ivory Halo Dogwood<span class="nt">Short, and covered by the surplus Red-Twig under the approved substitution. Do not order.</span></td><td class='n'>155</td><td class='n'>97</td><td class='n'>&mdash;</td><td><span class='pill ok'>covered by substitution</span></td></tr>
-<tr><td>Goldfinger Potentilla</td><td class='n'>96</td><td class='n'>55</td><td class='n'><b>41</b></td><td><span class='pill sh'>short 41</span></td></tr>
-<tr><td>Columnar Swedish Aspen</td><td class='n'>19</td><td class='n'>0</td><td class='n'><b>19</b></td><td><span class='pill no'>none yet</span></td></tr>
-<tr><td>Scotch Pine</td><td class='n'>16</td><td class='n'>0</td><td class='n'><b>16</b></td><td><span class='pill no'>none yet</span></td></tr>
-<tr><td>Paper Birch</td><td class='n'>7</td><td class='n'>0</td><td class='n'><b>7</b></td><td><span class='pill no'>none yet</span></td></tr>
-<tr><td>Birchleaf Spirea<span class="nt">31 on hand - 27 counted on site 9/16 plus 4 found in the nursery. The earlier figure of 65 was never a count; those plants were moved from the Home2 Suites staging area to the Anchorage nursery on 9/14 without being counted. SEPARATE OPEN QUESTION: Todd recounted the requirement at 44 against the drawing&#x27;s 65. Target left at 65 here pending confirmation with Chris - same class as the Miss Kim callouts-versus-schedule gap, and not something to change without the architect.</span></td><td class='n'>65</td><td class='n'>65</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Hedge Cotoneaster</td><td class='n'>59</td><td class='n'>59</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Karl Foerster Reed Grass</td><td class='n'>65</td><td class='n'>65</td><td class='n'>&mdash;</td><td><span class='pill ok'>complete</span></td></tr>
-<tr><td>Colorado Green Spruce</td><td class='n'>19</td><td class='n'>20</td><td class='n'>&mdash;</td><td><span class='pill ok'>1 spare</span></td></tr>
-<tr><td>Helena Maple</td><td class='n'>4</td><td class='n'>19</td><td class='n'>&mdash;</td><td><span class='pill ok'>15 spare</span></td></tr>
-<tr><td>Red-Twig Dogwood<span class="nt">176 against a spec of 116 is correct - the extra 60 cover the Ivory Halo shortfall under the approved substitution. Total dogwood still 272 as drawn.</span></td><td class='n'>118</td><td class='n'>176</td><td class='n'>&mdash;</td><td><span class='pill ok'>58 spare</span></td></tr>
-</table></div></div></section>
+<div class="stamp" id="stamp">Loading the current counts&hellip;</div>
+
+<div class="state load" id="state">Reading the live count from the field app&hellip;</div>
+
+<div class="big" id="big"></div>
+<div class="jump" id="jump"></div>
+<div id="sections"></div>
 <section id="beds"><h2>Home2 Suites &mdash; beds</h2>
-<div class="sub">44 beds in build order. Beds planted short have their open spots flagged on site &mdash; the layout is done, so material goes straight in the ground.</div>
-<div class="card"><div class="scroll"><table>
+<div class="sub">44 beds in build order. Beds planted short have their open spots flagged on site &mdash; the layout is done, so material goes straight in the ground.<div class="card"><div class="scroll"><table>
 <tr><th>Bed</th><th>Where</th><th class="n">Units</th><th>Status</th></tr>
 <tr><td colspan='4' style='background:#eef1ea;font-weight:700;font-size:.86rem'>Z1 &mdash; North yard &middot; Both crews</td></tr>
 <tr><td><b>01</b></td><td>North side</td><td class='n'>7</td><td><span class='pill ok'>planted</span></td></tr>
@@ -212,3 +144,198 @@ footer{color:var(--mut);font-size:.82rem;margin-top:24px;border-top:1px solid va
 </table></div></div></section>
 <div class="sig"><b>Matt Walsh</b><span>Nursery &amp; Field Operations Manager</span><span>Titan Alaska</span></div>
 <footer>Counts are taken in the field as material is received and planted, and are maintained against each job's planting plan. This page is a snapshot of that record as of the date shown at the top &mdash; request a refresh if that date looks old.</footer></div>
+<script src="jobs.js"></script>
+<script>
+// This page used to be typed out by hand, and every number on it was a second
+// copy of something the app already knew. The two drifted every single time
+// one was corrected and the other was not -- Miss Kim said short 27 here for
+// days after it was settled, False Spirea said 17 when the app said 26, and
+// a whole rainy afternoon's potentilla count reached nobody because it lived
+// on one phone.
+//
+// So nothing here is typed any more except the prose. The plan comes from
+// jobs.js, the same file the app reads. The counts come from the same sync
+// document the app writes to, which serves a plain GET with no key and no
+// Google session -- writing needs the key, reading does not.
+//
+// The one thing this page must never do is show a number it is not sure of.
+// If the fetch fails it says so in red and shows nothing, because a stale
+// figure that looks live is worse than no page at all.
+
+var SYNC_URL = "https://script.google.com/macros/s/AKfycbwZ_nEbfpR5zdX6Rz7fIi0hKEO63f_xsnl9WPFwW6RJL7Q1rEqBd7nsfDXLqJcqZKu4/exec";
+
+// The prose that explains a number somebody will otherwise query. Keyed
+// job:slug, the same key the counts use. This is the only hand-written content
+// left on the page, and it is here because it is editorial, not data.
+var NOTES = {
+  "h2s:gold-crinkled-hair-grass-sub":
+    "Tufted Hair Grass is the approved substitute, routed through Chris. Order the balance as Tufted.",
+  "h2s:columnar-swedish-aspen":
+    "14 on hand as of 9/16 - 5 from Danny and 9 from Titan&#x27;s own nursery.",
+  "h2s:miss-kim-lilac":
+    "Settled. The plan schedule says 45 and 46 were ordered to it; all 46 are in the ground. The bed callouts ask for 73 &mdash; the remaining 27 are covered by common purple, on the next line.",
+  "h2s:hardy-purple-common-lilac-2-sub":
+    "Covers the Miss Kim shortfall, and is on site. Bed callouts total 73 Miss Kim against a schedule of 45; the 46 ordered to the schedule are in, and these 27 were pulled from the nursery and delivered to Home2 Suites to make up the balance. Supersedes the 9/16 plan to use Donald Wyman, of which the nursery counted 17 on 9/21 &mdash; not enough for 27. These are #2 containers against a #5, 18&quot; minimum shrub spec: a size exception, accepted.",
+  "h2s:false-spirea":
+    "Bed callouts total 252 against a schedule of 226. The shortfall is being covered from nursery stock rather than ordered — the On site figure is the live count, so any balance still showing is what has not been counted in yet.",
+  "h2s:birchleaf-spirea":
+    "Bed callouts total 58, the plant schedule says 63. Surplus, not a shortfall.",
+  "charter:parkland-pillar-birch":
+    "The 2 on site are WEEPING BIRCH, not Parkland Pillar. Substitution is being worked but is NOT approved yet, so this job is not closed out. Note the form difference: Parkland Pillar is a narrow upright columnar birch, roughly 6-7 ft spread; a weeping birch is broad and draping and can run several times that. If these are going somewhere tight, the spread is the thing to raise.",
+  "wsrcc:ivory-halo-dogwood":
+    "Short, and covered by the surplus Red-Twig under the approved substitution. Do not order.",
+  "wsrcc:birchleaf-spirea":
+    "31 on hand - 27 counted on site 9/16 plus 4 found in the nursery. The earlier figure of 65 was never a count; those plants were moved from the Home2 Suites staging area to the Anchorage nursery on 9/14 without being counted. SEPARATE OPEN QUESTION: Todd recounted the requirement at 44 against the drawing&#x27;s 65. Target left at 65 here pending confirmation with Chris - same class as the Miss Kim callouts-versus-schedule gap, and not something to change without the architect.",
+  "wsrcc:red-twig-dogwood":
+    "176 against a spec of 116 is correct - the extra 60 cover the Ivory Halo shortfall under the approved substitution. Total dogwood still 272 as drawn.",
+};
+
+function slug(name){
+  return decode(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+function decode(s){
+  var el = document.createElement("textarea");
+  el.innerHTML = String(s);
+  return el.value;
+}
+function esc(s){
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// Every species on a job, with what the plan asks and what is actually there.
+function rowsFor(jobKey, counts){
+  var job = JOBS[jobKey], out = [];
+  Object.keys(job.groups).forEach(function(gk){
+    job.groups[gk].items.forEach(function(it){
+      var name = it[0], target = it[1];
+      var key = jobKey + ":" + slug(name);
+      var got = counts[key];
+      var known = typeof got === "number";
+      out.push({
+        name: decode(name),
+        target: target,
+        got: known ? got : 0,
+        short: known ? Math.max(0, target - got) : target,
+        note: NOTES[key] || "",
+      });
+    });
+  });
+  // Worst first, exactly like the app's species list: the eye should land on
+  // what needs somebody, not on the alphabet.
+  out.sort(function(a, b){
+    if (b.short !== a.short) return b.short - a.short;
+    return a.name.localeCompare(b.name);
+  });
+  return out;
+}
+
+function pillFor(r){
+  if (r.short > 0 && r.got === 0) return {cls: "no", text: "none yet"};
+  if (r.short > 0) return {cls: "sh", text: "short " + r.short};
+  if (r.got > r.target) return {cls: "ok", text: (r.got - r.target) + " spare"};
+  return {cls: "ok", text: "complete"};
+}
+
+function renderJob(jobKey, counts){
+  var rows = rowsFor(jobKey, counts);
+  var short = rows.reduce(function(n, r){ return n + r.short; }, 0);
+  var done = rows.filter(function(r){ return r.short === 0; }).length;
+
+  var html = '<section id="' + jobKey + '"><h2>' + esc(decode(JOBS[jobKey].label)) + '</h2>' +
+    '<div class="sub">' + done + ' of ' + rows.length + ' species complete &middot; <b>' +
+    short + ' plants still needed</b></div>' +
+    '<div class="card"><div class="scroll"><table>' +
+    '<tr><th>Species</th><th class="n">Plan</th><th class="n">On site</th>' +
+    '<th class="n">Short</th><th>Status</th></tr>';
+
+  rows.forEach(function(r){
+    var p = pillFor(r);
+    html += '<tr><td>' + esc(r.name) +
+      (r.note ? '<span class="nt">' + r.note + '</span>' : '') + '</td>' +
+      '<td class="n">' + r.target + '</td>' +
+      '<td class="n">' + r.got + '</td>' +
+      '<td class="n">' + (r.short ? '<b>' + r.short + '</b>' : '&mdash;') + '</td>' +
+      '<td><span class="pill ' + p.cls + '">' + p.text + '</span></td></tr>';
+  });
+
+  return {html: html + '</table></div></div></section>', short: short, done: done, rows: rows.length};
+}
+
+// The bed rows stay hand-written -- the bed list is plan data this page does
+// not carry -- but their STATUS comes from the same live record as everything
+// else, read off the bed number already printed in the row.
+function paintBeds(planted, staked){
+  var n = 0, total = 0;
+  document.querySelectorAll('#beds tr').forEach(function(tr){
+    var b = tr.querySelector('td b');
+    if (!b || !/^\d+$/.test(b.textContent.trim())) return;
+    total++;
+    var id = "B" + (b.textContent.trim().length < 2 ? "0" : "") + b.textContent.trim();
+    var cell = tr.querySelectorAll('td')[3];
+    if (!cell) return;
+    if (planted[id]) { cell.innerHTML = '<span class="pill ok">planted</span>'; n++; }
+    else if (staked[id]) cell.innerHTML = '<span class="pill sh">staked</span>';
+    else cell.innerHTML = '<span style="color:#8a9184">&mdash;</span>';
+  });
+  return {planted: n, total: total};
+}
+
+function fail(msg){
+  var el = document.getElementById("state");
+  el.className = "state err";
+  el.innerHTML = '<b>These counts could not be loaded.</b> ' + esc(msg) +
+    '<br><br>Nothing is shown below rather than showing figures that might be ' +
+    'out of date. Try again in a moment, or ask Matt for a current copy.';
+  document.getElementById("stamp").textContent = "Counts unavailable";
+}
+
+function render(j){
+  var counts = (j.data && j.data.counts) || {};
+  var planted = (j.data && j.data.planted) || {};
+  var staked = (j.data && j.data.staked) || {};
+
+  var keys = Object.keys(JOBS);
+  var secs = "", totalShort = 0, totalDone = 0, totalRows = 0, jump = "";
+
+  keys.forEach(function(k){
+    var r = renderJob(k, counts);
+    secs += r.html;
+    totalShort += r.short; totalDone += r.done; totalRows += r.rows;
+    jump += '<a href="#' + k + '">' + esc(decode(JOBS[k].label)) +
+      ' &nbsp;<b>' + r.short + '</b></a>';
+  });
+
+  document.getElementById("sections").innerHTML = secs;
+  document.getElementById("jump").innerHTML = jump;
+  document.getElementById("jobCount").textContent = keys.length + " active jobs";
+
+  var beds = paintBeds(planted, staked);
+
+  document.getElementById("big").innerHTML =
+    '<div><b>' + totalDone + '<span style="font-size:1rem">/' + totalRows +
+      '</span></b><span>species fully on site</span></div>' +
+    '<div><b>' + totalShort + '</b><span>plants still needed</span></div>' +
+    '<div><b>' + beds.planted + '<span style="font-size:1rem">/' + beds.total +
+      '</span></b><span>Home2 Suites beds planted</span></div>';
+
+  var when = j.updatedAt ? new Date(j.updatedAt) : null;
+  document.getElementById("stamp").innerHTML = '<span class="live"></span>' +
+    (when
+      ? 'Live &mdash; last counted ' + when.toLocaleString(undefined, {
+          weekday: "long", month: "long", day: "numeric",
+          hour: "numeric", minute: "2-digit"
+        })
+      : 'Live') + ' &nbsp;&middot;&nbsp; read-only';
+
+  var st = document.getElementById("state");
+  st.parentNode.removeChild(st);
+}
+
+fetch(SYNC_URL + "?action=get&t=" + Date.now(), {cache: "no-store"})
+  .then(function(r){ return r.json(); })
+  .then(function(j){
+    if (!j || !j.ok) throw new Error((j && j.error) || "the field app returned no record");
+    render(j);
+  })
+  .catch(function(e){ fail(e && e.message ? e.message : String(e)); });
+</script>

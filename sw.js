@@ -60,7 +60,7 @@ function cachesToDelete(names, keep){
 }
 // ---- /PURE ----
 
-const CACHE_VERSION = 'v11';
+const CACHE_VERSION = 'v12';
 const SHELL_CACHE = `${CACHE_PREFIX}${CACHE_VERSION}`;
 
 // Bed crops and site maps: ~17 MB over 45 files for Home2Suites and ~10 MB over
@@ -93,7 +93,10 @@ const BED_CACHE = 'wolf-beds-v2';
 const MAX_BEDS = 220;
 
 // Without these the app cannot open at all. Cached all-or-nothing.
-const CRITICAL = ['./', './index.html'];
+// jobs.js is CRITICAL, not EXTRA: index.html defines no jobs of its own any
+// more, so an install that skipped it would install an app with nothing in it.
+// Better to fail the install and keep serving the old shell.
+const CRITICAL = ['./', './index.html', './jobs.js'];
 // Nice to have. Allowed to fail individually without failing the install.
 const EXTRA = [
   './manifest.json',
