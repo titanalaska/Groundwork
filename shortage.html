@@ -47,6 +47,12 @@ ul{margin:10px 0 0;padding-left:20px}li{margin:6px 0}
 .sig span{display:block;color:var(--mut);font-size:.92rem}
 footer{color:var(--mut);font-size:.82rem;margin-top:26px;border-top:1px solid var(--line);
  padding-top:14px}
+.state{border-radius:10px;padding:13px 16px;margin:0 0 22px;font-size:.92rem}
+.state.load{background:#eef1ea;color:var(--mut)}
+.state.err{background:var(--redbg);border:1px solid var(--red);color:var(--ink)}
+.state.err b{color:var(--red)}
+.live{display:inline-block;width:7px;height:7px;border-radius:99px;
+ background:var(--green);margin-right:7px;vertical-align:middle}
 @media print{body{background:#fff}.card,.ask{break-inside:avoid}}
 </style>
 <div class="wrap">
@@ -55,10 +61,14 @@ footer{color:var(--mut);font-size:.82rem;margin-top:26px;border-top:1px solid va
 <h1>Plant shortages and the cause</h1>
 <div class="by">Field record maintained by <b>Matt Walsh</b>, Nursery &amp; Field
  Operations Manager &middot; Titan Alaska</div>
-<div class="stamp">Counts as of Saturday 9/12/26 &nbsp;&middot;&nbsp; for Chris Dietrich and Jeremi Anderson</div>
+<div class="stamp" id="stamp">Reading the current counts&hellip; &nbsp;&middot;&nbsp; for Chris Dietrich and Jeremi Anderson</div>
+<div class="state load" id="state">Reading the live count from the field app&hellip;</div>
 
-<p class="lede">There are two separate reasons material is short, and they are not
-the same kind of problem. They are kept apart below on purpose.</p>
+<p class="lede">There were two separate reasons material was short, and they are not
+the same kind of problem, so they are kept apart below. <b>Item one is now
+closed</b> &mdash; it is left here as the record of what happened and what was
+done, because the drawing that caused it has not changed. <b>Item two is still
+open.</b> Every On hand figure below is read live from the field record.</p>
 
 <section>
   <h2>Item one</h2>
@@ -69,35 +79,37 @@ the same kind of problem. They are kept apart below on purpose.</p>
     the plant schedule. The beds have to be planted to the callouts. Where the two
     differ, the order comes up short no matter how accurately it was filled.</p>
 
-    <table>
+    <table id="itemOne">
       <tr><th>Species</th><th class="n">Callouts</th><th class="n">Schedule</th>
           <th class="n">On hand</th><th class="n">Result</th></tr>
-      <tr><td class="sp">Miss Kim Lilac</td><td class="n">73</td><td class="n">45</td>
-          <td class="n">46</td><td class="n short">short 27</td></tr>
-      <tr><td class="sp">False Spirea</td><td class="n">252</td><td class="n">226</td>
-          <td class="n">226</td><td class="n short">short 26</td></tr>
-      <tr><td class="sp">Birchleaf Spirea</td><td class="n">58</td><td class="n">63</td>
-          <td class="n">63</td><td class="n over">5 spare</td></tr>
     </table>
 
-    <p class="note">Net across the three: the callouts require <b>49 more plants</b>
-    than the schedule totals.</p>
+    <p class="note">The drawing has not changed &mdash; the callouts still require
+    <b>49 more plants</b> than the schedule totals, and will on the next job that
+    reads this sheet. What changed is that the gap is now filled.</p>
 
     <div class="callout">
-      <b>Miss Kim Lilac has already hit.</b> The 46 on hand are in the ground and
-      I ran out mid-install on 9/12. The beds are 27 short.<br><br>
-      <b>False Spirea has not hit yet.</b> I have not reached those beds. When I do
-      it will come up 26 short for the identical reason. Flagging it now rather
-      than reporting it again in a week.
+      <b>Both are closed.</b><br><br>
+      <b>Miss Kim Lilac.</b> The 46 ordered to the schedule are in the ground; I
+      ran out mid-install on 9/12. The remaining <b>27 went in as common purple
+      lilac</b>, pulled from our own nursery and delivered here. Those are <b>#2
+      containers against a #5, 18&quot; minimum shrub spec</b> &mdash; a size
+      exception, accepted. It is written down here because a smaller pot is the
+      kind of thing that gets raised at walkthrough, and the answer should not
+      have to be remembered.<br><br>
+      <b>False Spirea.</b> Covered the same way &mdash; the shortfall came off
+      nursery stock rather than an order. No change order, no delay.
     </div>
 
-    <p class="note">Birchleaf Spirea runs the other way &mdash; 5 more on hand than
+    <p class="note">Birchleaf Spirea runs the other way &mdash; more on hand than
     the callouts need. Included so this is a complete accounting and not a
     one-directional ask.</p>
 
     <div class="quiet">This is verifiable on the sheet itself. Add up the bed
     callouts by species and compare to the plant schedule in the corner. I am not
-    asking anyone to take my word for it.</div>
+    asking anyone to take my word for it. The On hand column is read live from
+    the field record, so it is whatever was last counted, not a figure typed into
+    this page.</div>
   </div>
 </section>
 
@@ -107,17 +119,9 @@ the same kind of problem. They are kept apart below on purpose.</p>
   <div class="card">
     <p style="margin:0 0 4px">Not a drawing problem. These are simply not delivered
     or not bought.</p>
-    <table>
+    <table id="itemTwo">
       <tr><th>Species</th><th class="n">Required</th><th class="n">On hand</th>
           <th class="n">Short</th></tr>
-      <tr><td class="sp">Tufted Hair Grass <span style="color:var(--mut);font-weight:400">(approved substitute)</span></td>
-          <td class="n">132</td><td class="n">64</td><td class="n short">68</td></tr>
-      <tr><td class="sp">Columnar Swedish Aspen</td><td class="n">28</td>
-          <td class="n">0</td><td class="n short">28</td></tr>
-      <tr><td class="sp">Paper Birch</td><td class="n">15</td><td class="n">0</td>
-          <td class="n short">15</td></tr>
-      <tr><td class="sp">Quaking Aspen</td><td class="n">8</td><td class="n">0</td>
-          <td class="n short">8</td></tr>
     </table>
     <p class="note">Tufted Hair Grass was approved as the substitute for Gold
     Crinkled, routed through Chris. The species question is settled &mdash; the
@@ -170,13 +174,15 @@ the same kind of problem. They are kept apart below on purpose.</p>
   <div class="ask">
     <h3>What I need</h3>
     <ul>
-      <li><b>Item one</b> &mdash; direction on how you want the 27 Miss Kim Lilac
-      and the 26 False Spirea covered, and confirmation of which number governs:
-      the callouts or the schedule. I will plant to whichever you confirm. I am not
-      going to quietly absorb 53 plants or quietly leave 53 holes, and I would
-      rather settle it now than at walkthrough.</li>
-      <li><b>Item two</b> &mdash; confirmation of the remaining 68 Tufted Hair Grass,
-      and what is released from the pit before any trees are ordered.</li>
+      <li><b>Item one is closed and needs nothing from you.</b> The 53 plants were
+      covered from our own nursery rather than absorbed or left as holes &mdash; 27
+      as common purple lilac in #2 containers, which is a size exception against
+      the #5 spec and has been accepted, and the False Spirea balance the same
+      way. It is recorded above rather than removed, because the drawing still
+      disagrees with itself and the next person to read L102 will hit it.</li>
+      <li><b>Item two</b> &mdash; confirmation of the remaining Tufted Hair Grass
+      (the figure above is live), and what is released from the pit before any
+      trees are ordered. <b>This is the only thing still outstanding.</b></li>
     </ul>
     <p class="note" style="margin-top:14px">Happy to walk either of you through the
     sheet if that is easier than email.</p>
@@ -192,5 +198,181 @@ the same kind of problem. They are kept apart below on purpose.</p>
 <footer>Counts are taken in the field as material is received and planted, and are
 maintained against the L102 planting plan. This page is a snapshot of that record
 as of the date shown at the top &mdash; request a refresh if that date looks old.</footer>
+
+<script src="jobs.js"></script>
+<script src="live.js"></script>
+<script>
+// This page argues a case, so the prose is written by hand. The numbers are
+// not: every On hand figure is the field record, read the same way status.html
+// reads it.
+//
+// It used to be typed. The figures went stale within days -- it still said
+// Miss Kim was short 27 and False Spirea short 26 after both had been covered
+// from our own nursery, and it was still asking Chris and Todd for direction
+// on decisions that had already been made. A page that asks for something it
+// has already got is worse than no page: it makes the sender look like they
+// are not keeping up.
+//
+// WHICH species belong to which item is editorial -- item one is the ones the
+// drawing disagrees with itself about, item two is ordinary procurement -- so
+// that stays here. The numbers are not editorial.
+
+// Species the plan schedule and the bed callouts disagree about. The Schedule
+// column is a fact about the DRAWING, not about stock, so it is written here;
+// there is nowhere else it lives.
+// The callout total is NOT read from a single row any more. L102 calls for 73
+// lilac in those beds; since the split that is 46 Miss Kim plus 27 common
+// purple, so the callout is the SUM of the rows that satisfy it. Deriving it
+// rather than typing 73 means the split cannot silently halve the drawing's
+// own number -- which is exactly what happened the first time this table was
+// filled, and a test caught it.
+var ITEM_ONE = [
+  {label: "Miss Kim Lilac", schedule: 45,
+   filledBy: ["Miss Kim Lilac", "Hardy Purple Common Lilac (#2 sub)"]},
+  {label: "False Spirea", schedule: 226, filledBy: ["False Spirea"]},
+  {label: "Birchleaf Spirea", schedule: 63, filledBy: ["Birchleaf Spirea"]}
+];
+
+// Short for ordinary reasons: not delivered, or not bought.
+var ITEM_TWO = [
+  {name: "Gold Crinkled Hair Grass (sub)", as: "Tufted Hair Grass", note: "approved substitute"},
+  {name: "Columnar Swedish Aspen"},
+  {name: "Paper Birch"},
+  {name: "Quaking Aspen"}
+];
+
+// What the plan asks for, from the same file the app reads.
+function requiredFor(name){
+  var g = JOBS.h2s.groups, want = slugOf(name), hit = null;
+  Object.keys(g).forEach(function(k){
+    g[k].items.forEach(function(it){ if (slugOf(it[0]) === want) hit = it; });
+  });
+  return hit ? hit[1] : null;
+}
+
+function onHand(counts, name){
+  var v = counts["h2s:" + slugOf(name)];
+  return typeof v === "number" ? v : 0;
+}
+
+function fillItemOne(counts){
+  var t = document.getElementById("itemOne");
+  ITEM_ONE.forEach(function(r){
+    var callouts = 0, have = 0, known = false;
+    r.filledBy.forEach(function(n){
+      var need = requiredFor(n);
+      if (need === null) return;
+      known = true;
+      callouts += need;
+      have += onHand(counts, n);
+    });
+    if (!known) return;
+    var gap = callouts - have;
+    var tr = document.createElement("tr");
+    tr.innerHTML =
+      '<td class="sp">' + escapeHtml(decodeEntities(r.label)) + '</td>' +
+      '<td class="n">' + callouts + '</td>' +
+      '<td class="n">' + r.schedule + '</td>' +
+      '<td class="n">' + have + '</td>' +
+      (gap > 0
+        ? '<td class="n short">short ' + gap + '</td>'
+        : gap < 0
+          ? '<td class="n over">' + (-gap) + ' spare</td>'
+          : '<td class="n over">covered</td>');
+    t.appendChild(tr);
+  });
+}
+
+function fillItemTwo(counts){
+  var t = document.getElementById("itemTwo");
+  var stillShort = 0;
+  ITEM_TWO.forEach(function(r){
+    var need = requiredFor(r.name);
+    if (need === null) return;
+    var have = onHand(counts, r.name);
+    var gap = Math.max(0, need - have);
+    stillShort += gap;
+    var label = escapeHtml(decodeEntities(r.as || r.name)) +
+      (r.note ? ' <span style="color:var(--mut);font-weight:400">(' + escapeHtml(r.note) + ')</span>' : '');
+    var tr = document.createElement("tr");
+    tr.innerHTML =
+      '<td class="sp">' + label + '</td>' +
+      '<td class="n">' + need + '</td>' +
+      '<td class="n">' + have + '</td>' +
+      (gap ? '<td class="n short">' + gap + '</td>' : '<td class="n over">covered</td>');
+    t.appendChild(tr);
+  });
+  return stillShort;
+}
+
+function clearRows(t){
+  while (t.rows.length > 1) t.deleteRow(1);
+}
+
+function paint(j){
+  var counts = (j.data && j.data.counts) || {};
+  clearRows(document.getElementById("itemOne"));
+  clearRows(document.getElementById("itemTwo"));
+  fillItemOne(counts);
+  fillItemTwo(counts);
+
+  document.getElementById("stamp").innerHTML = '<span class="live"></span>' +
+    'Live &mdash; last counted ' + countedAt(j.updatedAt) +
+    ' &nbsp;&middot;&nbsp; for Chris Dietrich and Jeremi Anderson';
+
+  var st = document.getElementById("state");
+  if (st && st.parentNode) st.parentNode.removeChild(st);
+}
+
+// Same rule as status.html: when the record cannot be read, show NO numbers.
+// This page is an argument put to two people who can act on it, and an
+// argument built on figures that might be days old is worse than one that
+// admits it cannot see them.
+function cannotLoad(msg){
+  var el = document.getElementById("state");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "state";
+    var wrap = document.querySelector(".wrap");
+    wrap.insertBefore(el, wrap.querySelector(".lede"));
+  }
+  el.className = "state err";
+  el.innerHTML = '<b>The counts on this page could not be loaded.</b> ' + escapeHtml(msg) +
+    '<br><br>The tables are left empty rather than showing figures that might be ' +
+    'out of date. The written account below still stands. Ask Matt for a current copy.';
+  clearRows(document.getElementById("itemOne"));
+  clearRows(document.getElementById("itemTwo"));
+  document.getElementById("stamp").textContent = "Counts unavailable";
+}
+
+// live.js is a separate request, so it is a thing that can fail on its own.
+// Without this the page sits on "Reading the live count" forever, which looks
+// like a slow network rather than a broken deploy. No numbers are shown either
+// way -- this just makes the failure legible.
+if (typeof startLive !== "function") {
+  // Written inline rather than through the page failure handler, because THAT
+  // depends on helpers that also live in live.js -- calling it here set the
+  // banner class and then threw on escapeHtml, leaving the loading text in
+  // place under an error style. A test caught it. Nothing in this branch may
+  // touch live.js.
+  var el = document.getElementById("state");
+  if (el) {
+    el.className = "state err";
+    el.textContent = "These counts could not be loaded: the page could not " +
+      "fetch live.js, so it cannot read the field record. Nothing is shown " +
+      "rather than figures that might be out of date. Ask Matt for a current copy.";
+  }
+  var stamp = document.getElementById("stamp");
+  if (stamp) stamp.textContent = "Counts unavailable";
+} else {
+startLive(paint, cannotLoad, function(lastSeen){
+  var el = document.getElementById("stamp");
+  if (!el) return;
+  el.innerHTML = '<span class="live" style="background:var(--amber)"></span>' +
+    'Showing the count from ' + countedAt(lastSeen) +
+    ' &mdash; could not refresh just now, still trying';
+});
+}
+</script>
 
 </div>

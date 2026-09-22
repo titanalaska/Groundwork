@@ -145,6 +145,7 @@ th:last-child{padding-left:10px}
 <div class="sig"><b>Matt Walsh</b><span>Nursery &amp; Field Operations Manager</span><span>Titan Alaska</span></div>
 <footer>Counts are taken in the field as material is received and planted, and are maintained against each job's planting plan. This page is a snapshot of that record as of the date shown at the top &mdash; request a refresh if that date looks old.</footer></div>
 <script src="jobs.js"></script>
+<script src="live.js"></script>
 <script>
 // This page used to be typed out by hand, and every number on it was a second
 // copy of something the app already knew. The two drifted every single time
@@ -161,8 +162,6 @@ th:last-child{padding-left:10px}
 // The one thing this page must never do is show a number it is not sure of.
 // If the fetch fails it says so in red and shows nothing, because a stale
 // figure that looks live is worse than no page at all.
-
-var SYNC_URL = "https://script.google.com/macros/s/AKfycbwZ_nEbfpR5zdX6Rz7fIi0hKEO63f_xsnl9WPFwW6RJL7Q1rEqBd7nsfDXLqJcqZKu4/exec";
 
 // The prose that explains a number somebody will otherwise query. Keyed
 // job:slug, the same key the counts use. This is the only hand-written content
@@ -190,29 +189,16 @@ var NOTES = {
     "176 against a spec of 116 is correct - the extra 60 cover the Ivory Halo shortfall under the approved substitution. Total dogwood still 272 as drawn.",
 };
 
-function slug(name){
-  return decode(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-}
-function decode(s){
-  var el = document.createElement("textarea");
-  el.innerHTML = String(s);
-  return el.value;
-}
-function esc(s){
-  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-// Every species on a job, with what the plan asks and what is actually there.
 function rowsFor(jobKey, counts){
   var job = JOBS[jobKey], out = [];
   Object.keys(job.groups).forEach(function(gk){
     job.groups[gk].items.forEach(function(it){
       var name = it[0], target = it[1];
-      var key = jobKey + ":" + slug(name);
+      var key = jobKey + ":" + slugOf(name);
       var got = counts[key];
       var known = typeof got === "number";
       out.push({
-        name: decode(name),
+        name: decodeEntities(name),
         target: target,
         got: known ? got : 0,
         short: known ? Math.max(0, target - got) : target,
@@ -241,7 +227,7 @@ function renderJob(jobKey, counts){
   var short = rows.reduce(function(n, r){ return n + r.short; }, 0);
   var done = rows.filter(function(r){ return r.short === 0; }).length;
 
-  var html = '<section id="' + jobKey + '"><h2>' + esc(decode(JOBS[jobKey].label)) + '</h2>' +
+  var html = '<section id="' + jobKey + '"><h2>' + escapeHtml(decodeEntities(JOBS[jobKey].label)) + '</h2>' +
     '<div class="sub">' + done + ' of ' + rows.length + ' species complete &middot; <b>' +
     short + ' plants still needed</b></div>' +
     '<div class="card"><div class="scroll"><table>' +
@@ -250,7 +236,7 @@ function renderJob(jobKey, counts){
 
   rows.forEach(function(r){
     var p = pillFor(r);
-    html += '<tr><td>' + esc(r.name) +
+    html += '<tr><td>' + escapeHtml(r.name) +
       (r.note ? '<span class="nt">' + r.note + '</span>' : '') + '</td>' +
       '<td class="n">' + r.target + '</td>' +
       '<td class="n">' + r.got + '</td>' +
@@ -303,7 +289,7 @@ function fail(msg){
     wrap.insertBefore(el, document.getElementById("big"));
   }
   el.className = "state err";
-  el.innerHTML = '<b>These counts could not be loaded.</b> ' + esc(msg) +
+  el.innerHTML = '<b>These counts could not be loaded.</b> ' + escapeHtml(msg) +
     '<br><br>Nothing is shown below rather than showing figures that might be ' +
     'out of date. Try again in a moment, or ask Matt for a current copy.';
   document.getElementById("sections").innerHTML = "";
@@ -324,7 +310,7 @@ function render(j){
     var r = renderJob(k, counts);
     secs += r.html;
     totalShort += r.short; totalDone += r.done; totalRows += r.rows;
-    jump += '<a href="#' + k + '">' + esc(decode(JOBS[k].label)) +
+    jump += '<a href="#' + k + '">' + escapeHtml(decodeEntities(JOBS[k].label)) +
       ' &nbsp;<b>' + r.short + '</b></a>';
   });
 
@@ -362,70 +348,38 @@ function render(j){
   if (st && st.parentNode) st.parentNode.removeChild(st);
 }
 
-// ---- Keeping an open tab current -----------------------------------------
-//
-// Chris and Todd leave this open. Without a poll it shows whatever was true
-// when the tab was opened, which on a Monday morning could be Friday -- and it
-// would look exactly as confident as a fresh one.
-//
-// Same 60s as the app, and the same two rules the app's poll follows:
-//
-//   - Skip while the tab is hidden. This sits in a background tab all day and
-//     there is no reason to keep asking on behalf of a screen nobody is
-//     looking at.
-//   - Only re-render when updatedAt actually MOVES. Repainting on every poll
-//     would throw away a scroll position and flicker the table for nothing,
-//     and this page gets read on a TV.
-var POLL_MS = 60000;
-var lastSeen = "";
-var missed = 0;
-
-// A failed poll is NOT the same as a failed first load, and must not be
-// treated like one.
-//
-// On first load there is nothing true to show, so the page shows nothing. But
-// once a real record is on screen, those numbers were real -- they are only
-// getting old. Blanking them because one request timed out would throw away
-// good information and, worse, teach people the page breaks. So the figures
-// stay and the stamp stops claiming to be live.
-function staleStamp(){
-  var el = document.getElementById("stamp");
-  if (!el || !lastSeen) return;
-  var when = new Date(lastSeen);
-  el.innerHTML = '<span class="live" style="background:var(--amber)"></span>' +
-    'Showing the count from ' + when.toLocaleString(undefined, {
-      weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit"
-    }) + ' &mdash; could not refresh just now, still trying';
+// live.js does the fetching, the polling and the rule about what may be shown
+// when a refresh fails. This page only says what to paint.
+// live.js is a separate request, so it is a thing that can fail on its own.
+// Without this the page sits on "Reading the live count" forever, which looks
+// like a slow network rather than a broken deploy. No numbers are shown either
+// way -- this just makes the failure legible.
+if (typeof startLive !== "function") {
+  // Written inline rather than through the page failure handler, because THAT
+  // depends on helpers that also live in live.js -- calling it here set the
+  // banner class and then threw on escapeHtml, leaving the loading text in
+  // place under an error style. A test caught it. Nothing in this branch may
+  // touch live.js.
+  var el = document.getElementById("state");
+  if (el) {
+    el.className = "state err";
+    el.textContent = "These counts could not be loaded: the page could not " +
+      "fetch live.js, so it cannot read the field record. Nothing is shown " +
+      "rather than figures that might be out of date. Ask Matt for a current copy.";
+  }
+  var stamp = document.getElementById("stamp");
+  if (stamp) stamp.textContent = "Counts unavailable";
+} else {
+startLive(
+  render,
+  fail,
+  function(lastSeen){
+    var el = document.getElementById("stamp");
+    if (!el) return;
+    el.innerHTML = '<span class="live" style="background:var(--amber)"></span>' +
+      'Showing the count from ' + countedAt(lastSeen) +
+      ' &mdash; could not refresh just now, still trying';
+  }
+);
 }
-
-function poll(){
-  if (document.hidden) return;
-  fetch(SYNC_URL + "?action=get&t=" + Date.now(), {cache: "no-store"})
-    .then(function(r){ return r.json(); })
-    .then(function(j){
-      if (!j || !j.ok) throw new Error("no record");
-      missed = 0;
-      if (!j.updatedAt || j.updatedAt === lastSeen) return;  // nothing moved
-      render(j);
-    })
-    .catch(function(){
-      // One missed poll is a phone in a dead spot, not news. Two in a row is
-      // worth saying out loud, because by then the page could be well behind.
-      if (++missed >= 2) staleStamp();
-    });
-}
-
-setInterval(poll, POLL_MS);
-// A tab brought back to the front should not wait out the rest of its minute.
-document.addEventListener("visibilitychange", function(){
-  if (!document.hidden) poll();
-});
-
-fetch(SYNC_URL + "?action=get&t=" + Date.now(), {cache: "no-store"})
-  .then(function(r){ return r.json(); })
-  .then(function(j){
-    if (!j || !j.ok) throw new Error((j && j.error) || "the field app returned no record");
-    render(j);
-  })
-  .catch(function(e){ fail(e && e.message ? e.message : String(e)); });
 </script>

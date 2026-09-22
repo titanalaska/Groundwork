@@ -180,7 +180,7 @@ test('a poll with a newer record repaints', async ({ page }) => {
   moved.data.counts['h2s:false-spirea'] = 252;
 
   await page.route('**/macros/s/**', serve(moved));
-  await page.evaluate(() => poll());
+  await page.evaluate(() => startLive.poll());
   await expect(page.locator('#h2s tr', { hasText: 'False Spirea' })).toContainText('252');
   await expect(page.locator('#h2s tr', { hasText: 'False Spirea' }).locator('.pill')).toHaveText('complete');
 });
@@ -193,7 +193,7 @@ test('a poll with the same record does not repaint', async ({ page }) => {
     document.querySelector('#sections section').dataset.mark = 'original';
     return document.querySelector('#sections section').dataset.mark;
   });
-  await page.evaluate(() => poll());
+  await page.evaluate(() => startLive.poll());
   await page.waitForTimeout(250);
   const after = await page.evaluate(() => document.querySelector('#sections section').dataset.mark);
   expect(before).toBe('original');
@@ -209,7 +209,7 @@ test('a failed poll keeps the numbers already on screen', async ({ page }) => {
   const rowsBefore = await page.locator('#sections section tr').count();
 
   await page.route('**/macros/s/**', (r) => r.abort('failed'));
-  await page.evaluate(async () => { poll(); poll(); });
+  await page.evaluate(async () => { startLive.poll(); startLive.poll(); });
   await page.waitForTimeout(400);
 
   expect(await page.locator('#sections section tr').count()).toBe(rowsBefore);
@@ -221,7 +221,7 @@ test('two failed polls stop the page claiming to be live', async ({ page }) => {
   await expect(page.locator('#stamp')).toContainText('Live');
 
   await page.route('**/macros/s/**', (r) => r.abort('failed'));
-  await page.evaluate(async () => { poll(); poll(); });
+  await page.evaluate(async () => { startLive.poll(); startLive.poll(); });
   await page.waitForTimeout(400);
 
   await expect(page.locator('#stamp')).toContainText('could not refresh');
@@ -234,7 +234,7 @@ test('polling is skipped while the tab is hidden', async ({ page }) => {
   await page.route('**/macros/s/**', (r) => { calls++; return serve(RECORD)(r); });
   await page.evaluate(() => {
     Object.defineProperty(document, 'hidden', { get: () => true, configurable: true });
-    poll();
+    startLive.poll();
   });
   await page.waitForTimeout(300);
   expect(calls).toBe(0);
