@@ -1318,8 +1318,14 @@ var JOBS = {
 
 // Baseline: the 9/4 sort log, plus the six filled in by hand on 9/8
 // (Amur Maple, Savin Juniper, Goldflame Spirea, Hardy Purple Lilac,
-// Creeping Juniper, Dwarf American Cranberry). Used only when a viewer
-// has no saved counts yet -- after that, saved counts always win.
+// Creeping Juniper, Dwarf American Cranberry), plus False Spirea corrected to
+// 252 on 9/21 when the 26 short were pulled from the nursery and planted.
+//
+// Used only when a viewer has no saved counts yet -- after that, saved counts
+// always win, because fillMissingFromSeed() only fills a key that is undefined.
+// So editing a number here does NOT correct a phone that already has one. It
+// changes what a FRESH install sees, which is the case that was showing a 26
+// False Spirea shortfall that no longer exists.
 var SEED = {
   "h2s:birchleaf-spirea": 63,
   "h2s:goldmound-spirea": 61,
@@ -1332,7 +1338,7 @@ var SEED = {
   "h2s:rugosa-rose": 33,
   "h2s:alaska-flag-iris": 338,
   "h2s:karl-foerster-reed-grass": 164,
-  "h2s:false-spirea": 226,
+  "h2s:false-spirea": 252,
   "h2s:bishop-s-weed-goutweed": 305,
   "h2s:hosta-patriot": 83,
   "h2s:sweet-woodruff": 67,
