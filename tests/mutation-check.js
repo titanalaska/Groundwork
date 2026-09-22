@@ -154,6 +154,31 @@ const MUTATIONS = [
     replace: '    ;',
     caughtBy: 'without re-sorting under you',
   },
+  {
+    // The bug itself: the count stays under the old name and the new row reads
+    // zero, so a planted job reports 27 short.
+    name: 'never carry the split lilac count across',
+    find: '  migrateLilacSplit();',
+    replace: '  ;',
+    caughtBy: 'move to the new one',
+  },
+  {
+    // Guard on truthiness instead of presence. A deliberate zero on the new row
+    // then looks like "no value here" and gets overwritten with 27 -- the app
+    // inventing plants that somebody explicitly said had not arrived.
+    name: 'treat a deliberate zero as an empty slot',
+    find: '  if(state[sub] !== undefined && state[sub] !== null) return;',
+    replace: '  if(state[sub]) return;',
+    caughtBy: 'zero on the new row is a real answer',
+  },
+  {
+    // Drop the cap. A wild number under the old row then fills the new one far
+    // past what the job asks for.
+    name: 'let the carried count overflow the new row',
+    find: '  state[sub] = Math.min(had - 46, 27);',
+    replace: '  state[sub] = had - 46;',
+    caughtBy: 'never fills past what the job asks for',
+  },
 ];
 
 // Normalised to LF. Git checks this repo out with CRLF on Windows, so any

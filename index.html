@@ -1334,6 +1334,9 @@ var SEED = {
   "h2s:amur-maple": 3,
   "h2s:red-twig-dogwood": 41,
   "h2s:miss-kim-lilac": 46,
+  // Pulled from the nursery and delivered to Home2 Suites before 9/21, so a
+  // fresh install starts these on site rather than claiming 27 short.
+  "h2s:hardy-purple-common-lilac-2-sub": 27,
   "h2s:late-lilac": 44,
   "h2s:rugosa-rose": 33,
   "h2s:alaska-flag-iris": 338,
@@ -1701,9 +1704,41 @@ function payload(){
           updatedAt: new Date().toISOString()};
 }
 
+// Repair for the 9/21 lilac split.
+//
+// Miss Kim Lilac was a single row of 73 until the 27 that cover its shortfall
+// were moved onto their own "Hardy Purple Common Lilac (#2 sub)" row. Anyone
+// who had already counted those 27 recorded them against MISS KIM, because
+// that was the only row there was. After the split their count sat under the
+// old name and the new row read zero -- so a job that was fully planted
+// reported 27 short. The plants had been pulled and delivered to Home2 Suites;
+// the only thing missing was a key.
+//
+// Splitting a row is a rename wearing a different hat, and a rename does not
+// carry the value with it. This carries it.
+//
+// It lives in applyPayload() rather than running once in init() because a
+// synced payload REPLACES state wholesale -- a repair done only at startup
+// would be undone by the next sync from another phone.
+//
+// Guarded on the destination being absent, so it cannot run twice, and cannot
+// overwrite a real count somebody enters later. The 46 and 27 are written out
+// rather than read from JOBS on purpose: this repairs one specific historical
+// shape, and it must keep repairing it even if those targets move.
+function migrateLilacSplit(){
+  var kim = "h2s:miss-kim-lilac";
+  var sub = "h2s:hardy-purple-common-lilac-2-sub";
+  if(state[sub] !== undefined && state[sub] !== null) return;
+  var had = state[kim];
+  if(typeof had !== "number" || had <= 46) return;
+  state[sub] = Math.min(had - 46, 27);
+  state[kim] = 46;
+}
+
 function applyPayload(p){
   if(!p) return;
   if(p.counts && typeof p.counts === "object") state = Object.assign({}, p.counts);
+  migrateLilacSplit();
   if(p.notes && typeof p.notes === "object") notes = Object.assign({}, p.notes);
   if(p.staked && typeof p.staked === "object") staked = Object.assign({}, p.staked);
   if(p.planted && typeof p.planted === "object") planted = Object.assign({}, p.planted);
