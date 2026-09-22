@@ -168,6 +168,78 @@ test('a missing jobs.js fails loudly instead of showing an empty job list', asyn
   await expect(page.locator('#big')).toBeEmpty();
 });
 
+// ---- polling ---------------------------------------------------------------
+// Chris and Todd leave this tab open, so what it shows an hour later matters
+// more than what it shows on load. These drive poll() directly rather than
+// waiting out 60s of real time.
+
+test('a poll with a newer record repaints', async ({ page }) => {
+  await open(page, serve(RECORD));
+  const moved = JSON.parse(JSON.stringify(RECORD));
+  moved.updatedAt = '2026-09-22T09:00:00.000Z';
+  moved.data.counts['h2s:false-spirea'] = 252;
+
+  await page.route('**/macros/s/**', serve(moved));
+  await page.evaluate(() => poll());
+  await expect(page.locator('#h2s tr', { hasText: 'False Spirea' })).toContainText('252');
+  await expect(page.locator('#h2s tr', { hasText: 'False Spirea' }).locator('.pill')).toHaveText('complete');
+});
+
+test('a poll with the same record does not repaint', async ({ page }) => {
+  // Repainting for nothing throws away the reader's scroll position and
+  // flickers a table that is being read across a room.
+  await open(page, serve(RECORD));
+  const before = await page.evaluate(() => {
+    document.querySelector('#sections section').dataset.mark = 'original';
+    return document.querySelector('#sections section').dataset.mark;
+  });
+  await page.evaluate(() => poll());
+  await page.waitForTimeout(250);
+  const after = await page.evaluate(() => document.querySelector('#sections section').dataset.mark);
+  expect(before).toBe('original');
+  expect(after).toBe('original');   // same node, never rebuilt
+});
+
+test('a failed poll keeps the numbers already on screen', async ({ page }) => {
+  // This is the opposite rule to a failed FIRST load. Nothing true can be
+  // shown on load, so nothing is. But once a real record is up, those figures
+  // were real -- they are only ageing. Blanking them would throw away good
+  // information over one dead spot.
+  await open(page, serve(RECORD));
+  const rowsBefore = await page.locator('#sections section tr').count();
+
+  await page.route('**/macros/s/**', (r) => r.abort('failed'));
+  await page.evaluate(async () => { poll(); poll(); });
+  await page.waitForTimeout(400);
+
+  expect(await page.locator('#sections section tr').count()).toBe(rowsBefore);
+  await expect(page.locator('#h2s tr', { hasText: 'Hardy Purple Common Lilac' })).toContainText('27');
+});
+
+test('two failed polls stop the page claiming to be live', async ({ page }) => {
+  await open(page, serve(RECORD));
+  await expect(page.locator('#stamp')).toContainText('Live');
+
+  await page.route('**/macros/s/**', (r) => r.abort('failed'));
+  await page.evaluate(async () => { poll(); poll(); });
+  await page.waitForTimeout(400);
+
+  await expect(page.locator('#stamp')).toContainText('could not refresh');
+  await expect(page.locator('#stamp')).not.toContainText('Live —');
+});
+
+test('polling is skipped while the tab is hidden', async ({ page }) => {
+  await open(page, serve(RECORD));
+  let calls = 0;
+  await page.route('**/macros/s/**', (r) => { calls++; return serve(RECORD)(r); });
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'hidden', { get: () => true, configurable: true });
+    poll();
+  });
+  await page.waitForTimeout(300);
+  expect(calls).toBe(0);
+});
+
 test('the stamp says when the count was taken', async ({ page }) => {
   await open(page, serve(RECORD));
   // Not "as of whenever somebody last edited this file", which is what a typed

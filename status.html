@@ -280,12 +280,35 @@ function paintBeds(planted, staked){
   return {planted: n, total: total};
 }
 
+// Show nothing, and say why.
+//
+// This has to work whether or not anything has rendered yet. render() removes
+// the banner element when it succeeds, and the first version of fail() looked
+// that element up and assumed it was there -- so calling fail() after a
+// successful render threw instead of reporting. That hid a broken guard from
+// its own test: a mutation that swapped this in for the poll's stale handler
+// left the page intact purely because this function crashed, and the test
+// watching for intact numbers passed on broken code.
+//
+// It rebuilds the banner if it is gone, and it CLEARS the figures, because
+// "could not load" and a screen full of numbers must never appear together.
+// The poll does not call this -- see staleStamp(), which keeps a real record
+// on screen and only stops calling it live.
 function fail(msg){
   var el = document.getElementById("state");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "state";
+    var wrap = document.querySelector(".wrap");
+    wrap.insertBefore(el, document.getElementById("big"));
+  }
   el.className = "state err";
   el.innerHTML = '<b>These counts could not be loaded.</b> ' + esc(msg) +
     '<br><br>Nothing is shown below rather than showing figures that might be ' +
     'out of date. Try again in a moment, or ask Matt for a current copy.';
+  document.getElementById("sections").innerHTML = "";
+  document.getElementById("jump").innerHTML = "";
+  document.getElementById("big").innerHTML = "";
   document.getElementById("stamp").textContent = "Counts unavailable";
 }
 
@@ -318,6 +341,11 @@ function render(j){
     '<div><b>' + beds.planted + '<span style="font-size:1rem">/' + beds.total +
       '</span></b><span>Home2 Suites beds planted</span></div>';
 
+  // Set here rather than at the call sites so the first load and every poll
+  // record it the same way -- otherwise the first poll always repaints.
+  lastSeen = j.updatedAt || lastSeen;
+  missed = 0;
+
   var when = j.updatedAt ? new Date(j.updatedAt) : null;
   document.getElementById("stamp").innerHTML = '<span class="live"></span>' +
     (when
@@ -327,13 +355,71 @@ function render(j){
         })
       : 'Live') + ' &nbsp;&middot;&nbsp; read-only';
 
-  // Guarded because render() must survive being called more than once. It is
-  // called once today, but this page is the obvious candidate for polling the
-  // way the app does, and the second call would otherwise die here -- after
-  // painting a correct page, which is the worst kind of failure to find later.
+  // Guarded because render() runs on every poll, not just on load. Before it
+  // was guarded the second call painted a correct page and then died here,
+  // removing a banner the first call had already removed.
   var st = document.getElementById("state");
   if (st && st.parentNode) st.parentNode.removeChild(st);
 }
+
+// ---- Keeping an open tab current -----------------------------------------
+//
+// Chris and Todd leave this open. Without a poll it shows whatever was true
+// when the tab was opened, which on a Monday morning could be Friday -- and it
+// would look exactly as confident as a fresh one.
+//
+// Same 60s as the app, and the same two rules the app's poll follows:
+//
+//   - Skip while the tab is hidden. This sits in a background tab all day and
+//     there is no reason to keep asking on behalf of a screen nobody is
+//     looking at.
+//   - Only re-render when updatedAt actually MOVES. Repainting on every poll
+//     would throw away a scroll position and flicker the table for nothing,
+//     and this page gets read on a TV.
+var POLL_MS = 60000;
+var lastSeen = "";
+var missed = 0;
+
+// A failed poll is NOT the same as a failed first load, and must not be
+// treated like one.
+//
+// On first load there is nothing true to show, so the page shows nothing. But
+// once a real record is on screen, those numbers were real -- they are only
+// getting old. Blanking them because one request timed out would throw away
+// good information and, worse, teach people the page breaks. So the figures
+// stay and the stamp stops claiming to be live.
+function staleStamp(){
+  var el = document.getElementById("stamp");
+  if (!el || !lastSeen) return;
+  var when = new Date(lastSeen);
+  el.innerHTML = '<span class="live" style="background:var(--amber)"></span>' +
+    'Showing the count from ' + when.toLocaleString(undefined, {
+      weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit"
+    }) + ' &mdash; could not refresh just now, still trying';
+}
+
+function poll(){
+  if (document.hidden) return;
+  fetch(SYNC_URL + "?action=get&t=" + Date.now(), {cache: "no-store"})
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if (!j || !j.ok) throw new Error("no record");
+      missed = 0;
+      if (!j.updatedAt || j.updatedAt === lastSeen) return;  // nothing moved
+      render(j);
+    })
+    .catch(function(){
+      // One missed poll is a phone in a dead spot, not news. Two in a row is
+      // worth saying out loud, because by then the page could be well behind.
+      if (++missed >= 2) staleStamp();
+    });
+}
+
+setInterval(poll, POLL_MS);
+// A tab brought back to the front should not wait out the rest of its minute.
+document.addEventListener("visibilitychange", function(){
+  if (!document.hidden) poll();
+});
 
 fetch(SYNC_URL + "?action=get&t=" + Date.now(), {cache: "no-store"})
   .then(function(r){ return r.json(); })
