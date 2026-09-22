@@ -141,6 +141,33 @@ test('a refusal from the endpoint is treated the same as being down', async ({ p
   await expect(page.locator('#sections section')).toHaveCount(0);
 });
 
+test('rendering twice paints the same page and does not throw', async ({ page }) => {
+  // Found live: the second render died removing a banner the first one had
+  // already removed -- after painting a correct page, so the damage was a
+  // thrown error nobody would see until this page started polling.
+  await open(page, serve(RECORD));
+  const twice = await page.evaluate(async () => {
+    const j = await fetch('https://script.google.com/macros/s/x/exec?action=get').then((r) => r.json());
+    const before = document.querySelectorAll('#sections section').length;
+    let threw = null;
+    try { render(j); } catch (e) { threw = String(e); }
+    return { before, after: document.querySelectorAll('#sections section').length, threw };
+  });
+  expect(twice.threw).toBeNull();
+  expect(twice.after).toBe(twice.before);
+});
+
+test('a missing jobs.js fails loudly instead of showing an empty job list', async ({ page }) => {
+  // jobs.js is a separate file now, so it is a thing that can fail to load.
+  // If it does, JOBS is undefined and render() throws -- which must land in
+  // the same "no numbers" path as a dead endpoint, not in a page of zeros.
+  await page.route('**/jobs.js', (r) => r.abort('failed'));
+  await open(page, serve(RECORD));
+  await expect(page.locator('#state')).toHaveClass(/err/);
+  await expect(page.locator('#sections section')).toHaveCount(0);
+  await expect(page.locator('#big')).toBeEmpty();
+});
+
 test('the stamp says when the count was taken', async ({ page }) => {
   await open(page, serve(RECORD));
   // Not "as of whenever somebody last edited this file", which is what a typed

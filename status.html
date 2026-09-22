@@ -327,8 +327,12 @@ function render(j){
         })
       : 'Live') + ' &nbsp;&middot;&nbsp; read-only';
 
+  // Guarded because render() must survive being called more than once. It is
+  // called once today, but this page is the obvious candidate for polling the
+  // way the app does, and the second call would otherwise die here -- after
+  // painting a correct page, which is the worst kind of failure to find later.
   var st = document.getElementById("state");
-  st.parentNode.removeChild(st);
+  if (st && st.parentNode) st.parentNode.removeChild(st);
 }
 
 fetch(SYNC_URL + "?action=get&t=" + Date.now(), {cache: "no-store"})
