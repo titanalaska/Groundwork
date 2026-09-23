@@ -156,3 +156,24 @@ catalog page, not pasted from output; every guard seen failing first.
 2. The NTMB plan's botanical names (Early Forsythia at least) — or accept
    "unresolved" for those rows at first.
 3. Kalco's list, whenever Chris sends it (Phase 2).
+
+## Amendment 9/23 — offers come from the alias table, verified against the catalogs
+
+Found while planning: `species-alias-table.json` already holds hand-read sizes
+and prices per vendor (e.g. Bron Pink Beauty #5 $23.79), taken off the books on
+9/19. Parsing all five catalog formats a second time would create a second,
+automatic copy of that record, and two copies drift. So:
+
+- The table gains a structured `offers` field (`as`, `forms: [{size, price}]`).
+  That is the record.
+- `build_vendors.py` **verifies** it: every `as` name must be printed in that
+  vendor's catalog, and every price must be printed near it, or the build is
+  refused. Catalogs are the check, not the source.
+- The builder rejects any field besides `as`/`forms`/`size`/`price`, so the
+  table's notes can never reach `vendors.js`.
+- **The Groundwork repo is public.** The alias table and catalogs stay in
+  `claudes room` and are never committed; only generated `vendors.js` is.
+- Bailey's quote was found 9/23: "TITAN AVAILABILITY QUOTE 8-4-26.xlsx", Aaron
+  Rivera's email of 8/4/26 in the Titan Outlook. To be saved to `claudes room`.
+
+Plan: `docs/superpowers/plans/2026-09-23-vendor-catalogs.md`.
