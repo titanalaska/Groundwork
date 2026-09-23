@@ -180,6 +180,29 @@ const MUTATIONS = [
     replace: '    var have = onHand(counts, r.name) + (subsFor(notes, "h2s:" + slugOf(r.name)).length ? 3 : 0);',
     caughtBy: 'change no figure',
   },
+
+  // ---- status.html + vendors-view.js: who carries it (vendors-*.spec.js) ----
+  {
+    file: 'status.html',
+    name: 'build HTML out of a vendor name',
+    find: "      r.vendors.map(function(t){ return '<span class=\"vl\">' + escapeHtml(t) + '</span>'; }).join('') + '</td>' +",
+    replace: "      r.vendors.map(function(t){ return '<span class=\"vl\">' + t + '</span>'; }).join('') + '</td>' +",
+    caughtBy: 'escaped before it reaches the page',
+  },
+  {
+    file: 'vendors-view.js',
+    name: 'drop the list date from a vendor line',
+    find: '        " (" + list.dated + ")");',
+    replace: '        "");',
+    caughtBy: 'on each job that has it',
+  },
+  {
+    file: 'vendors-view.js',
+    name: 'say "not on list" for a vendor that was never read',
+    find: '    if (!Object.prototype.hasOwnProperty.call(sp.offers, v)) return;',
+    replace: '    if (!Object.prototype.hasOwnProperty.call(sp.offers, v)) { out.push(VENDORS.lists[v].label + ": not on list"); return; }',
+    caughtBy: 'names who carries the plant',
+  },
 ];
 
 const originals = {};
@@ -214,7 +237,7 @@ for (const m of MUTATIONS) {
   const run = spawnSync(
     process.execPath,
     [require.resolve('@playwright/test/cli'),
-     'test', 'tests/status-live.spec.js', 'tests/shortage-live.spec.js', 'tests/status-subs.spec.js', 'tests/shortage-subs.spec.js',
+     'test', 'tests/status-live.spec.js', 'tests/shortage-live.spec.js', 'tests/status-subs.spec.js', 'tests/shortage-subs.spec.js', 'tests/vendors-status.spec.js', 'tests/vendors-app.spec.js',
      '-g', m.caughtBy, '--reporter=json'],
     { cwd: REPO, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 }
   );
