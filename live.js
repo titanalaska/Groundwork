@@ -97,6 +97,36 @@ function escapeHtml(s){
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+// Substitution options, as the app writes them: notes["subs-<job>:<slug>"],
+// a JSON string of {sp, qty, note}. They live in notes, not a field of their
+// own, because the old Wolf app rewrites the whole record and keeps only what
+// it knows -- and it carries notes through whole.
+//
+// Record only. Nothing here feeds a count, a shortfall or a total.
+//
+// A garbled entry reads as no subs rather than throwing: this page builds
+// every job in one pass, and one bad string off a phone must not blank it for
+// Chris. Options with no species picked yet are left off.
+//
+// Returns plain text lines; callers escape them, because they build HTML.
+//
+// The multiplication sign and dash are written as escapes on purpose.
+// status.html and shortage.html declare no charset, so opened from a file this
+// script is read as Windows-1252 and a literal one comes out as mojibake --
+// the same thing index.html hit with its minus sign.
+function subsFor(notes, key){
+  var raw = notes && notes["subs-" + key];
+  if (!raw) return [];
+  var list;
+  try { list = JSON.parse(raw); } catch (e) { return []; }
+  if (!Array.isArray(list)) return [];
+  return list.filter(function(o){ return o && typeof o.sp === "string" && o.sp; }).map(function(o){
+    return "sub option: " + o.sp +
+      (typeof o.qty === "number" ? " \u00d7 " + o.qty : " (qty open)") +
+      (typeof o.note === "string" && o.note ? " \u2014 " + o.note : "");
+  });
+}
+
 // When the record was taken -- not when somebody last edited a file, which is
 // what a typed date meant and why it was always a little wrong.
 function countedAt(iso){

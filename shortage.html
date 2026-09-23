@@ -29,6 +29,9 @@ td{padding:11px 10px 11px 0;border-bottom:1px solid var(--line);vertical-align:b
 tr:last-child td{border-bottom:none}
 th.n,td.n{text-align:right;font-variant-numeric:tabular-nums;padding-right:0}
 td.sp{font-weight:600}
+/* Substitution options from the app's Subs panel -- same purple as the app
+   and status.html, so a sub never reads as a figure. */
+.so{display:block;font-size:.8rem;font-weight:400;color:#7a3ea1;margin-top:3px}
 .short{color:var(--red);font-weight:700}
 .over{color:var(--green);font-weight:700}
 .note{font-size:.88rem;color:var(--mut);margin:14px 0 0}
@@ -255,7 +258,20 @@ function onHand(counts, name){
   return typeof v === "number" ? v : 0;
 }
 
-function fillItemOne(counts){
+// Sub lines for a set of Home2Suites rows, escaped, ready to drop into a cell.
+// This page is H2S only, so the key is always "h2s:". Record only -- nothing
+// here reaches a figure.
+function subsHtml(notes, names){
+  var out = "";
+  names.forEach(function(n){
+    subsFor(notes, "h2s:" + slugOf(n)).forEach(function(t){
+      out += '<span class="so">' + escapeHtml(t) + '</span>';
+    });
+  });
+  return out;
+}
+
+function fillItemOne(counts, notes){
   var t = document.getElementById("itemOne");
   ITEM_ONE.forEach(function(r){
     var callouts = 0, have = 0, known = false;
@@ -270,7 +286,9 @@ function fillItemOne(counts){
     var gap = callouts - have;
     var tr = document.createElement("tr");
     tr.innerHTML =
-      '<td class="sp">' + escapeHtml(decodeEntities(r.label)) + '</td>' +
+      '<td class="sp">' + escapeHtml(decodeEntities(r.label)) +
+      // Every row that fills this callout, so the lilac shows both halves' subs.
+      subsHtml(notes, r.filledBy) + '</td>' +
       '<td class="n">' + callouts + '</td>' +
       '<td class="n">' + r.schedule + '</td>' +
       '<td class="n">' + have + '</td>' +
@@ -283,7 +301,7 @@ function fillItemOne(counts){
   });
 }
 
-function fillItemTwo(counts){
+function fillItemTwo(counts, notes){
   var t = document.getElementById("itemTwo");
   var stillShort = 0;
   ITEM_TWO.forEach(function(r){
@@ -296,7 +314,7 @@ function fillItemTwo(counts){
       (r.note ? ' <span style="color:var(--mut);font-weight:400">(' + escapeHtml(r.note) + ')</span>' : '');
     var tr = document.createElement("tr");
     tr.innerHTML =
-      '<td class="sp">' + label + '</td>' +
+      '<td class="sp">' + label + subsHtml(notes, [r.name]) + '</td>' +
       '<td class="n">' + need + '</td>' +
       '<td class="n">' + have + '</td>' +
       (gap ? '<td class="n short">' + gap + '</td>' : '<td class="n over">covered</td>');
@@ -311,10 +329,11 @@ function clearRows(t){
 
 function paint(j){
   var counts = (j.data && j.data.counts) || {};
+  var notes = (j.data && j.data.notes) || {};
   clearRows(document.getElementById("itemOne"));
   clearRows(document.getElementById("itemTwo"));
-  fillItemOne(counts);
-  fillItemTwo(counts);
+  fillItemOne(counts, notes);
+  fillItemTwo(counts, notes);
 
   document.getElementById("stamp").innerHTML = '<span class="live"></span>' +
     'Live &mdash; last counted ' + countedAt(j.updatedAt) +

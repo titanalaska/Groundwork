@@ -192,29 +192,8 @@ var NOTES = {
     "176 against a spec of 116 is correct - the extra 60 cover the Ivory Halo shortfall under the approved substitution. Total dogwood still 272 as drawn.",
 };
 
-// Substitution options, as the app writes them: notes["subs-<job>:<slug>"],
-// a JSON string of {sp, qty, note}. They live in notes, not a field of their
-// own, because the old Wolf app rewrites the whole record and keeps only what
-// it knows -- and it carries notes through whole.
-//
-// Record only. Nothing here feeds a count, a shortfall or a total.
-//
-// A garbled entry reads as no subs rather than throwing: this page builds
-// every job in one pass, and one bad string off a phone must not blank it for
-// Chris. Options with no species picked yet are left off.
-function subsFor(notes, key){
-  var raw = notes && notes["subs-" + key];
-  if (!raw) return [];
-  var list;
-  try { list = JSON.parse(raw); } catch (e) { return []; }
-  if (!Array.isArray(list)) return [];
-  return list.filter(function(o){ return o && typeof o.sp === "string" && o.sp; }).map(function(o){
-    return "sub option: " + o.sp +
-      (typeof o.qty === "number" ? " × " + o.qty : " (qty open)") +
-      (typeof o.note === "string" && o.note ? " — " + o.note : "");
-  });
-}
-
+// subsFor() -- the substitution options under a species -- is in live.js,
+// shared with shortage.html so the two pages read subs the same way.
 function rowsFor(jobKey, counts, notes){
   var job = JOBS[jobKey], out = [];
   Object.keys(job.groups).forEach(function(gk){

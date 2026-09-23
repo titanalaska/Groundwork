@@ -128,7 +128,7 @@ const MUTATIONS = [
     caughtBy: 'own job only',
   },
   {
-    file: 'status.html',
+    file: 'live.js',
     name: 'let one garbled sub throw and blank the page',
     find: '  try { list = JSON.parse(raw); } catch (e) { return []; }',
     replace: '  list = JSON.parse(raw);',
@@ -143,11 +143,42 @@ const MUTATIONS = [
     caughtBy: 'change no number',
   },
   {
-    file: 'status.html',
+    file: 'live.js',
     name: 'show an option with no species picked',
     find: 'return o && typeof o.sp === "string" && o.sp; })',
     replace: 'return o && typeof o.sp === "string"; })',
     caughtBy: 'quantity and note',
+  },
+
+  // ---- shortage.html: substitution options (tests/shortage-subs.spec.js) ---
+  {
+    file: 'shortage.html',
+    name: 'build HTML out of a sub note on the shortage page',
+    find: "      out += '<span class=\"so\">' + escapeHtml(t) + '</span>';",
+    replace: "      out += '<span class=\"so\">' + t + '</span>';",
+    caughtBy: 'typed note is text',
+  },
+  {
+    // Miss Kim's callout is filled by two app rows since the lilac split.
+    file: 'shortage.html',
+    name: 'read the lilac subs off one row instead of both',
+    find: "      subsHtml(notes, r.filledBy) + '</td>' +",
+    replace: "      subsHtml(notes, r.filledBy.slice(0, 1)) + '</td>' +",
+    caughtBy: 'both rows that fill it',
+  },
+  {
+    file: 'shortage.html',
+    name: "let another job's subs onto the Home2Suites page",
+    find: '    subsFor(notes, "h2s:" + slugOf(n)).forEach(function(t){',
+    replace: '    subsFor(notes, "wsrcc:" + slugOf(n)).concat(subsFor(notes, "h2s:" + slugOf(n))).forEach(function(t){',
+    caughtBy: 'only Home2Suites',
+  },
+  {
+    file: 'shortage.html',
+    name: 'count a sub as on hand',
+    find: '    var have = onHand(counts, r.name);',
+    replace: '    var have = onHand(counts, r.name) + (subsFor(notes, "h2s:" + slugOf(r.name)).length ? 3 : 0);',
+    caughtBy: 'change no figure',
   },
 ];
 
@@ -183,7 +214,7 @@ for (const m of MUTATIONS) {
   const run = spawnSync(
     process.execPath,
     [require.resolve('@playwright/test/cli'),
-     'test', 'tests/status-live.spec.js', 'tests/shortage-live.spec.js', 'tests/status-subs.spec.js',
+     'test', 'tests/status-live.spec.js', 'tests/shortage-live.spec.js', 'tests/status-subs.spec.js', 'tests/shortage-subs.spec.js',
      '-g', m.caughtBy, '--reporter=json'],
     { cwd: REPO, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 }
   );
