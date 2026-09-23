@@ -53,6 +53,27 @@ test('Palmer and Raspberry are in the app with their proposal counts', async ({ 
   expect(jobs.raspberry.total, 'Raspberry Townhomes Lot 4, proposal of 7/7/26').toBe(494);
 });
 
+test('NTMB is in the app with Chris\'s scope counts, and starts at zero', async ({ page }) => {
+  await loadApp(page);
+
+  const ntmb = await page.evaluate(() => {
+    const job = JOBS.ntmb;
+    let total = 0, nonZero = 0;
+    Object.keys(job.groups).forEach((g) => job.groups[g].items.forEach((row) => {
+      total += row[1];
+      if ((state['ntmb:' + slug(row[0])] || 0) !== 0) nonZero++;
+    }));
+    return { total, nonZero, bedView: hasBedView('ntmb'), flags: job.flags.join(' ') };
+  });
+
+  // Chris, 9/18/26: 5 Helena Maple + 9 Quaking Aspen = 14 trees;
+  // 16 Cotoneaster + 20 Forsythia + 19 Pink Beauty + 28 Vanhoutte = 83 shrubs.
+  expect(ntmb.total, 'NTMB scope email of 9/18/26').toBe(97);
+  expect(ntmb.nonZero, 'nothing has gone to NTMB yet').toBe(0);
+  expect(ntmb.bedView, 'a scope list has no bed callouts').toBe(false);
+  expect(ntmb.flags).toContain('Provisional');
+});
+
 test('Lady Fern stays under Shrubs, where the proposal filed it', async ({ page }) => {
   // This looks like a mistake and is not one. A fern is a perennial -- it dies
   // back and grows new every year -- but the proposal is the document Palmer

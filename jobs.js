@@ -218,5 +218,31 @@ var JOBS = {
       "&#128209; <strong>These counts come from the proposal</strong> printed 7/7/26, not from a plan set. It cites drawings dated 1.21.25 and sheet <strong>L503-1</strong>, so a set exists &mdash; ask Chris for the planting plan and the plant schedule before treating these as final.",
       "&#9888;&#65039; <strong>94 trees at 2&quot; caliper.</strong> That is the size wall in the 2027 sourcing work, where Martin is the only vendor breaking it. Raise availability before this job is scheduled, not after."
     ]
+  },
+  // Titan's own new building at the pit. Counts are Chris's scope list from
+  // his "NTMB Landscaping Project" email of 9/18/26, taken off the landscape
+  // permit drawings dated 7/16/25 -- not a proposal, and not a plan schedule
+  // anyone has reconciled. 14 trees + 83 shrubs = 97. The plan is to serve it
+  // from stock already in the nursery, so it is demand, not a buy.
+  ntmb: {
+    label: "Titan Maintenance Building &mdash; the pit",
+    short: "NTMB",
+    groups: {
+      trees: { label: "Trees", items: [
+        ["Quaking Aspen", 9],
+        ["Helena Maple", 5]
+      ]},
+      shrubs: { label: "Shrubs", items: [
+        ["Vanhoutte Spirea", 28],
+        ["Early Forsythia", 20],
+        ["Pink Beauty Potentilla", 19],
+        ["Hedge Cotoneaster", 16]
+      ]}
+    },
+    flags: [
+      "&#128209; <strong>These counts come from Chris&#39;s scope email</strong> of 9/18/26, off landscape permit drawings dated <strong>7/16/25</strong> &mdash; 14 months old. Trees 2&quot; cal, shrubs #5.",
+      "&#9888;&#65039; <strong>Provisional.</strong> Todd: grade and fences are the musts, landscaping is not settled. Gage: Corvus has to update the civil and landscape drawings before anything changes. Do not order against this.",
+      "&#127807; <strong>Nursery stock first.</strong> Chris asked whether to substitute what the nursery has for what it does not. That call is still open."
+    ]
   }
 };
