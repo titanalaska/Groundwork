@@ -209,6 +209,18 @@ test('a sync repaint keeps the panel open and the half-typed note', async ({ pag
   await expect(fresh.locator('.sub-note'), 'and the cursor is still in it').toHaveValue('waiting on Chris');
 });
 
+test('the Export status report button puts the options in what it exports', async ({ page }) => {
+  // The test below calls generateReport() directly. This one presses the real
+  // button and reads the box it fills, so the path Matt actually uses is covered.
+  await page.evaluate(() => {
+    writeSubs('ntmb', 'Early Forsythia', [{ sp: 'Vanhoutte Spirea', qty: 12, note: 'Chris ok' }]);
+  });
+  await page.locator('#reportBtn').click();
+  const exported = await page.locator('#reportPanel textarea, #reportText').first().inputValue();
+  expect(exported).toContain('- Early Forsythia: 0/20 -- open');
+  expect(exported).toContain('    sub option: Vanhoutte Spirea x 12 -- Chris ok');
+});
+
 test('the status report lists the options under their species', async ({ page }) => {
   const text = await page.evaluate(() => {
     writeSubs('ntmb', 'Early Forsythia', [
