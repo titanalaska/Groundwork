@@ -3672,8 +3672,56 @@ function logSnapshot(){
     staked: JSON.parse(JSON.stringify(staked)),
     planted: JSON.parse(JSON.stringify(planted)),
     owed: JSON.parse(JSON.stringify(owed)),
+    subs: subsSnapshot(),
     at: new Date().toISOString()
   };
+}
+
+// Every row's sub options, keyed "<job>:<slug>" like the counts. Taken with
+// the baseline so the next draft reports only what moved.
+function subsSnapshot(){
+  var out = {};
+  Object.keys(JOBS).forEach(function(jobKey){
+    Object.keys(JOBS[jobKey].groups).forEach(function(gk){
+      JOBS[jobKey].groups[gk].items.forEach(function(row){
+        var list = readSubs(jobKey, row[0]);
+        if(list.length) out[jobKey + ":" + slug(row[0])] = list;
+      });
+    });
+  });
+  return out;
+}
+
+// What changed in one row's sub options, as log phrases. Matched by species
+// within the row, so a quantity filled in later reads as a change rather than
+// one option dropped and another added. An option with no species picked is
+// not an option yet and is not logged.
+function subsLogChanges(was, now){
+  function named(l){ return (l || []).filter(function(o){ return o && o.sp; }); }
+  function amt(o){ return o.qty === null || o.qty === undefined ? "qty open" : "× " + o.qty; }
+  function full(o){
+    return o.sp + (o.qty === null || o.qty === undefined ? ", qty open" : " × " + o.qty) +
+           (o.note ? " (" + o.note + ")" : "");
+  }
+  var before = named(was), after = named(now), used = [], out = [];
+  after.forEach(function(o){
+    var i = -1;
+    for(var j = 0; j < before.length; j++){
+      if(used.indexOf(j) < 0 && before[j].sp === o.sp){ i = j; break; }
+    }
+    if(i < 0){ out.push("added " + full(o)); return; }
+    used.push(i);
+    var p = before[i], bits = [];
+    var pq = p.qty === undefined ? null : p.qty, nq = o.qty === undefined ? null : o.qty;
+    if(pq !== nq) bits.push(amt(p) + " → " + amt(o));
+    if((p.note || "") !== (o.note || "")) bits.push(o.note ? "note: " + o.note : "note cleared");
+    if(!bits.length) return;
+    out.push(o.sp + (pq === nq ? " " + amt(o) : "") + ", " + bits.join(", "));
+  });
+  before.forEach(function(p, j){
+    if(used.indexOf(j) < 0) out.push("dropped " + full(p));
+  });
+  return out;
 }
 
 function logSpecies(code){
@@ -3729,6 +3777,24 @@ function draftDailyLog(){
     });
   });
 
+  // Sub options, per row. A baseline taken before subs existed has no `subs`
+  // and reads as none -- which is true, there were none -- so everything since
+  // shows as added. So does a baseline an old Wolf install posts, which knows
+  // nothing of subs: that repeats a line rather than swallowing one.
+  var subLines = [], prevSubs = prev.subs || {};
+  Object.keys(JOBS).forEach(function(jobKey){
+    var job = JOBS[jobKey];
+    Object.keys(job.groups).forEach(function(gk){
+      job.groups[gk].items.forEach(function(row){
+        var k = jobKey + ":" + slug(row[0]);
+        subsLogChanges(prevSubs[k], readSubs(jobKey, row[0])).forEach(function(t){
+          subLines.push("  " + decode(job.short || job.label) + " — " +
+                        decode(row[0]) + ": " + t);
+        });
+      });
+    });
+  });
+
   // Per-bed shortfalls, off the owe steppers.
   var short = [], filled = [], bedIds = {};
   Object.keys(prev.owed || {}).forEach(function(b){ bedIds[b] = 1; });
@@ -3775,6 +3841,7 @@ function draftDailyLog(){
   block("Count corrections:", corrected);
   block("Short at the bed \u2014 spots flagged, drop in when it lands:", short);
   block("Filled since the last log:", filled);
+  block("Sub options (record only, counts unchanged):", subLines);
 
   if(!any) return {first: false, empty: true, text: "", since: whenLabel(prev.at)};
   out.push("");

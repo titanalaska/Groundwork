@@ -262,7 +262,77 @@ const MUTATIONS = [
     replace: '          return;',
     caughtBy: 'status report lists',
   },
+
+  // --- Sub options in the daily-log draft (tests/log-subs.spec.js) ---
+  {
+    name: 'leave subs out of the Posted-it baseline, so every draft repeats them',
+    find: '    subs: subsSnapshot(),',
+    replace: '',
+    tag: 'log-subs',
+    caughtBy: 'nothing changed since the snapshot',
+  },
+  {
+    // The tempting "safe" default: treat a missing baseline as today's subs.
+    // It silently swallows everything entered before the first new baseline.
+    name: "treat a baseline with no subs as already having today's",
+    find: '  var subLines = [], prevSubs = prev.subs || {};',
+    replace: '  var subLines = [], prevSubs = prev.subs || subsSnapshot();',
+    tag: 'log-subs',
+    caughtBy: 'before subs existed',
+  },
+  {
+    name: 'stop matching options by species, so a new quantity reads as drop + add',
+    find: '      if(used.indexOf(j) < 0 && before[j].sp === o.sp){ i = j; break; }',
+    replace: '      if(false){ i = j; break; }',
+    tag: 'log-subs',
+    caughtBy: 'change, not a drop',
+  },
+  {
+    name: 'ignore a changed note',
+    find: '    if((p.note || "") !== (o.note || "")) bits.push(o.note ? "note: " + o.note : "note cleared");',
+    replace: '    ;',
+    tag: 'log-subs',
+    caughtBy: 'changed note',
+  },
+  {
+    name: 'never log a dropped option',
+    find: '    if(used.indexOf(j) < 0) out.push("dropped " + full(p));',
+    replace: '    ;',
+    tag: 'log-subs',
+    caughtBy: 'drafted as dropped',
+  },
+  {
+    name: 'log an option with no species picked',
+    find: '  function named(l){ return (l || []).filter(function(o){ return o && o.sp; }); }',
+    replace: '  function named(l){ return (l || []).filter(function(o){ return o; }); }',
+    tag: 'log-subs',
+    caughtBy: 'no species picked',
+  },
+  {
+    name: 'file sub options under Received on site',
+    find: '  block("Sub options (record only, counts unchanged):", subLines);',
+    replace: '  block("Received on site:", subLines);',
+    tag: 'log-subs',
+    caughtBy: 'never show up as received',
+  },
+  {
+    name: 'leave the sub section out of the draft',
+    find: '  block("Sub options (record only, counts unchanged):", subLines);',
+    replace: '',
+    tag: 'log-subs',
+    caughtBy: 'added since the last log',
+  },
 ];
+
+// MUTATE_ONLY=<text> runs just the mutations whose name contains it -- the
+// whole list is ~40 runs of the full suite, over half an hour. Use it while
+// working; run the whole thing before calling a change done.
+if (process.env.MUTATE_ONLY) {
+  const keep = MUTATIONS.filter((m) => m.name.includes(process.env.MUTATE_ONLY) ||
+    (m.tag && m.tag.includes(process.env.MUTATE_ONLY)));
+  MUTATIONS.length = 0;
+  keep.forEach((m) => MUTATIONS.push(m));
+}
 
 // Normalised to LF. Git checks this repo out with CRLF on Windows, so any
 // find string containing \n silently matched nothing and the mutation was
