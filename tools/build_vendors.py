@@ -33,9 +33,12 @@ LISTS = {
     "bron": {"label": "Bron & Sons", "dated": "2027 booking form",
              "file": "Bron-2027-Spring-Booking-Order-Form.txt"},
     "mckay": {"label": "McKay", "dated": "list of 7/20/26",
-              "file": "McKay Nursery Company Wholesale Availability & Sale Items 7.20.26.xlsx"},
-    "bailey": {"label": "Bailey", "dated": "quote of 8/4/26",
-               "file": "TITAN AVAILABILITY QUOTE 8-4-26.xlsx"},
+              "file": "McKay Nursery Company Wholesale Availability & Sale Items 7.20.26.xlsx",
+              "sheet": "McKay Availability"},
+    # Bailey: waiting on "TITAN AVAILABILITY QUOTE 8-4-26.xlsx" (Aaron Rivera's
+    # email of 8/4/26, Titan Outlook) to be saved to claudes room. Uncomment then.
+    # "bailey": {"label": "Bailey", "dated": "quote of 8/4/26",
+    #            "file": "TITAN AVAILABILITY QUOTE 8-4-26.xlsx"},
     "stewart": {"label": "Stewart Bros", "dated": "2025-26 availability, no prices",
                 "file": "Stewart-Brothers-Availability.txt"},
 }
@@ -61,16 +64,25 @@ def groundwork_species(jobs_js_text):
 def _norm(s):
     s = str(s).replace("’", "'").replace("‘", "'")
     s = s.replace("“", '"').replace("”", '"').replace("…", " ")
+    s = re.sub(r"#\s+(\d)", r"#\1", s)  # McKay prints "# 3 Container"
     return re.sub(r"\s+", " ", s).strip().lower()
 
 
-def catalog_lines(path):
+def catalog_lines(path, sheet=None):
+    """One string per catalog line. An xlsx row becomes its cells joined by tabs.
+
+    `sheet` names the one worksheet to read. McKay's workbook carries a
+    product master -- everything they grow, no prices, not availability --
+    beside the availability sheet, and only the availability may vouch for
+    an offer.
+    """
     path = Path(path)
     if path.suffix.lower() == ".xlsx":
         import openpyxl
         wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
+        sheets = [wb[sheet]] if sheet else wb.worksheets
         out = []
-        for ws in wb.worksheets:
+        for ws in sheets:
             for r in ws.iter_rows(values_only=True):
                 cells = [str(c) for c in r if c is not None]
                 if cells:
@@ -83,22 +95,38 @@ def _numbers(text):
     return [float(n.replace(",", "")) for n in re.findall(r"\d[\d,]*(?:\.\d+)?", text)]
 
 
+def _names(line, want):
+    """Does this line print the name? In a tab-separated row a whole cell must
+    equal it -- Bron's "Prairie Dream Paper Birch" is not Paper Birch. Prose
+    lines (Martin's list, Stewart's) are matched as a substring."""
+    if "\t" in line:
+        return any(_norm(c) == want for c in line.split("\t"))
+    return want in _norm(line)
+
+
 def _verify(vendor, as_name, forms, lines):
     want = _norm(as_name)
-    hits = [i for i, ln in enumerate(lines) if want in _norm(ln)]
+    hits = [i for i, ln in enumerate(lines) if _names(ln, want)]
     if not hits:
         raise BuildError(f'{vendor}: "{as_name}" not found in its catalog')
     for size, price in forms:
-        if price is None:
-            continue
+        # The size and the price must be printed on the SAME line, within a
+        # few lines of the name: a #10 price must not vouch for a #5 typo.
+        # With no price (Stewart) the size alone must be printed nearby.
+        s = _norm(size)
         ok = False
         for i in hits:
-            window = " ".join(lines[max(0, i - WINDOW): i + WINDOW + 1])
-            if any(abs(round(n, 2) - price) < 0.005 for n in _numbers(window)):
-                ok = True
+            for ln in lines[max(0, i - WINDOW): i + WINDOW + 1]:
+                if s not in _norm(ln):
+                    continue
+                if price is None or any(abs(round(n, 2) - price) < 0.005 for n in _numbers(ln)):
+                    ok = True
+                    break
+            if ok:
                 break
         if not ok:
-            raise BuildError(f'{vendor}: price {price} for "{as_name}" {size} is not printed near that name')
+            at = f" at {price}" if price is not None else ""
+            raise BuildError(f'{vendor}: "{as_name}" {size}{at} is not printed near that name')
 
 
 def _offer(vendor, raw):
@@ -168,7 +196,7 @@ def main(argv=None):
         p = ROOM / m["file"]
         if not p.exists():
             raise BuildError(f"{v}: catalog file not found: {p} -- save it, or take {v} out of LISTS")
-        catalogs[v] = catalog_lines(p)
+        catalogs[v] = catalog_lines(p, m.get("sheet"))
     data, warnings = build(alias, names, LISTS, catalogs)
     for w in warnings:
         print("warning:", w)

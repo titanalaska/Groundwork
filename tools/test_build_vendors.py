@@ -112,6 +112,55 @@ class BuildTests(unittest.TestCase):
         data, _ = build(alias, ["Paper Birch"], LISTS, CATALOGS)
         self.assertEqual(list(data["species"]), ["paper-birch"])
 
+    def test_a_longer_name_in_a_tab_row_is_not_a_match(self):
+        # Bron row 1860: "Prairie Dream Paper Birch" is a different cultivar at
+        # the same #5 45.197. A substring match would let it vouch for Paper Birch.
+        cat = dict(CATALOGS, bron=["BEPAPDRE\tBetula papyrifera 'Varen'\tPrairie Dream Paper Birch\t#5\t45.197"])
+        alias = [row(offers={"bron": {"as": "Paper Birch", "forms": [{"size": "#5", "price": 45.20}]}})]
+        with self.assertRaisesRegex(BuildError, "not found"):
+            build(alias, ["Paper Birch"], LISTS, cat)
+
+    def test_the_size_must_be_on_the_line_with_the_price(self):
+        # Bron prints each size on its own row. 83.61 is the #10 price; typed
+        # against #5 it must be refused, even though both rows sit together.
+        cat = dict(CATALOGS, bron=["BEPAPYRI\tBetula papyrifera\tPaper Birch\t#5\t45.197",
+                                   "BEPAPYRI\tBetula papyrifera\tPaper Birch\t#10\t83.605999999999995"])
+        ok = [row(offers={"bron": {"as": "Paper Birch", "forms": [{"size": "#10", "price": 83.61}]}})]
+        build(ok, ["Paper Birch"], LISTS, cat)
+        bad = [row(offers={"bron": {"as": "Paper Birch", "forms": [{"size": "#5", "price": 83.61}]}})]
+        with self.assertRaisesRegex(BuildError, "#5"):
+            build(bad, ["Paper Birch"], LISTS, cat)
+
+    def test_a_size_with_no_price_must_still_be_printed(self):
+        # Stewart has no prices, so the size is the only thing to check.
+        cat = dict(CATALOGS, bron=["Betula papyrifera", "Paper Birch", "#15", "2-7"])
+        alias = [row(offers={"bron": {"as": "Paper Birch", "forms": [{"size": "#20", "price": None}]}})]
+        with self.assertRaisesRegex(BuildError, "#20"):
+            build(alias, ["Paper Birch"], LISTS, cat)
+
+    def test_mckay_spaces_its_container_sizes(self):
+        # McKay prints "# 3 Container"; the table may say "#3 Container".
+        cat = dict(CATALOGS, mckay=["SHRUB\tsrena34030\tSpiraea vanhouttei 'Renaissance'\tRenaissance Bridal Wreath Spirea \t# 3 Container\t\t\t\t17.75\t286"])
+        alias = [row(plan_name="Vanhoutte Spirea", offers={"mckay": {
+            "as": "Renaissance Bridal Wreath Spirea", "forms": [{"size": "#3 Container", "price": 17.75}]}})]
+        data, _ = build(alias, ["Vanhoutte Spirea"], LISTS, cat)
+        self.assertEqual(data["species"]["vanhoutte-spirea"]["offers"]["mckay"]["forms"], [["#3 Container", 17.75]])
+
+    def test_catalog_lines_reads_only_the_named_sheet(self):
+        # McKay's workbook holds a product master (no prices, not availability)
+        # beside the availability sheet. Only the named sheet may be read.
+        import openpyxl, tempfile, os
+        from build_vendors import catalog_lines
+        wb = openpyxl.Workbook()
+        wb.active.title = "All"
+        wb.active.append(["bcans23c6", "Birch Canoe Single (Betula papyrifera)", "2\" B&B"])
+        wb.create_sheet("McKay Availability").append(["SHRUB", "srena34030", "Renaissance Bridal Wreath Spirea", "# 3 Container", 17.75])
+        path = os.path.join(tempfile.mkdtemp(), "m.xlsx")
+        wb.save(path)
+        lines = catalog_lines(path, sheet="McKay Availability")
+        self.assertEqual(len(lines), 1)
+        self.assertIn("Renaissance", lines[0])
+
     def test_output_is_ascii(self):
         alias = [row(offers={"seedntree": {"as": "Alaska paper birch’s", "forms": []}})]
         cat = dict(CATALOGS, seedntree=["Alaska paper birch’s"])
