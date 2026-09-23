@@ -463,6 +463,8 @@ git commit -m "Generate vendors.js for the 22 Groundwork species the alias table
 
 ### Task 3: The formatter both pages share
 
+> **As built (9/23):** a vendor's entry is a LIST of products (see Task 1), so the formatter emits one line per product, each with its own `as`. The committed `vendors-view.js` and `tests/vendors-view.test.js` are authoritative over the code blocks below. The test helper returns plain copies because arrays built inside `vm` fail `deepStrictEqual` on prototype alone.
+
 **Files:**
 - Create: `vendors-view.js`
 - Test: `tests/vendors-view.test.js`
