@@ -322,6 +322,31 @@ const MUTATIONS = [
     tag: 'log-subs',
     caughtBy: 'added since the last log',
   },
+
+  // --- Who carries it, in the Subs panel (tests/vendors-app.spec.js) ---
+  {
+    name: 'leave the vendor block out of the Subs panel',
+    find: '    panel.appendChild(vend);',
+    replace: '',
+    tag: 'vendors',
+    caughtBy: 'names who carries the plant',
+  },
+  {
+    name: 'let a missing vendors.js break the panel instead of saying so',
+    find: '    (vl || ["Vendor lists not loaded."]).forEach(function(t){',
+    replace: '    vl.forEach(function(t){',
+    tag: 'vendors',
+    caughtBy: 'says the lists are not loaded',
+  },
+  {
+    // Passing the raw plan name (with its HTML entity) instead of the slug
+    // would look up nothing and call every species unmapped.
+    name: 'look vendors up by plan name instead of the slug',
+    find: '    var vl = (typeof vendorLines === "function") ? vendorLines(slug(name), decode(name)) : null;',
+    replace: '    var vl = (typeof vendorLines === "function") ? vendorLines(name, decode(name)) : null;',
+    tag: 'vendors',
+    caughtBy: 'names who carries the plant',
+  },
 ];
 
 // MUTATE_ONLY=<text> runs just the mutations whose name contains it -- the
