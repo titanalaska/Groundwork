@@ -44,7 +44,7 @@ class BuildTests(unittest.TestCase):
                                        "forms": [{"size": "2\" B&B", "price": 189.00}]}})]
         data, _ = build(alias, ["Paper Birch"], LISTS, CATALOGS)
         self.assertEqual(data["species"]["paper-birch"]["offers"]["mckay"],
-                         {"as": "Birch Canoe Single", "forms": [["2\" B&B", 189.0]]})
+                         [{"as": "Birch Canoe Single", "forms": [["2\" B&B", 189.0]]}])
 
     def test_plan_name_search_is_the_trap(self):
         # Searching McKay for "Paper Birch" finds nothing -- that is why "as" exists.
@@ -62,13 +62,13 @@ class BuildTests(unittest.TestCase):
         alias = [row(offers={"seedntree": {"as": "Alaska paper birch",
                                            "forms": [{"size": "2\"", "price": 238}]}})]
         data, _ = build(alias, ["Paper Birch"], LISTS, CATALOGS)
-        self.assertEqual(data["species"]["paper-birch"]["offers"]["seedntree"]["forms"], [["2\"", 238]])
+        self.assertEqual(data["species"]["paper-birch"]["offers"]["seedntree"][0]["forms"], [["2\"", 238]])
 
     def test_three_decimal_catalog_price_matches_cents(self):
         alias = [row(plan_name="Pink Beauty Potentilla", offers={"bron": {
             "as": "Pink Beauty Potentilla", "forms": [{"size": "#5", "price": 23.79}]}})]
         data, _ = build(alias, ["Pink Beauty Potentilla"], LISTS, CATALOGS)
-        self.assertEqual(data["species"]["pink-beauty-potentilla"]["offers"]["bron"]["forms"], [["#5", 23.79]])
+        self.assertEqual(data["species"]["pink-beauty-potentilla"]["offers"]["bron"][0]["forms"], [["#5", 23.79]])
 
     def test_not_on_list_is_kept_as_null(self):
         alias = [row(offers={"bron": None})]
@@ -144,7 +144,7 @@ class BuildTests(unittest.TestCase):
         alias = [row(plan_name="Vanhoutte Spirea", offers={"mckay": {
             "as": "Renaissance Bridal Wreath Spirea", "forms": [{"size": "#3 Container", "price": 17.75}]}})]
         data, _ = build(alias, ["Vanhoutte Spirea"], LISTS, cat)
-        self.assertEqual(data["species"]["vanhoutte-spirea"]["offers"]["mckay"]["forms"], [["#3 Container", 17.75]])
+        self.assertEqual(data["species"]["vanhoutte-spirea"]["offers"]["mckay"][0]["forms"], [["#3 Container", 17.75]])
 
     def test_catalog_lines_reads_only_the_named_sheet(self):
         # McKay's workbook holds a product master (no prices, not availability)
@@ -160,6 +160,23 @@ class BuildTests(unittest.TestCase):
         lines = catalog_lines(path, sheet="McKay Availability")
         self.assertEqual(len(lines), 1)
         self.assertIn("Renaissance", lines[0])
+
+    def test_one_vendor_can_sell_the_plant_as_two_products(self):
+        # Martin: "Colorado blue and green spruce, Ak. grown" at 4'-5' AND
+        # "Colorado green spruce. Idaho, Specimen trees" at 7'-8'. Both stay.
+        cat = dict(CATALOGS, seedntree=[
+            "Colorado blue and green spruce, Ak. grown. ",
+            "4’-5’   $245    5’-6’  $325 ",
+            "Colorado green spruce. Idaho, Specimen trees ",
+            "7’-8’  $1,128 "])
+        alias = [row(plan_name="Colorado Green Spruce", offers={"seedntree": [
+            {"as": "Colorado blue and green spruce, Ak. grown", "forms": [{"size": "4'-5'", "price": 245}]},
+            {"as": "Colorado green spruce. Idaho, Specimen trees", "forms": [{"size": "7'-8'", "price": 1128}]}]})]
+        data, _ = build(alias, ["Colorado Green Spruce"], LISTS, cat)
+        got = data["species"]["colorado-green-spruce"]["offers"]["seedntree"]
+        self.assertEqual([o["as"] for o in got],
+                         ["Colorado blue and green spruce, Ak. grown", "Colorado green spruce. Idaho, Specimen trees"])
+        self.assertEqual(got[1]["forms"], [["7'-8'", 1128]])
 
     def test_output_is_ascii(self):
         alias = [row(offers={"seedntree": {"as": "Alaska paper birch’s", "forms": []}})]

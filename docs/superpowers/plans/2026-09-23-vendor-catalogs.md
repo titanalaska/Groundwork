@@ -51,7 +51,7 @@
 
 **Interfaces:**
 - Produces: `slug(name) -> str`; `groundwork_species(jobs_js_text) -> list[str]`; `catalog_lines(path) -> list[str]`; `build(alias, species_names, lists, catalogs) -> (data: dict, warnings: list[str])`; `render_js(data) -> str`; `BuildError`. CLI: `python tools/build_vendors.py` writes `vendors.js`.
-- `data` shape: `{"lists": {vendor: {"label", "dated"}}, "species": {slug: {"mapped": bool, "offers": {vendor: None | {"as": str, "forms": [[size, price_or_None], ...]}}}}}` — `offers` omitted when `mapped` is false.
+- `data` shape: `{"lists": {vendor: {"label", "dated"}}, "species": {slug: {"mapped": bool, "offers": {vendor: None | [{"as": str, "forms": [[size, price_or_None], ...]}, ...]}}}}` — a vendor is null (read, not on list) or a LIST of products; `offers` omitted when `mapped` is false.
 
 - [ ] **Step 1: Write the failing tests**
 

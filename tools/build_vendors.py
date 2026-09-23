@@ -167,10 +167,18 @@ def build(alias, species_names, lists, catalogs):
             if vendor not in lists:
                 warnings.append(f"{name}: {vendor} is not in LISTS (no catalog saved) -- skipped")
                 continue
-            o = _offer(vendor, raw)
-            if o is not None:
+            if raw is None:
+                offers[vendor] = None
+                continue
+            # One vendor can sell the same plant as separate products -- Martin's
+            # Alaska-grown Colorado spruce and his Idaho specimen trees, McKay's
+            # single and clump aspen. Each keeps its own printed name.
+            products = []
+            for one in (raw if isinstance(raw, list) else [raw]):
+                o = _offer(vendor, one)
                 _verify(vendor, o["as"], o["forms"], catalogs[vendor])
-            offers[vendor] = o
+                products.append(o)
+            offers[vendor] = products
         species[s] = {"mapped": True, "offers": offers}
     out_lists = {v: {"label": m["label"], "dated": m["dated"]} for v, m in lists.items()}
     return {"lists": out_lists, "species": species}, warnings
