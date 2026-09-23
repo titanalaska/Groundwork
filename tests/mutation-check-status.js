@@ -110,6 +110,45 @@ const MUTATIONS = [
     replace: '    totalDone += r.done; totalRows += r.rows;',
     caughtBy: 'totals are the sum of the rows',
   },
+
+  // ---- status.html: substitution options (tests/status-subs.spec.js) -------
+  {
+    file: 'status.html',
+    name: 'build HTML out of a note typed on a phone',
+    find: "return '<span class=\"so\">' + escapeHtml(t) + '</span>';",
+    replace: "return '<span class=\"so\">' + t + '</span>';",
+    caughtBy: 'shown as text',
+  },
+  {
+    // The h2s-prefix bug, a fourth time: read every job's subs off Home2Suites.
+    file: 'status.html',
+    name: 'read subs off Home2Suites for every job',
+    find: '        subs: subsFor(notes, key),',
+    replace: '        subs: subsFor(notes, "h2s:" + slugOf(name)),',
+    caughtBy: 'own job only',
+  },
+  {
+    file: 'status.html',
+    name: 'let one garbled sub throw and blank the page',
+    find: '  try { list = JSON.parse(raw); } catch (e) { return []; }',
+    replace: '  list = JSON.parse(raw);',
+    caughtBy: 'garbled entry',
+  },
+  {
+    // Later key wins in an object literal, so this overrides the real short.
+    file: 'status.html',
+    name: 'let a sub quantity reduce the shortfall',
+    find: '        subs: subsFor(notes, key),',
+    replace: '        subs: subsFor(notes, key), short: Math.max(0, (known ? target - got : target) - 12 * subsFor(notes, key).length),',
+    caughtBy: 'change no number',
+  },
+  {
+    file: 'status.html',
+    name: 'show an option with no species picked',
+    find: 'return o && typeof o.sp === "string" && o.sp; })',
+    replace: 'return o && typeof o.sp === "string"; })',
+    caughtBy: 'quantity and note',
+  },
 ];
 
 const originals = {};
@@ -144,7 +183,7 @@ for (const m of MUTATIONS) {
   const run = spawnSync(
     process.execPath,
     [require.resolve('@playwright/test/cli'),
-     'test', 'tests/status-live.spec.js', 'tests/shortage-live.spec.js',
+     'test', 'tests/status-live.spec.js', 'tests/shortage-live.spec.js', 'tests/status-subs.spec.js',
      '-g', m.caughtBy, '--reporter=json'],
     { cwd: REPO, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 }
   );

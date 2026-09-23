@@ -57,6 +57,9 @@ tr:has(.pill.sh) td:first-child{box-shadow:inset 5px 0 0 var(--shortfill)}
 tr:has(.pill.no) td:first-child,tr:has(.pill.sh) td:first-child{padding-left:12px}
 tr:has(.pill.no) td.n b,tr:has(.pill.sh) td.n b{font-size:1.06rem}
 .nt{display:block;font-size:.78rem;color:var(--mut);margin-top:3px;max-width:60ch}
+/* Substitution options, from the app's Subs panel. The app's purple, so a sub
+   reads as a sub on both screens and never as a count. */
+.so{display:block;font-size:.8rem;color:#7a3ea1;margin-top:3px;max-width:60ch}
 .amber{background:var(--amberbg);border:1px solid var(--amberline);border-radius:10px;
  padding:13px 16px;margin:0 0 16px;font-size:.92rem}
 .amber b{color:var(--amber)}
@@ -189,7 +192,30 @@ var NOTES = {
     "176 against a spec of 116 is correct - the extra 60 cover the Ivory Halo shortfall under the approved substitution. Total dogwood still 272 as drawn.",
 };
 
-function rowsFor(jobKey, counts){
+// Substitution options, as the app writes them: notes["subs-<job>:<slug>"],
+// a JSON string of {sp, qty, note}. They live in notes, not a field of their
+// own, because the old Wolf app rewrites the whole record and keeps only what
+// it knows -- and it carries notes through whole.
+//
+// Record only. Nothing here feeds a count, a shortfall or a total.
+//
+// A garbled entry reads as no subs rather than throwing: this page builds
+// every job in one pass, and one bad string off a phone must not blank it for
+// Chris. Options with no species picked yet are left off.
+function subsFor(notes, key){
+  var raw = notes && notes["subs-" + key];
+  if (!raw) return [];
+  var list;
+  try { list = JSON.parse(raw); } catch (e) { return []; }
+  if (!Array.isArray(list)) return [];
+  return list.filter(function(o){ return o && typeof o.sp === "string" && o.sp; }).map(function(o){
+    return "sub option: " + o.sp +
+      (typeof o.qty === "number" ? " × " + o.qty : " (qty open)") +
+      (typeof o.note === "string" && o.note ? " — " + o.note : "");
+  });
+}
+
+function rowsFor(jobKey, counts, notes){
   var job = JOBS[jobKey], out = [];
   Object.keys(job.groups).forEach(function(gk){
     job.groups[gk].items.forEach(function(it){
@@ -203,6 +229,7 @@ function rowsFor(jobKey, counts){
         got: known ? got : 0,
         short: known ? Math.max(0, target - got) : target,
         note: NOTES[key] || "",
+        subs: subsFor(notes, key),
       });
     });
   });
@@ -222,8 +249,8 @@ function pillFor(r){
   return {cls: "ok", text: "complete"};
 }
 
-function renderJob(jobKey, counts){
-  var rows = rowsFor(jobKey, counts);
+function renderJob(jobKey, counts, notes){
+  var rows = rowsFor(jobKey, counts, notes);
   var short = rows.reduce(function(n, r){ return n + r.short; }, 0);
   var done = rows.filter(function(r){ return r.short === 0; }).length;
 
@@ -237,7 +264,9 @@ function renderJob(jobKey, counts){
   rows.forEach(function(r){
     var p = pillFor(r);
     html += '<tr><td>' + escapeHtml(r.name) +
-      (r.note ? '<span class="nt">' + r.note + '</span>' : '') + '</td>' +
+      (r.note ? '<span class="nt">' + r.note + '</span>' : '') +
+      // Escaped: NOTES above is trusted plan prose, a sub is typed on a phone.
+      r.subs.map(function(t){ return '<span class="so">' + escapeHtml(t) + '</span>'; }).join('') + '</td>' +
       '<td class="n">' + r.target + '</td>' +
       '<td class="n">' + r.got + '</td>' +
       '<td class="n">' + (r.short ? '<b>' + r.short + '</b>' : '&mdash;') + '</td>' +
@@ -302,12 +331,13 @@ function render(j){
   var counts = (j.data && j.data.counts) || {};
   var planted = (j.data && j.data.planted) || {};
   var staked = (j.data && j.data.staked) || {};
+  var notes = (j.data && j.data.notes) || {};
 
   var keys = Object.keys(JOBS);
   var secs = "", totalShort = 0, totalDone = 0, totalRows = 0, jump = "";
 
   keys.forEach(function(k){
-    var r = renderJob(k, counts);
+    var r = renderJob(k, counts, notes);
     secs += r.html;
     totalShort += r.short; totalDone += r.done; totalRows += r.rows;
     jump += '<a href="#' + k + '">' + escapeHtml(decodeEntities(JOBS[k].label)) +
