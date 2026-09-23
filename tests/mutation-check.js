@@ -179,6 +179,89 @@ const MUTATIONS = [
     replace: '  state[sub] = had - 46;',
     caughtBy: 'never fills past what the job asks for',
   },
+
+  // --- Substitution options (tests/subs.spec.js) ---
+  {
+    // The tempting "clean" design: subs as their own top-level field. The old
+    // Wolf app writes the whole document without it, so one tap on an old
+    // install wipes every sub. This is why they live inside notes.
+    name: 'store subs as a top-level field the old app does not carry',
+    edits: [
+      { find: 'var SUBS_PREFIX = "subs-";', replace: 'var SUBS_PREFIX = "subs-"; var subsTop = {};' },
+      { find: '  var raw = notes[subsKey(jobKey, name)];', replace: '  var raw = subsTop[subsKey(jobKey, name)];' },
+      { find: '  if(list.length) notes[key] = JSON.stringify(list);\n  else delete notes[key];',
+        replace: '  if(list.length) subsTop[key] = JSON.stringify(list);\n  else delete subsTop[key];' },
+      { find: 'itemMap: itemMap, pulls: pulls,', replace: 'itemMap: itemMap, pulls: pulls, subs: subsTop,' },
+      { find: '  migrateLilacSplit();\n', replace: '  migrateLilacSplit();\n  subsTop = Object.assign({}, p.subs || {});\n' },
+    ],
+    caughtBy: 'old Wolf install does not wipe',
+  },
+  {
+    name: 'pre-fill a substitute nobody chose',
+    find: '  if(!raw) return [];',
+    replace: '  if(!raw) return jobKey === "ntmb" ? [{sp: "Vanhoutte Spirea", qty: null, note: ""}] : [];',
+    caughtBy: 'nothing is pre-filled',
+  },
+  {
+    name: 'start a new option line at quantity 0',
+    find: '      list.push({sp: "", qty: null, note: ""});',
+    replace: '      list.push({sp: "", qty: 0, note: ""});',
+    caughtBy: 'new option line is blank',
+  },
+  {
+    name: 'save a cleared quantity as 0 instead of undecided',
+    find: 'update(i, {qty: v === "" || isNaN(n) ? null : Math.max(0, n)});',
+    replace: 'update(i, {qty: v === "" || isNaN(n) ? 0 : Math.max(0, n)});',
+    caughtBy: 'blank quantity stays blank',
+  },
+  {
+    name: 'offer a species as a substitute for itself',
+    find: '        if(s !== skip && !seen[s]) seen[s] = decode(r[0]);',
+    replace: '        if(!seen[s]) seen[s] = decode(r[0]);',
+    caughtBy: 'except the row itself',
+  },
+  {
+    name: 'ignore what is typed into the Other box',
+    find: 'otherBox.addEventListener("input", function(){ update(i, {sp: otherBox.value.trim()}); });',
+    replace: 'otherBox.addEventListener("input", function(){});',
+    caughtBy: '"Other" takes',
+  },
+  {
+    name: 'leave an empty [] behind when the last option is removed',
+    find: '  else delete notes[key];',
+    replace: '  else notes[key] = "[]";',
+    caughtBy: 'clears the entry',
+  },
+  {
+    name: 'let a sub quantity count as received',
+    find: '  if(list.length) notes[key] = JSON.stringify(list);',
+    replace: '  if(list.length){ notes[key] = JSON.stringify(list); var sk = key.slice(SUBS_PREFIX.length); state[sk] = (state[sk] || 0) + (list[0].qty || 0); }',
+    caughtBy: 'never move a count',
+  },
+  {
+    name: 'blank the one-line summary on the collapsed row',
+    find: '    summary.textContent = named.length ? "sub: " + named.map(subLabel).join("; ") : "";',
+    replace: '    summary.textContent = "";',
+    caughtBy: 'comes back after a reload',
+  },
+  {
+    name: 'let a sync repaint steal the field being typed in',
+    find: '  if(refocus){\n    var back',
+    replace: '  if(false){\n    var back',
+    caughtBy: 'sync repaint keeps',
+  },
+  {
+    name: 'close every open sub panel on a sync repaint',
+    find: 'ae.selectionEnd} : null;\n  container.innerHTML = "";',
+    replace: 'ae.selectionEnd} : null;\n  subsOpen = {};\n  container.innerHTML = "";',
+    caughtBy: 'sync repaint keeps',
+  },
+  {
+    name: 'leave the sub options out of the status report',
+    find: '          if(!o.sp) return;',
+    replace: '          return;',
+    caughtBy: 'status report lists',
+  },
 ];
 
 // Normalised to LF. Git checks this repo out with CRLF on Windows, so any

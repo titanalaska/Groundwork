@@ -315,6 +315,32 @@
   }
   .pull-btn:active{background:var(--line);}
   .pull-note{font-size:12px;opacity:.75;margin-top:2px;}
+  /* Substitution options. The button sits with Pull; the panel takes a full
+     line under the row so the three inputs keep a glove-sized height. */
+  .subs-btn{
+    background:none;border:1px solid var(--line);color:var(--fg);
+    border-radius:8px;padding:4px 10px;font-size:13px;margin-left:4px;cursor:pointer;
+  }
+  .subs-btn.has{border-color:var(--over);font-weight:600;}
+  /* ".counter button" is the 34px square for - and +. It out-ranks the two
+     classes above, so Pull and Subs were squeezed into 34px with their words
+     spilling out of the box. Size them to their label, same height. */
+  .counter .pull-btn,.counter .subs-btn{width:auto;height:34px;padding:0 10px;font-size:13px;}
+  .subs-summary{font-size:12px;margin-top:2px;color:var(--over);}
+  .subs-panel{flex:1 1 100%;border-top:1px dashed var(--line);padding-top:8px;}
+  .subs-panel .subs-head{font-size:12px;opacity:.75;margin-bottom:6px;}
+  .sub-line{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;align-items:center;}
+  .sub-line select,.sub-line input{
+    padding:8px;border-radius:8px;border:1px solid var(--line);
+    background:var(--bg);color:var(--fg);font-size:16px;min-height:40px;
+  }
+  .sub-line select,.sub-line .sub-other{flex:1 1 180px;min-width:0;}
+  .sub-line .sub-qty{width:80px;flex:0 0 80px;}
+  .sub-line .sub-note{flex:1 1 100%;min-width:0;}
+  .sub-remove,.subs-add{
+    background:none;border:1px solid var(--line);color:var(--fg);
+    border-radius:8px;padding:8px 12px;font-size:14px;cursor:pointer;min-height:40px;
+  }
   .counter{
     display:flex;
     align-items:center;
@@ -1802,6 +1828,222 @@ function codeForName(name){
   return NAME_CODE[slug(name)] || null;
 }
 
+// Substitution options, per species per job -- what could stand in for a row.
+//
+// Stored INSIDE `notes`, as a JSON string under "subs-<job>:<slug>", and not as
+// a new top-level field on purpose. The old Wolf app is still installed on
+// phones, writes the whole shared document with .set() on every tap, and knows
+// nothing about subs -- a top-level `subs` would be wiped the first time
+// somebody on an old install counted a shrub. It copies `notes` through whole,
+// so subs survive it. tests/subs.spec.js holds that line.
+//
+// A RECORD, not arithmetic: nothing here touches state, a shortfall or the
+// sort. When a sub is decided it becomes its own row, the way the lilac split
+// did, so the counts stay traceable to the drawing.
+//
+// Everything ships blank. qty is null until somebody types one -- an
+// undecided quantity is not zero.
+var SUBS_PREFIX = "subs-";
+var SUB_OTHER = "__other";
+var subsOpen = {};   // which rows have the panel open; survives a sync repaint
+
+function subsKey(jobKey, name){ return SUBS_PREFIX + jobKey + ":" + slug(name); }
+
+function readSubs(jobKey, name){
+  var raw = notes[subsKey(jobKey, name)];
+  if(!raw) return [];
+  var list;
+  try{ list = JSON.parse(raw); }catch(e){ return []; }
+  if(!Array.isArray(list)) return [];
+  return list.filter(function(o){ return o && typeof o === "object"; }).map(function(o){
+    var q = (typeof o.qty === "number" && isFinite(o.qty)) ? o.qty : null;
+    return {sp: typeof o.sp === "string" ? o.sp : "", qty: q,
+            note: typeof o.note === "string" ? o.note : ""};
+  });
+}
+
+function writeSubs(jobKey, name, list){
+  var key = subsKey(jobKey, name);
+  if(list.length) notes[key] = JSON.stringify(list);
+  else delete notes[key];
+  scheduleSave();
+}
+
+// Every species on every job, decoded, one per slug, alphabetical -- minus the
+// row being substituted.
+function subPickList(exceptName){
+  var seen = {}, skip = slug(exceptName);
+  Object.keys(JOBS).forEach(function(jk){
+    Object.keys(JOBS[jk].groups).forEach(function(g){
+      JOBS[jk].groups[g].items.forEach(function(r){
+        var s = slug(r[0]);
+        if(s !== skip && !seen[s]) seen[s] = decode(r[0]);
+      });
+    });
+  });
+  return Object.keys(seen).map(function(s){ return seen[s]; })
+    .sort(function(a, b){ return a.localeCompare(b); });
+}
+
+function subLabel(o){
+  return (o.sp || "(species not picked)") + (o.qty !== null ? " × " + o.qty : "");
+}
+
+// Builds the Subs button, the one-line summary and (if open) the panel for a
+// row. The summary and button are refreshed in place while typing, never by a
+// re-render, so the field being typed into is never destroyed under a thumb.
+function attachSubs(wrap, info, counter, jobKey, name){
+  var k = jobKey + ":" + slug(name);
+  var picks = subPickList(name);
+
+  var summary = document.createElement("div");
+  summary.className = "subs-summary";
+  info.appendChild(summary);
+
+  var btn = document.createElement("button");
+  btn.className = "subs-btn";
+  btn.setAttribute("aria-label", "substitution options for " + decode(name));
+  counter.appendChild(btn);
+
+  var panel = null;
+
+  function refresh(){
+    var list = readSubs(jobKey, name);
+    btn.textContent = list.length ? "Subs " + list.length : "Subs";
+    btn.classList.toggle("has", list.length > 0);
+    var named = list.filter(function(o){ return o.sp; });
+    summary.textContent = named.length ? "sub: " + named.map(subLabel).join("; ") : "";
+    summary.style.display = named.length ? "" : "none";
+  }
+
+  function update(i, patch){
+    var list = readSubs(jobKey, name);
+    if(!list[i]) return;
+    Object.keys(patch).forEach(function(f){ list[i][f] = patch[f]; });
+    writeSubs(jobKey, name, list);
+    refresh();
+  }
+
+  function buildLine(o, i){
+    var line = document.createElement("div");
+    line.className = "sub-line";
+    var tag = k + "|" + i + "|";
+
+    var sel = document.createElement("select");
+    sel.setAttribute("aria-label", "substitute species");
+    sel.dataset.focus = tag + "sp";
+    var blank = document.createElement("option");
+    blank.value = ""; blank.textContent = "— pick species —";
+    sel.appendChild(blank);
+    picks.forEach(function(p){
+      var opt = document.createElement("option");
+      opt.value = p; opt.textContent = p;
+      sel.appendChild(opt);
+    });
+    var other = document.createElement("option");
+    other.value = SUB_OTHER; other.textContent = "Other…";
+    sel.appendChild(other);
+    // A typed-in species is not in the list, so it shows as Other with its box.
+    var isOther = o.sp !== "" && picks.indexOf(o.sp) < 0;
+    sel.value = isOther ? SUB_OTHER : o.sp;
+    line.appendChild(sel);
+
+    var otherBox = document.createElement("input");
+    otherBox.type = "text";
+    otherBox.className = "sub-other";
+    otherBox.placeholder = "species name";
+    otherBox.dataset.focus = tag + "other";
+    otherBox.value = isOther ? o.sp : "";
+    otherBox.style.display = isOther ? "" : "none";
+    line.appendChild(otherBox);
+
+    sel.addEventListener("change", function(){
+      if(sel.value === SUB_OTHER){
+        otherBox.style.display = "";
+        otherBox.focus();
+        update(i, {sp: otherBox.value.trim()});
+      }else{
+        otherBox.style.display = "none";
+        update(i, {sp: sel.value});
+      }
+    });
+    otherBox.addEventListener("input", function(){ update(i, {sp: otherBox.value.trim()}); });
+
+    var qty = document.createElement("input");
+    qty.type = "number";
+    qty.inputMode = "numeric";
+    qty.min = "0";
+    qty.className = "sub-qty";
+    qty.placeholder = "qty";
+    qty.dataset.focus = tag + "qty";
+    qty.value = o.qty !== null ? o.qty : "";
+    qty.addEventListener("input", function(){
+      var v = qty.value.trim();
+      var n = parseInt(v, 10);
+      update(i, {qty: v === "" || isNaN(n) ? null : Math.max(0, n)});
+    });
+    line.appendChild(qty);
+
+    var rm = document.createElement("button");
+    rm.className = "sub-remove";
+    rm.textContent = "✕";
+    rm.setAttribute("aria-label", "remove this option");
+    rm.addEventListener("click", function(){
+      var list = readSubs(jobKey, name);
+      list.splice(i, 1);
+      writeSubs(jobKey, name, list);
+      refresh();
+      buildPanel();
+    });
+    line.appendChild(rm);
+
+    var note = document.createElement("input");
+    note.type = "text";
+    note.className = "sub-note";
+    note.placeholder = "note — size, who approved, where it is";
+    note.dataset.focus = tag + "note";
+    note.value = o.note;
+    note.addEventListener("input", function(){ update(i, {note: note.value}); });
+    line.appendChild(note);
+
+    return line;
+  }
+
+  function buildPanel(){
+    if(panel) panel.remove();
+    panel = null;
+    if(!subsOpen[k]) return;
+    panel = document.createElement("div");
+    panel.className = "subs-panel";
+    var head = document.createElement("div");
+    head.className = "subs-head";
+    head.textContent = "Options to stand in for " + decode(name) +
+      ". A record only — counts do not change.";
+    panel.appendChild(head);
+    readSubs(jobKey, name).forEach(function(o, i){ panel.appendChild(buildLine(o, i)); });
+    var add = document.createElement("button");
+    add.className = "subs-add";
+    add.textContent = "+ Add option";
+    add.addEventListener("click", function(){
+      var list = readSubs(jobKey, name);
+      list.push({sp: "", qty: null, note: ""});
+      writeSubs(jobKey, name, list);
+      refresh();
+      buildPanel();
+    });
+    panel.appendChild(add);
+    wrap.appendChild(panel);
+  }
+
+  btn.addEventListener("click", function(){
+    if(subsOpen[k]) delete subsOpen[k]; else subsOpen[k] = true;
+    buildPanel();
+  });
+
+  refresh();
+  buildPanel();
+}
+
 function renderItem(jobKey, name, target, isAlt){
   var k = jobKey + ":" + slug(name);
   var received = state[k] || 0;
@@ -1909,11 +2151,18 @@ function renderItem(jobKey, name, target, isAlt){
   wrap.appendChild(info);
   wrap.appendChild(flag);
   wrap.appendChild(counter);
+  attachSubs(wrap, info, counter, jobKey, name);
   return wrap;
 }
 
 function renderGroups(){
   var container = document.getElementById("groups");
+  // A sync from another phone lands here and rebuilds every row. If somebody
+  // is mid-way through typing a sub note, put them back in the same field with
+  // the caret where it was -- otherwise the snapshot steals the keyboard.
+  var ae = document.activeElement;
+  var refocus = (ae && container.contains(ae) && ae.dataset && ae.dataset.focus)
+    ? {tag: ae.dataset.focus, start: ae.selectionStart, end: ae.selectionEnd} : null;
   container.innerHTML = "";
   var job = JOBS[currentJob];
   Object.keys(job.groups).forEach(function(gk){
@@ -1950,6 +2199,13 @@ function renderGroups(){
     });
     container.appendChild(section);
   });
+  if(refocus){
+    var back = container.querySelector('[data-focus="' + refocus.tag.replace(/"/g, '\\"') + '"]');
+    if(back){
+      back.focus();
+      try{ back.setSelectionRange(refocus.start, refocus.end); }catch(e){ /* number/select have no caret */ }
+    }
+  }
 }
 
 // Bed crops and the site map are ordinary files next to the page. The published
@@ -3330,6 +3586,12 @@ function generateReport(){
         else status = "open";
         lines.push("- " + decode(name) + ": " + received + "/" + target +
           (isAlt ? " (alt)" : "") + " -- " + status);
+        readSubs(jobKey, name).forEach(function(o){
+          if(!o.sp) return;
+          lines.push("    sub option: " + o.sp +
+            (o.qty !== null ? " x " + o.qty : " (qty open)") +
+            (o.note ? " -- " + o.note : ""));
+        });
       });
     });
     if(job.flags && job.flags.length){
