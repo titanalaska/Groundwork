@@ -22,10 +22,70 @@ var VENDORS = {
  },
  "species": {
   "abbottswood-potentilla": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": null,
+    "bron": [
+     {
+      "as": "Abbotswood Potentilla",
+      "forms": [
+       [
+        "#1",
+        8.17
+       ],
+       [
+        "#2",
+        14.24
+       ],
+       [
+        "#5",
+        23.79
+       ]
+      ]
+     }
+    ],
+    "mckay": null,
+    "stewart": [
+     {
+      "as": "Abbotswood Potentilla",
+      "forms": [
+       [
+        "1QT",
+        null
+       ]
+      ]
+     }
+    ]
+   }
   },
   "alaska-flag-iris": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": [
+     {
+      "as": "Iris\u2026Alaskan",
+      "forms": [
+       [
+        "#1",
+        8
+       ]
+      ]
+     }
+    ],
+    "bron": [
+     {
+      "as": "Arctic Iris",
+      "forms": [
+       [
+        "#1",
+        7.83
+       ]
+      ]
+     }
+    ],
+    "mckay": null,
+    "stewart": null
+   }
   },
   "alpine-currant": {
    "mapped": true,
@@ -75,7 +135,56 @@ var VENDORS = {
    }
   },
   "amur-maple": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": [
+     {
+      "as": "Amur maple",
+      "forms": [
+       [
+        "#5",
+        48
+       ]
+      ]
+     }
+    ],
+    "bron": [
+     {
+      "as": "Amur Maple",
+      "forms": [
+       [
+        "#1 Shrub",
+        7.88
+       ],
+       [
+        "#2 Shrub",
+        14.53
+       ],
+       [
+        "#5 Shrub",
+        22.98
+       ],
+       [
+        "#10 Shrub",
+        45.53
+       ],
+       [
+        "#5 Tree",
+        45.2
+       ],
+       [
+        "#10 Tree",
+        83.61
+       ],
+       [
+        "#15 Tree",
+        115.56
+       ]
+      ]
+     }
+    ],
+    "mckay": null
+   }
   },
   "birchleaf-spirea": {
    "mapped": true,
@@ -138,7 +247,23 @@ var VENDORS = {
    }
   },
   "bishop-s-weed-goutweed": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": null,
+    "bron": [
+     {
+      "as": "Variegated Goutweed",
+      "forms": [
+       [
+        "#1",
+        7.83
+       ]
+      ]
+     }
+    ],
+    "mckay": null,
+    "stewart": null
+   }
   },
   "colorado-green-spruce": {
    "mapped": true,
@@ -341,13 +466,59 @@ var VENDORS = {
    }
   },
   "goatsbeard": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": null,
+    "bron": [
+     {
+      "as": "Goat's Beard",
+      "forms": [
+       [
+        "#1",
+        7.83
+       ]
+      ]
+     }
+    ],
+    "mckay": null,
+    "stewart": null
+   }
   },
   "gold-crinkled-hair-grass": {
    "mapped": false
   },
   "gold-crinkled-hair-grass-sub": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": null,
+    "bron": [
+     {
+      "as": "Tufted Hair Grass",
+      "forms": [
+       [
+        "#1",
+        7.83
+       ],
+       [
+        "#2",
+        14.1
+       ]
+      ]
+     }
+    ],
+    "mckay": [
+     {
+      "as": "Tufted Hair Grass",
+      "forms": [
+       [
+        "#1 Container",
+        9
+       ]
+      ]
+     }
+    ],
+    "stewart": null
+   }
   },
   "gold-drop-potentilla": {
    "mapped": true,
@@ -377,19 +548,243 @@ var VENDORS = {
    }
   },
   "goldfinger-potentilla": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": [
+     {
+      "as": "Gold\ufb01nger",
+      "forms": [
+       [
+        "#5",
+        52
+       ]
+      ]
+     }
+    ],
+    "bron": [
+     {
+      "as": "Goldfinger Potentilla",
+      "forms": [
+       [
+        "#1",
+        8.17
+       ],
+       [
+        "#2",
+        14.24
+       ],
+       [
+        "#5",
+        23.79
+       ]
+      ]
+     }
+    ],
+    "mckay": [
+     {
+      "as": "Goldfinger (Cinquefoil) Potentilla",
+      "forms": [
+       [
+        "#3 Container",
+        17.5
+       ]
+      ]
+     }
+    ],
+    "stewart": null
+   }
   },
   "goldflame-spirea": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": [
+     {
+      "as": "Goldflame",
+      "forms": [
+       [
+        "#5",
+        48
+       ]
+      ]
+     }
+    ],
+    "bron": [
+     {
+      "as": "Goldflame Spirea",
+      "forms": [
+       [
+        "#1",
+        7.88
+       ],
+       [
+        "#2",
+        14.53
+       ],
+       [
+        "#5",
+        22.98
+       ]
+      ]
+     }
+    ],
+    "mckay": [
+     {
+      "as": "Goldflame Spirea",
+      "forms": [
+       [
+        "#3 Container",
+        17.75
+       ]
+      ]
+     }
+    ],
+    "stewart": null
+   }
   },
   "goldmound-spirea": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": [
+     {
+      "as": "Goldmound",
+      "forms": [
+       [
+        "#5",
+        46
+       ]
+      ]
+     }
+    ],
+    "bron": [
+     {
+      "as": "Gold Mound Spirea",
+      "forms": [
+       [
+        "#1",
+        7.88
+       ],
+       [
+        "#2",
+        14.53
+       ],
+       [
+        "#5",
+        22.98
+       ]
+      ]
+     }
+    ],
+    "mckay": [
+     {
+      "as": "Goldmound Spirea",
+      "forms": [
+       [
+        "#3 Container",
+        17.75
+       ]
+      ]
+     }
+    ],
+    "stewart": null
+   }
   },
   "hardy-purple-common-lilac": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": null,
+    "bron": [
+     {
+      "as": "Common Lilac",
+      "forms": [
+       [
+        "#1",
+        7.88
+       ],
+       [
+        "#2",
+        14.53
+       ],
+       [
+        "#5",
+        22.98
+       ]
+      ]
+     }
+    ],
+    "mckay": [
+     {
+      "as": "Common Purple Old Fashioned Lilac",
+      "forms": [
+       [
+        "3' Balled & Burlap",
+        25.75
+       ],
+       [
+        "4' Balled & Burlap",
+        32.5
+       ],
+       [
+        "#3 Container",
+        22.5
+       ],
+       [
+        "#5 Container",
+        26.25
+       ]
+      ]
+     }
+    ],
+    "stewart": null
+   }
   },
   "hardy-purple-common-lilac-2-sub": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": null,
+    "bron": [
+     {
+      "as": "Common Lilac",
+      "forms": [
+       [
+        "#1",
+        7.88
+       ],
+       [
+        "#2",
+        14.53
+       ],
+       [
+        "#5",
+        22.98
+       ]
+      ]
+     }
+    ],
+    "mckay": [
+     {
+      "as": "Common Purple Old Fashioned Lilac",
+      "forms": [
+       [
+        "3' Balled & Burlap",
+        25.75
+       ],
+       [
+        "4' Balled & Burlap",
+        32.5
+       ],
+       [
+        "#3 Container",
+        22.5
+       ],
+       [
+        "#5 Container",
+        26.25
+       ]
+      ]
+     }
+    ],
+    "stewart": null
+   }
   },
   "hedge-cotoneaster": {
    "mapped": true,
@@ -478,10 +873,88 @@ var VENDORS = {
    }
   },
   "hosta-patriot": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": null,
+    "bron": [
+     {
+      "as": "Patriot Hosta",
+      "forms": [
+       [
+        "#1",
+        8.17
+       ],
+       [
+        "#2",
+        14.24
+       ]
+      ]
+     }
+    ],
+    "mckay": [
+     {
+      "as": "Patriot Hosta Plantain Lily",
+      "forms": [
+       [
+        "#1 Container",
+        8.25
+       ]
+      ]
+     }
+    ],
+    "stewart": null
+   }
   },
   "ivory-halo-dogwood": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": [
+     {
+      "as": "Ivory halo",
+      "forms": [
+       [
+        "#5",
+        58
+       ]
+      ]
+     }
+    ],
+    "bron": [
+     {
+      "as": "Ivory Halo\u00ae Dogwood",
+      "forms": [
+       [
+        "#1",
+        7.88
+       ],
+       [
+        "#2",
+        14.53
+       ],
+       [
+        "#5",
+        22.98
+       ],
+       [
+        "#10",
+        45.53
+       ]
+      ]
+     }
+    ],
+    "mckay": [
+     {
+      "as": "Ivory Halo\u00ae Variegated Dogwood",
+      "forms": [
+       [
+        "#3 Container",
+        23.75
+       ]
+      ]
+     }
+    ],
+    "stewart": null
+   }
   },
   "karl-foerster-reed-grass": {
    "mapped": true,
@@ -554,7 +1027,27 @@ var VENDORS = {
    }
   },
   "late-lilac": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": null,
+    "bron": [
+     {
+      "as": "Villosa Late Lilac",
+      "forms": [
+       [
+        "#1",
+        7.88
+       ],
+       [
+        "#2",
+        14.53
+       ]
+      ]
+     }
+    ],
+    "mckay": null,
+    "stewart": null
+   }
   },
   "lodgepole-pine": {
    "mapped": true,
@@ -846,7 +1339,47 @@ var VENDORS = {
    }
   },
   "parkland-pillar-birch": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": null,
+    "bron": [
+     {
+      "as": "Parkland Pillar\u2122 Birch",
+      "forms": [
+       [
+        "#5 Low Branch FE",
+        49.76
+       ],
+       [
+        "#10 Low Branch",
+        83.94
+       ]
+      ]
+     }
+    ],
+    "mckay": [
+     {
+      "as": "Birch Parkland Pillar Aian Columnar Single FE\u00ae",
+      "forms": [
+       [
+        "#15 Container",
+        112.5
+       ]
+      ]
+     }
+    ],
+    "stewart": [
+     {
+      "as": "Parkland Pillar Birch",
+      "forms": [
+       [
+        "#10",
+        null
+       ]
+      ]
+     }
+    ]
+   }
   },
   "pink-beauty-potentilla": {
    "mapped": true,
@@ -886,7 +1419,33 @@ var VENDORS = {
    }
   },
   "prairiefire-crabapple": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": [
+     {
+      "as": "Prairie \ufb01re crabapple",
+      "forms": [
+       [
+        "#20",
+        225
+       ]
+      ]
+     }
+    ],
+    "bron": null,
+    "mckay": [
+     {
+      "as": "Prairifire Flowering Crab",
+      "forms": [
+       [
+        "#15 Container",
+        110
+       ]
+      ]
+     }
+    ],
+    "stewart": null
+   }
   },
   "quaking-aspen": {
    "mapped": true,
@@ -1020,7 +1579,95 @@ var VENDORS = {
    }
   },
   "red-twig-dogwood": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": [
+     {
+      "as": "Bailey red twig Dogwood",
+      "forms": [
+       [
+        "#5",
+        48
+       ]
+      ]
+     }
+    ],
+    "bron": [
+     {
+      "as": "Red Osier Dogwood",
+      "forms": [
+       [
+        "#1",
+        7.88
+       ],
+       [
+        "#2",
+        14.53
+       ],
+       [
+        "#5",
+        22.98
+       ],
+       [
+        "#10",
+        45.53
+       ]
+      ]
+     },
+     {
+      "as": "Bailey Red Twig Dogwood",
+      "forms": [
+       [
+        "#1",
+        7.88
+       ],
+       [
+        "#2",
+        14.53
+       ],
+       [
+        "#5",
+        22.98
+       ]
+      ]
+     }
+    ],
+    "mckay": [
+     {
+      "as": "Bailey Red-Twig Dogwood",
+      "forms": [
+       [
+        "#3 Container",
+        18
+       ],
+       [
+        "#5 Container",
+        22
+       ]
+      ]
+     }
+    ],
+    "stewart": [
+     {
+      "as": "Red Osier Dogwood",
+      "forms": [
+       [
+        "#5",
+        null
+       ]
+      ]
+     },
+     {
+      "as": "Bailey Redtwig Dogwood",
+      "forms": [
+       [
+        "#5",
+        null
+       ]
+      ]
+     }
+    ]
+   }
   },
   "rugosa-rose": {
    "mapped": true,
@@ -1070,13 +1717,38 @@ var VENDORS = {
    }
   },
   "savin-juniper": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": null,
+    "bron": [
+     {
+      "as": "Savin Juniper",
+      "forms": [
+       [
+        "#2",
+        17.09
+       ],
+       [
+        "#5",
+        25.97
+       ]
+      ]
+     }
+    ],
+    "stewart": null
+   }
   },
   "scotch-pine": {
    "mapped": false
   },
   "siberian-crabapple": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": null,
+    "bron": null,
+    "mckay": null,
+    "stewart": null
+   }
   },
   "subalpine-fir-arizonica": {
    "mapped": true,
@@ -1088,7 +1760,23 @@ var VENDORS = {
    }
   },
   "sweet-woodruff": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": null,
+    "bron": [
+     {
+      "as": "Sweet Woodruff",
+      "forms": [
+       [
+        "#1",
+        8.17
+       ]
+      ]
+     }
+    ],
+    "mckay": null,
+    "stewart": null
+   }
   },
   "vanhoutte-spirea": {
    "mapped": true,
@@ -1128,7 +1816,94 @@ var VENDORS = {
    }
   },
   "white-spruce": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": [
+     {
+      "as": "Alaska White spruce, Black hills spruce. Ak. grown",
+      "forms": [
+       [
+        "5'-6'",
+        165
+       ],
+       [
+        "6'-7'",
+        195
+       ],
+       [
+        "7'-8'",
+        225
+       ]
+      ]
+     },
+     {
+      "as": "Alaskan white spruce \ufb01eld grade",
+      "forms": [
+       [
+        "per ft.",
+        20
+       ]
+      ]
+     }
+    ],
+    "bron": [
+     {
+      "as": "White Spruce",
+      "forms": [
+       [
+        "#1",
+        7.88
+       ],
+       [
+        "#2",
+        15.81
+       ],
+       [
+        "#5",
+        26.11
+       ],
+       [
+        "#10",
+        81.37
+       ],
+       [
+        "#15",
+        104.21
+       ]
+      ]
+     }
+    ],
+    "mckay": [
+     {
+      "as": "Black Hills White Spruce",
+      "forms": [
+       [
+        "#3 Container",
+        27
+       ],
+       [
+        "#5 Container",
+        40
+       ],
+       [
+        "5' Balled & Burlap",
+        169.25
+       ]
+      ]
+     }
+    ],
+    "stewart": [
+     {
+      "as": "White Spruce",
+      "forms": [
+       [
+        "#25 6-7''",
+        null
+       ]
+      ]
+     }
+    ]
+   }
   },
   "yellow-potentilla": {
    "mapped": false
