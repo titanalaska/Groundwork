@@ -105,6 +105,10 @@ const EXTRA = [
   './icon-maskable-512.png',
   './apple-touch-icon.png',
   './live.js',
+  // Who carries each species. Optional on purpose: without them the Subs
+  // panel says the vendor lists are not loaded and nothing else changes.
+  './vendors.js',
+  './vendors-view.js',
   './status.html',
   './shortage.html',
 ];
