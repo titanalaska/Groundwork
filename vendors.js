@@ -468,7 +468,14 @@ var VENDORS = {
    "mapped": false
   },
   "false-spirea": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": null,
+    "bron": null,
+    "mckay": null,
+    "bailey": null,
+    "stewart": null
+   }
   },
   "feather-reed-grass": {
    "mapped": false
@@ -532,7 +539,14 @@ var VENDORS = {
    }
   },
   "gold-crinkled-hair-grass": {
-   "mapped": false
+   "mapped": true,
+   "offers": {
+    "seedntree": null,
+    "bron": null,
+    "mckay": null,
+    "bailey": null,
+    "stewart": null
+   }
   },
   "gold-crinkled-hair-grass-sub": {
    "mapped": true,
