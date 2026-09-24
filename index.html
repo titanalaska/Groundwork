@@ -1037,7 +1037,7 @@
     <a class="share-link" href="./status.html">Status page</a>
     <a class="share-link" href="./shortage.html">Shortage notice</a>
   </div>
-  <p class="share-hint">These two are safe to send. Do <b>not</b> send this
+  <p class="share-hint" data-es-html="Estas dos se pueden mandar. <b>No</b> mandes esta lista &mdash; se guarda solo en este tel&eacute;fono, as&iacute; que abrir&iacute;an una hoja en blanco con todos los conteos en cero.">These two are safe to send. Do <b>not</b> send this
     checklist &mdash; it saves to this phone only, so they would open a blank
     sheet with every count at zero.</p>
 </div>
@@ -1100,7 +1100,7 @@
   </div>
   <div class="log-prompts">
     <h4>Restore from a backup file</h4>
-    <p class="bk-warn">This <b>replaces</b> everything on this phone with what is
+    <p class="bk-warn" data-es-html="Esto <b>reemplaza</b> todo lo que hay en este tel&eacute;fono con lo que trae el archivo. Primero puedes leer qu&eacute; trae, y despu&eacute;s hay un deshacer.">This <b>replaces</b> everything on this phone with what is
       in the file. You get to read what the file holds first, and an undo
       afterwards.</p>
     <input type="file" id="restoreFile" accept="application/json,.json" class="bk-file">
@@ -1622,7 +1622,7 @@ function scheduleSave(){
     dbDoc.set(p).then(function(){
       lastSavedAt = Date.parse(p.updatedAt);
       setOffline(false);
-      var t = new Date().toLocaleTimeString([], {hour:"numeric", minute:"2-digit"});
+      var t = new Date().toLocaleTimeString(uiLocale() || [], {hour:"numeric", minute:"2-digit"});
       setSaveNote("Saved " + t + " — safe to close.");
     }).catch(function(err){
       setOffline(true);
@@ -1726,21 +1726,35 @@ var MATERIAL_AT = {
           "Suites storage area. That is correct &mdash; WSRCC is an Anchorage " +
           "job. Nothing to chase.<br><br>The 65 Birchleaf Spirea were staged " +
           "at Home2 Suites by mistake and moved to the Anchorage nursery on " +
-          "9/14. They were always WSRCC's."
+          "9/14. They were always WSRCC's.",
+    bodyEs: "Las plantas est\u00e1n en el <b>vivero de Anchorage</b>, no en el " +
+          "almac\u00e9n de Home2 Suites. Eso est\u00e1 bien &mdash; WSRCC es un trabajo " +
+          "de Anchorage. No hay nada que buscar.<br><br>Las 65 espireas de hoja de " +
+          "abedul se dejaron en Home2 Suites por error y se movieron al vivero de " +
+          "Anchorage el 9/14. Siempre fueron de WSRCC."
   },
   baxter: {
     head: "Where this material is coming from",
     body: "Everything on hand is still <b>held at the Home2 Suites storage " +
           "area</b>, until further notice. It has not moved to the Baxter " +
           "site.<br><br>Outstanding here is Paper Birch, Prairiefire Crabapple " +
-          "and White Spruce &mdash; not bought, so nothing to move."
+          "and White Spruce &mdash; not bought, so nothing to move.",
+    bodyEs: "Todo lo que hay sigue <b>guardado en el almac\u00e9n de Home2 " +
+          "Suites</b> hasta nuevo aviso. No se ha movido al sitio de Baxter." +
+          "<br><br>Aqu\u00ed falta el abedul papir\u00edfera, el manzano silvestre " +
+          "'Prairiefire' y la picea blanca &mdash; no se han comprado, as\u00ed que " +
+          "no hay nada que mover."
   },
   charter: {
     head: "Where this material is coming from",
     body: "Everything on hand has already been <b>moved to the Charter site</b>. " +
           "Do not look for it at the Home2 Suites storage area.<br><br>The Paper " +
           "Birch and Parkland Pillar Birch are still outstanding &mdash; those " +
-          "have not been bought, so there is nothing to move."
+          "have not been bought, so there is nothing to move.",
+    bodyEs: "Todo lo que hay ya se <b>movi\u00f3 al sitio de Charter</b>. No lo " +
+          "busques en el almac\u00e9n de Home2 Suites.<br><br>El abedul papir\u00edfera " +
+          "y el abedul 'Parkland Pillar' siguen pendientes &mdash; no se han " +
+          "comprado, as\u00ed que no hay nada que mover."
   }
 };
 
@@ -1750,7 +1764,7 @@ function renderSourceNote(slot){
   var box = document.createElement("div");
   box.className = "src-box";
   box.innerHTML = '<div class="src-head">' + m.head + "</div>" +
-    '<div class="src-note">' + m.body + "</div>";
+    '<div class="src-note">' + L(m.body, m.bodyEs || m.body) + "</div>";
   var ta = document.createElement("textarea");
   ta.className = "notes";
   ta.id = "source-" + currentJob;
@@ -1775,8 +1789,13 @@ function renderFlags(){
 
   var box = document.createElement("div");
   box.className = "flags";
+  // flagsEs is used only while it has the same number of notes as flags. An
+  // English note added without its Spanish shows the English set whole,
+  // rather than a Spanish set with one note silently missing.
+  var shown = (lang === "es" && job.flagsEs && job.flagsEs.length === job.flags.length)
+    ? job.flagsEs : job.flags;
   box.innerHTML = "<h2>Open with Chris</h2>" +
-    job.flags.map(function(f){ return '<div class="flag-item">' + f + "</div>"; }).join("");
+    shown.map(function(f){ return '<div class="flag-item">' + f + "</div>"; }).join("");
 
   var notesId = "notes-" + currentJob;
   var ta = document.createElement("textarea");
@@ -2033,10 +2052,11 @@ function attachSubs(wrap, info, counter, jobKey, name){
     // missing vendors.js or vendors-view.js says so; it never blocks the subs.
     var vend = document.createElement("div");
     vend.className = "vendors";
+    vend.setAttribute("data-no-es", "");
     var vl = (typeof vendorLines === "function") ? vendorLines(slug(name), decode(name)) : null;
     (vl || ["Vendor lists not loaded."]).forEach(function(t){
       var d = document.createElement("div");
-      d.textContent = t;
+      d.textContent = vendorLineEs(t);
       vend.appendChild(d);
     });
     panel.appendChild(vend);
@@ -2786,8 +2806,11 @@ function mapLegendHTML(){
            tally[k] + " " + MAP_LABEL[k].toLowerCase() + "</span>";
   }).join("");
   return '<div class="map-legend">' + rows + "</div>" +
-    '<p class="map-legend-note">A bed that is planted but still owed material stays ' +
-    "<b>amber</b>, never green. It is a reminder to finish the job, not a score.</p>";
+    '<p class="map-legend-note">' + L("A bed that is planted but still owed material stays " +
+    "<b>amber</b>, never green. It is a reminder to finish the job, not a score.",
+    "Una cama plantada a la que todav\u00eda le falta material se queda en " +
+    "<b>\u00e1mbar</b>, nunca en verde. Es un recordatorio para terminar el trabajo, " +
+    "no una calificaci\u00f3n.") + "</p>";
 }
 
 // ---- the third bed state: finished, but short -----------------------------
@@ -2911,33 +2934,259 @@ function shortText(list){
   return list.map(function(o){ return o.qty + " " + o.name; }).join(", ");
 }
 
-// ---- Spanish for the field views ------------------------------------------
-// Most of this crew writes their daily logs in Spanish. The bed cards and the
-// layout are what they work from, so those translate; the counting side and
-// everything written for Chris stay in English, because translating those
-// helps nobody.
+// ---- Spanish ----------------------------------------------------------------
+// Most of this crew writes their daily logs in Spanish. As of 9/23 the whole
+// app translates -- Matt's call: "full Spanish on everything". What stays
+// English is what is written FOR Chris and Todd: the status report, and
+// status.html / shortage.html, which never load this code.
 //
-// Applied over TEXT NODES only, never attributes, so class names, ids and
-// image paths cannot be caught by a phrase match. Longest phrases replace
-// first so a short key cannot eat part of a longer one. Anything missing from
-// the table simply stays in English -- a gap degrades, it never blanks.
+// Three mechanisms, each for the kind of text it suits:
 //
-// Species names are deliberately absent: they are cultivar names printed on
-// the plan ('Miss Kim', 'Karl Foerster'), and a name that is not on the sheet
-// makes matching back to the drawing harder, not easier. The symbol, the code
-// and the botanical name carry that load without a language.
+//   ES / ES_RULES  Short labels and messages. Applied over TEXT NODES and a
+//                  few attributes, never into data: species names are the
+//                  storage keys (slug(name)), so they are translated on the
+//                  way to the screen and nowhere else. A MutationObserver
+//                  re-applies it whenever the screen changes, so a message set
+//                  later by textContent is caught without touching its code.
+//   L(en, es)      Paragraphs written in this file. A phrase table would break
+//                  the first time the English was edited; this keeps the two
+//                  side by side, where an edit to one shows the other.
+//   data-es-html   The same, for paragraphs in the static markup.
+//
+// Anything missing simply stays in English -- a gap degrades, it never blanks.
+//
+// Plant names ARE translated (Matt, 9/23), with the cultivar kept in quotes
+// the way a Spanish nursery tag prints it -- "Espirea 'Goldflame'" -- so the
+// word on the pot is still in the name.
 var lang = "en";
 
+function L(en, es){ return lang === "es" ? es : en; }
+function uiLocale(){ return lang === "es" ? "es-MX" : undefined; }
+
 var ES = {
+  // --- plants, every job. Longest key wins, so a full name is never split
+  // by a shorter one hiding inside it.
+  "Columnar Swedish Aspen": "\u00c1lamo tembl\u00f3n columnar sueco",
+  "Quaking Aspen": "\u00c1lamo tembl\u00f3n",
+  "Helena Maple": "Arce 'Helena'",
+  "Amur Maple": "Arce de Amur",
+  "Paper Birch": "Abedul papir\u00edfera",
+  "Parkland Pillar Birch": "Abedul 'Parkland Pillar'",
+  "Siberian Crabapple": "Manzano silvestre siberiano",
+  "Prairiefire Crabapple": "Manzano silvestre 'Prairiefire'",
+  "White Spruce": "Picea blanca",
+  "Colorado Green Spruce": "Picea verde de Colorado",
+  "Fat Albert Colorado Blue Spruce": "Picea azul de Colorado 'Fat Albert'",
+  "Scotch Pine": "Pino silvestre",
+  "Lodgepole Pine": "Pino contorta",
+  "Subalpine Fir Arizonica": "Abeto subalpino 'Arizonica'",
+  "Birchleaf Spirea": "Espirea de hoja de abedul",
+  "Birch-Leaved Spirea": "Espirea de hoja de abedul",
+  "Goldmound Spirea": "Espirea 'Goldmound'",
+  "Goldflame Spirea": "Espirea 'Goldflame'",
+  "Vanhoutte Spirea": "Espirea 'Vanhoutte'",
+  "Froebelii Spirea": "Espirea 'Froebelii'",
+  "False Spirea": "Falsa espirea",
+  "Creeping Juniper": "Enebro rastrero",
+  "Savin Juniper": "Enebro sabino",
+  "Red-Twig Dogwood": "Cornejo de tallo rojo",
+  "Red-twig Dogwood": "Cornejo de tallo rojo",
+  "'Ivory Halo' Dogwood": "Cornejo 'Ivory Halo'",
+  "Ivory Halo Dogwood": "Cornejo 'Ivory Halo'",
+  "Miss Kim Lilac": "Lila 'Miss Kim'",
+  "'Miss Canada' Lilac": "Lila 'Miss Canada'",
+  "Miss Canada Lilac": "Lila 'Miss Canada'",
+  "Hardy Purple Common Lilac": "Lila com\u00fan morada",
+  "Late Lilac": "Lila tard\u00eda",
+  "Rugosa Rose": "Rosa rugosa",
+  "Hedge Cotoneaster": "Cotoneaster de seto",
+  "Yellow Potentilla": "Potentila amarilla",
+  "Abbottswood Potentilla": "Potentila 'Abbottswood'",
+  "Goldfinger Potentilla": "Potentila 'Goldfinger'",
+  "Pink Beauty Potentilla": "Potentila 'Pink Beauty'",
+  "Gold Drop Potentilla": "Potentila 'Gold Drop'",
+  "Dwarf American Cranberry": "Ar\u00e1ndano americano enano",
+  "Alpine Currant": "Grosellero alpino",
+  "Flowering Raspberry": "Frambueso de flor",
+  "Early Forsythia": "Forsythia temprana",
+  "Lady Fern": "Helecho hembra",
+  "Alaska Flag Iris": "Iris bandera de Alaska",
+  "Wild Iris": "Iris silvestre",
+  "Karl Foerster Feather Reed Grass": "Pasto plumoso 'Karl Foerster'",
+  "Karl Foerster Reed Grass": "Pasto plumoso 'Karl Foerster'",
+  "Overdam Variegated Reed Grass": "Pasto plumoso variegado 'Overdam'",
+  "Overdam Reed Grass": "Pasto plumoso 'Overdam'",
+  "Feather Reed Grass": "Pasto plumoso",
+  "Gold Crinkled Hair Grass": "Pasto ondulado dorado",
+  "Tufted Hair Grass": "Pasto de mech\u00f3n",
+  "Bishop's Weed": "Hierba de San Gerardo",
+  "(Goutweed)": "(podagraria)",
+  "Hosta Patriot": "Hosta 'Patriot'",
+  "Sweet Woodruff": "Asperilla olorosa",
+  "Goatsbeard": "Barba de chivo",
+  "UNSCHEDULED - confirm with Corvus": "SIN PROGRAMAR - confirmar con Corvus",
+  "(#2 sub)": "(sustituto #2)",
+  "(sub)": "(sustituto)",
+
+  // --- the species list
+  "Trees": "\u00c1rboles", "Shrubs": "Arbustos", "Grasses": "Pastos",
+  "Iris, perennials & grasses": "Iris, perennes y pastos",
+  "need ": "necesita ",
+  " (alt / optional)": " (alterna / opcional)",
+  "NONE YET \u00b7 ": "NADA A\u00daN \u00b7 ",
+  "SHORT ": "FALTAN ",
+  " SPARE": " DE SOBRA",
+  "Pull": "Retirar",
+  "Subs": "Sust.",
+  "sub: ": "sust.: ",
+  "(species not picked)": "(especie sin elegir)",
+  "\u2014 pick species \u2014": "\u2014 elige especie \u2014",
+  "Other\u2026": "Otra\u2026",
+  "Vendor lists not loaded.": "Listas de proveedores no cargadas.",
+  "+ Add option": "+ Agregar opci\u00f3n",
+  "Not mapped yet \u2014 no vendor list has been matched to this species.":
+    "Sin asignar todav\u00eda \u2014 ninguna lista de proveedor coincide con esta especie.",
+  "No vendor list has been read for this species yet.":
+    "Todav\u00eda no se ha revisado ninguna lista de proveedor para esta especie.",
+  ": not on list (": ": no est\u00e1 en la lista (",
+  "Open with Chris": "Pendiente con Chris",
+  "Where this material is coming from": "De d\u00f3nde viene este material",
+  " complete": " completos",
+
+  // --- header, buttons and panels
+  "Plant sort counts": "Conteo de plantas",
+  " active jobs": " trabajos activos",
+  "Loading your counts\u2026": "Cargando tus conteos\u2026",
+  "Export status report": "Exportar reporte de estado",
+  "Draft today\u2019s daily log": "Borrador del reporte diario",
+  "Back up / restore": "Respaldo / restaurar",
+  "Status page": "P\u00e1gina de estado",
+  "Shortage notice": "Aviso de faltantes",
+  "Status report \u2014 all 4 jobs": "Reporte de estado \u2014 todos los trabajos",
+  "\u2715 close": "\u2715 cerrar",
+  "Copy to clipboard": "Copiar",
+  "Daily log draft": "Borrador del reporte diario",
+  "Add before you post \u2014 the app cannot know these": "Agrega esto antes de publicar \u2014 la app no lo puede saber",
+  "Did any material move between jobs? What, how many, from where, to where.":
+    "\u00bfSe movi\u00f3 material entre trabajos? Qu\u00e9, cu\u00e1nto, de d\u00f3nde y a d\u00f3nde.",
+  "Did anyone direct a change? Who, and what they said.":
+    "\u00bfAlguien orden\u00f3 un cambio? Qui\u00e9n, y qu\u00e9 dijo.",
+  "What arrived today, and who delivered it?": "\u00bfQu\u00e9 lleg\u00f3 hoy y qui\u00e9n lo entreg\u00f3?",
+  "What did you flag but could not finish, and what is it waiting on?":
+    "\u00bfQu\u00e9 marcaste pero no pudiste terminar, y qu\u00e9 est\u00e1 esperando?",
+  "Posted it \u2014 start next draft from here": "Ya lo publiqu\u00e9 \u2014 el siguiente borrador empieza aqu\u00ed",
+  "Start from here": "Empezar desde aqu\u00ed",
+  "Undo": "Deshacer",
+  "Save a backup file": "Guardar un archivo de respaldo",
+  "Sync": "Sincronizaci\u00f3n",
+  "Save the key on this phone": "Guardar la clave en este tel\u00e9fono",
+  "Remove it": "Quitarla",
+  "Restore from a backup file": "Restaurar desde un archivo de respaldo",
+  "Replace what is on this phone": "Reemplazar lo que hay en este tel\u00e9fono",
+  "Undo the restore": "Deshacer la restauraci\u00f3n",
+  "Whole job": "Todo el trabajo",
+  "Pull by bed": "Retirar por cama",
+  "Fit": "Ajustar",
+  "Counts save as you tap.": "Los conteos se guardan al tocar.",
+  "Job": "Trabajo",
+  "Copied": "Copiado",
+  "Shared": "Compartido",
+  "Sent": "Enviado",
+  "Long-press the text above and Copy": "Mant\u00e9n presionado el texto de arriba y copia",
+  "Text is selected below \u2014 long-press and Copy": "El texto est\u00e1 seleccionado abajo \u2014 mant\u00e9n presionado y copia",
+  "Marked \u2014 the next draft starts from here.": "Listo \u2014 el siguiente borrador empieza desde aqu\u00ed.",
+  "Put back.": "Regresado.",
+  "Put back the way it was.": "Regresado como estaba.",
+  "Restored.": "Restaurado.",
+  "Paste the key first.": "Pega la clave primero.",
+  "Key saved. The next tap syncs.": "Clave guardada. El siguiente toque sincroniza.",
+  "Key removed. This phone reads but no longer writes.": "Clave quitada. Este tel\u00e9fono lee pero ya no escribe.",
+  "Sync is not switched on yet. Everything is on this phone, so keep saving backup files.":
+    "La sincronizaci\u00f3n todav\u00eda no est\u00e1 activada. Todo est\u00e1 en este tel\u00e9fono, as\u00ed que sigue guardando respaldos.",
+  "This phone writes to the shared record. Chris and Todd see the numbers you tap.":
+    "Este tel\u00e9fono escribe en el registro compartido. Chris y Todd ven los n\u00fameros que tocas.",
+  "Reading the shared record, but this phone cannot write to it yet. Paste the key to turn that on.":
+    "Leyendo el registro compartido, pero este tel\u00e9fono todav\u00eda no puede escribir. Pega la clave para activarlo.",
+  "On this phone right now:": "En este tel\u00e9fono ahora mismo:",
+  "Save this somewhere off the phone \u2014 mail it to yourself, drop it in Drive. It is the only copy of the field record.":
+    "Gu\u00e1rdalo fuera del tel\u00e9fono \u2014 m\u00e1ndatelo por correo o s\u00fabelo a Drive. Es la \u00fanica copia del registro de campo.",
+  "In the file": "En el archivo",
+  "On this phone": "En este tel\u00e9fono",
+  "no date in the file": "sin fecha en el archivo",
+  "That file is not a checklist backup.": "Ese archivo no es un respaldo de la lista.",
+  "It has no counts in it, so there is nothing to restore. Nothing has been changed.":
+    "No trae conteos, as\u00ed que no hay nada que restaurar. No se cambi\u00f3 nada.",
+  "The facts the app can vouch for. Edit it freely \u2014 this box is yours, nothing here is sent anywhere.":
+    "Los datos que la app puede confirmar. Ed\u00edtalo como quieras \u2014 este cuadro es tuyo, nada de aqu\u00ed se manda a ning\u00fan lado.",
+  "First time. The log is a diff, so it needs a starting point \u2014 tap below, and from tomorrow this drafts only what changed. It will not claim you did the whole job today.":
+    "Primera vez. El reporte compara contra un punto de partida \u2014 toca abajo, y desde ma\u00f1ana solo escribe lo que cambi\u00f3. No va a decir que hiciste todo el trabajo hoy.",
+
+  // --- save notes and the offline banner
+  "Saved on this device only \u2014 not synced.": "Guardado solo en este tel\u00e9fono \u2014 sin sincronizar.",
+  "NOT SAVING here. Send the status report before you close this.":
+    "NO SE EST\u00c1 GUARDANDO aqu\u00ed. Manda el reporte de estado antes de cerrar.",
+  "Saved on this device. Add the sync key under Back up / restore to share it.":
+    "Guardado en este tel\u00e9fono. Agrega la clave en Respaldo / restaurar para compartirlo.",
+  "Saved here. Another device holds newer counts \u2014 they will come down shortly.":
+    "Guardado aqu\u00ed. Otro tel\u00e9fono tiene conteos m\u00e1s nuevos \u2014 bajar\u00e1n en un momento.",
+  "Saved on this device \u2014 will sync when signal returns.":
+    "Guardado en este tel\u00e9fono \u2014 se sincroniza cuando vuelva la se\u00f1al.",
+  "Counts loaded from this device.": "Conteos cargados de este tel\u00e9fono.",
+  "Starting from the September 8 baseline.": "Empezando desde la base del 8 de septiembre.",
+  "Saves to this device only.": "Se guarda solo en este tel\u00e9fono.",
+  "Synced \u2014 showing the latest counts.": "Sincronizado \u2014 mostrando los conteos m\u00e1s recientes.",
+  "Synced \u2014 this device had the newer counts.": "Sincronizado \u2014 este tel\u00e9fono ten\u00eda los conteos m\u00e1s nuevos.",
+  "This copy saves to this device only. Counts stay in this browser - they will not follow you to another phone.":
+    "Esta copia se guarda solo en este tel\u00e9fono. Los conteos se quedan en este navegador \u2014 no te siguen a otro tel\u00e9fono.",
+  "Working offline. Counts are held on this device and will sync when you are back on signal.":
+    "Sin conexi\u00f3n. Los conteos se guardan en este tel\u00e9fono y se sincronizan cuando vuelvas a tener se\u00f1al.",
+
+  // --- placeholders and screen-reader labels
+  "Paste the write key": "Pega la clave de escritura",
+  "substitute species": "especie sustituta",
+  "species name": "nombre de la especie",
+  "qty": "cant.",
+  "remove this option": "quitar esta opci\u00f3n",
+  "note \u2014 size, who approved, where it is": "nota \u2014 tama\u00f1o, qui\u00e9n aprob\u00f3, d\u00f3nde est\u00e1",
+  "Pickup point, who to call, what has moved...": "Punto de recogida, a qui\u00e9n llamar, qu\u00e9 se ha movido\u2026",
+  "Notes \u2014 update here as Chris gets back to you...": "Notas \u2014 actualiza aqu\u00ed cuando Chris te conteste\u2026",
+  "Type to filter": "Escribe para filtrar",
+  "fewer owed": "faltan menos", "more owed": "faltan m\u00e1s",
+
+  // --- the pull sheet
+  "How many actually left the yard?": "\u00bfCu\u00e1ntas salieron del patio en realidad?",
+  "Cancel": "Cancelar",
+  "Pull from inventory": "Retirar del inventario",
+  "Enter how many left the yard.": "Escribe cu\u00e1ntas salieron del patio.",
+  "Need signal to pull. Nothing was deducted.": "Se necesita se\u00f1al para retirar. No se descont\u00f3 nada.",
+  "Pulling...": "Retirando\u2026",
+  "could not reach inventory": "no se pudo conectar con el inventario",
+  "Could not reach inventory.": "No se pudo conectar con el inventario.",
+  "Picked once. Everyone on the checklist gets this mapping.":
+    "Se elige una vez. Todos en la lista reciben esta asignaci\u00f3n.",
+  "Use this item": "Usar este art\u00edculo",
+  "Pick an item first.": "Elige un art\u00edculo primero.",
+  " on hand)": " disponibles)",
+  "Sign in to pull stock": "Inicia sesi\u00f3n para retirar material",
+  "Same PIN as the Inventory app. The Change Log records who pulled.":
+    "El mismo PIN de la app de Inventario. El registro de cambios anota qui\u00e9n retir\u00f3.",
+  "Sign in": "Iniciar sesi\u00f3n",
+  "Loading...": "Cargando\u2026",
+  "Loading inventory...": "Cargando inventario\u2026",
+  "No approved profiles found.": "No se encontraron perfiles aprobados.",
+  "Pick your name.": "Elige tu nombre.",
+  "Checking...": "Revisando\u2026",
+  "Wrong PIN": "PIN incorrecto",
+
   // --- marking-out summary
   "Mass planting": "Plantaci\u00f3n en masa",
-  "mark the bed edge": "marque la orilla de la cama",
+  "mark the bed edge": "marca la orilla de la cama",
   "\u00b7 rows ": "\u00b7 hileras a ",
   "Not a separate bed.": "No es una cama aparte.",
   "This callout covers two planters.": "Esta anotaci\u00f3n cubre dos jardineras.",
   "Same planter as bed ": "Misma jardinera que la cama ",
   "One callout stack on the sheet, 86 units together": "Una sola anotaci\u00f3n en el plano, 86 unidades juntas",
-  "walk it as one bed.": "rec\u00f3rrala como una sola cama.",
+  "walk it as one bed.": "rec\u00f3rrela como una sola cama.",
   "One is the parking lot planter \u2014 the dogwood and the tree. The other is against the building at the drive-under archway \u2014 the hair grass. They are not next to each other.":
     "Una es la jardinera del estacionamiento \u2014 el cornejo y el \u00e1rbol. La otra est\u00e1 junto al edificio en el arco de entrada \u2014 el pasto. No est\u00e1n una al lado de la otra.",
   "owe ": "faltan ",
@@ -2946,10 +3195,10 @@ var ES = {
   "spots to stake individually": "puntos para marcar uno por uno",
   "trees and shrubs, one symbol each": "\u00e1rboles y arbustos, un s\u00edmbolo cada uno",
   "grasses and perennials &mdash; mark the bed edge and the spacing, not each plant":
-    "pastos y perennes: marque la orilla de la cama y el espaciado, no cada planta",
+    "pastos y perennes: marca la orilla de la cama y el espaciado, no cada planta",
   "grasses and perennials \u2014 mark the bed edge and the spacing, not each plant":
-    "pastos y perennes: marque la orilla de la cama y el espaciado, no cada planta",
-  "Flag colours match the drawing:": "Los colores coinciden con el plano:",
+    "pastos y perennes: marca la orilla de la cama y el espaciado, no cada planta",
+  "Flag colours match the drawing:": "Los colores de las banderas coinciden con el plano:",
   "massed": "en masa",
   "trees": "\u00e1rboles", "shrubs": "arbustos",
   "grasses": "pastos", "perennials": "perennes",
@@ -2963,33 +3212,54 @@ var ES = {
   "Bed ": "Cama ",
   " to stake": " para marcar",
   " units total": " unidades en total",
+  " units": " unidades",
+  " beds \u00b7 ": " camas \u00b7 ",
   " ft away": " pies de distancia",
-  "Mark staked": "Marcar",
-  "Mark planted": "Marcar plantado",
-  "Staked": "Marcado",
-  "Planted": "Plantado",
-  "Stake each one": "Marcar cada uno",
+  " ft": " pies",
+  "Mark staked": "Marcar como marcada",
+  "Mark planted": "Marcar como plantada",
+  "Staked": "Marcada",
+  "Planted": "Plantada",
+  "Stake each one": "Marca cada uno",
   " spots": " puntos",
   "check plan": "revisar plano",
+  "Site map": "Mapa del sitio",
+  "Site map with every bed numbered": "Mapa del sitio con cada cama numerada",
+  "not started": "sin empezar",
+  "staked out": "marcadas",
+  "planted, still owed": "plantadas, a\u00fan falta",
+  "planted, complete": "plantadas, completas",
+  "Where am I?": "\u00bfD\u00f3nde estoy?",
+  "Finding you...": "Busc\u00e1ndote\u2026",
+  "This phone will not give a position.": "Este tel\u00e9fono no da su ubicaci\u00f3n.",
+  "Location is blocked. Allow it for this site in the browser.":
+    "La ubicaci\u00f3n est\u00e1 bloqueada. Perm\u00edtela para este sitio en el navegador.",
+  "Could not get a position out here.": "No se pudo obtener la ubicaci\u00f3n aqu\u00ed.",
+  "Those top two are closer together than your GPS is accurate. Check the picture on the card before you trust it.":
+    "Esas dos est\u00e1n m\u00e1s cerca entre s\u00ed que la precisi\u00f3n de tu GPS. Revisa la foto de la tarjeta antes de confiar.",
+  "Whole bed. Tap 2\u00d7 or 3\u00d7 to get in close, then drag to pan.":
+    "Toda la cama. Toca 2\u00d7 o 3\u00d7 para acercarte y arrastra para moverte.",
+  "Actual size of the drawing. 1 pixel is about 1.6 in on the ground.":
+    "Tama\u00f1o real del plano. 1 p\u00edxel es como 1.6 pulgadas en el terreno.",
 
   // --- short-bed banners
-  "Planted, short ": "Plantado, faltan ",
+  "Planted, short ": "Plantada, faltan ",
   "Still owed here: ": "Todav\u00eda falta aqu\u00ed: ",
   "Everything else in this bed is in the ground.":
     "Todo lo dem\u00e1s de esta cama ya est\u00e1 plantado.",
   "Spots are flagged": "Los puntos ya est\u00e1n marcados",
   "drop-in when material arrives.": "solo colocar cuando llegue el material.",
-  "Do not re-stake this bed.": "No volver a marcar esta cama.",
+  "Do not re-stake this bed.": "No vuelvas a marcar esta cama.",
   "Cannot finish this bed yet": "Esta cama no se puede terminar todav\u00eda",
   "None on hand: ": "No hay en sitio: ",
   "Stake the spots anyway so it is drop-in when material lands.":
-    "Marque los puntos de todos modos para solo colocar cuando llegue el material.",
+    "Marca los puntos de todos modos para que solo sea colocar cuando llegue el material.",
 
   // --- layout block
   "How to lay it out": "C\u00f3mo distribuirlo",
   "Nothing to lay out here.": "Aqu\u00ed no hay nada que distribuir.",
   "Every plant in this bed is a tree or shrub. Those are drawn as individual symbols on the sheet, so stake them off the plan rather than to a spacing. Row layouts only apply to massed grasses and perennials.":
-    "Todas las plantas de esta cama son \u00e1rboles o arbustos. En el plano est\u00e1n dibujados uno por uno, as\u00ed que m\u00e1rquelos seg\u00fan el plano y no por espaciado. Las hileras solo aplican a pastos y perennes en masa.",
+    "Todas las plantas de esta cama son \u00e1rboles o arbustos. En el plano est\u00e1n dibujados uno por uno, as\u00ed que m\u00e1rcalos seg\u00fan el plano y no por espaciado. Las hileras solo aplican a pastos y perennes en masa.",
   "Spec spacing fits this bed as drawn.":
     "El espaciado del plano cabe en esta cama tal como est\u00e1 dibujado.",
   "Tighter than spec": "M\u00e1s junto que el plano",
@@ -2997,6 +3267,9 @@ var ES = {
   "The count does not fit this bed at the spacing on the sheet, so it is packed to hold the full count inside the same footprint.":
     "La cantidad no cabe en esta cama con el espaciado del plano, as\u00ed que va m\u00e1s junto para que entre todo en la misma \u00e1rea.",
   " OC as drawn": " centro a centro como en el plano",
+  "\" OC triangular": "\" centro a centro tresbolillo",
+  "\" OC as drawn": "\" centro a centro como en el plano",
+  "\" OC": "\" centro a centro",
   "spec ": "plano ",
   "plant at ": "plantar a ",
   " rows of ": " hileras de ",
@@ -3004,6 +3277,7 @@ var ES = {
   " apart": " de separaci\u00f3n",
   "drift runs ": "el grupo mide ",
   " ft &middot; start ": " pies &middot; empezar a ",
+  " ft \u00b7 start ": " pies \u00b7 empezar a ",
   " in, stagger alternate rows ": " de la orilla, alternar hileras ",
   "Drifts use ": "Los grupos ocupan ",
   " ft. The other ": " pies. Los otros ",
@@ -3013,21 +3287,21 @@ var ES = {
   "The rectangle is the spacing pattern, not the bed shape":
     "El rect\u00e1ngulo es el patr\u00f3n de espaciado, no la forma de la cama",
   "the plan carries no bed outlines. Follow the real edge.":
-    "el plano no trae contornos. Siga la orilla real.",
+    "el plano no trae contornos. Sigue la orilla real.",
 
   // --- fit box
   "Check the bed against the count": "Comparar la cama con la cantidad",
   "Length": "Largo", "Width": "Ancho",
   "Plan needs": "El plano necesita",
-  "You measured": "Usted midi\u00f3",
+  "You measured": "Mediste",
   " sq ft spare": " pies\u00b2 de sobra",
   " sq ft short": " pies\u00b2 de menos",
   "it will not all fit": "no cabe todo",
   "matches the plan": "coincide con el plano",
   "Pace the bed and put the two numbers in. Beds are rarely a clean rectangle":
-    "Mida la cama a pasos y ponga los dos n\u00fameros. Las camas casi nunca son rect\u00e1ngulos exactos",
+    "Mide la cama a pasos y pon los dos n\u00fameros. Las camas casi nunca son rect\u00e1ngulos exactos",
   "use the average length and width, it only has to be close.":
-    "use el largo y el ancho promedio, solo tiene que ser aproximado.",
+    "usa el largo y el ancho promedio, solo tiene que ser aproximado.",
   " sq ft": " pies\u00b2",
 
   // --- spacing line
@@ -3043,11 +3317,17 @@ var ES = {
   "Farthest from Duane Dr. Both crews open it together.":
     "Lo m\u00e1s lejos de Duane Dr. Ambas cuadrillas lo abren juntas.",
   "North to south. Narrow corridor - stage ahead of the crew, not beside it.":
-    "De norte a sur. Pasillo angosto: deje el material adelante de la cuadrilla, no a un lado.",
+    "De norte a sur. Pasillo angosto: deja el material adelante de la cuadrilla, no a un lado.",
   "North to south. Gated on the laydown and trailers clearing.":
     "De norte a sur. Depende de que se despeje el \u00e1rea de material y los remolques.",
   "Walk out to the road, never back through the job. Keep the gravel access corridor open to Day 10.":
-    "Salga hacia la calle, nunca de regreso por el trabajo. Mantenga abierto el paso de grava hasta el D\u00eda 10.",
+    "Sal hacia la calle, nunca de regreso por el trabajo. Mant\u00e9n abierto el paso de grava hasta el D\u00eda 10.",
+  "North - Boundary Ave frontage": "Norte - frente a Boundary Ave",
+  "Middle - around the training center": "Centro - alrededor del centro de capacitaci\u00f3n",
+  "South - back frontage": "Sur - frente trasero",
+  "Geometric band, not a build order. No crew split set for this job yet.":
+    "Franja geogr\u00e1fica, no un orden de obra. Todav\u00eda no hay divisi\u00f3n de cuadrillas para este trabajo.",
+  "North": "Norte", "Middle": "Centro", "South": "Sur",
 
   // --- bed locations
   "North side": "Lado norte", "South side": "Lado sur",
@@ -3055,6 +3335,72 @@ var ES = {
   "South-east corner": "Esquina sureste", "South-west corner": "Esquina suroeste",
   "By the building": "Junto al edificio"
 };
+
+// Where Spanish word order differs from English, or a number sits in the
+// middle, a phrase swap would come out backwards. These run after ES, on the
+// same text, and only where the whole pattern matches.
+var ES_RULES = [
+  [/^Saved (.+) \u2014 safe to close\.$/, "Guardado $1 \u2014 ya puedes cerrar."],
+  [/^pulled (\d+) so far$/, "$1 retiradas hasta ahora"],
+  [/^Options to stand in for (.+)\. A record only \u2014 counts do not change\.$/,
+    "Opciones para sustituir $1. Solo es un registro \u2014 los conteos no cambian."],
+  [/\bsubstitution options for (.+)$/, "opciones de sustituci\u00f3n para $1"],
+  [/^decrease (.+)$/, "menos $1"], [/^increase (.+)$/, "m\u00e1s $1"],
+  [/^(.+) received count$/, "conteo recibido de $1"],
+  [/^record a yard pull of (.+)$/, "registrar un retiro del patio de $1"],
+  [/^Save all bed maps for offline \((\d+) MB\)$/, "Guardar todos los mapas sin conexi\u00f3n ($1 MB)"],
+  [/^Saving (\d+) of (\d+)\.\.\.$/, "Guardando $1 de $2\u2026"],
+  [/^Saved (\d+) of (\d+) - retry when you have signal$/, "Guardados $1 de $2 - reintenta cuando tengas se\u00f1al"],
+  [/^Saved for offline - all (\d+) maps$/, "Guardado sin conexi\u00f3n - los $1 mapas"],
+  // Rules run AFTER the phrase pass, so they match its output: "ft" is already
+  // "pies" here, "need" already "necesita", " units" already " unidades".
+  [/^Nearest beds \u2014 GPS good to about (\d+) pies$/, "Camas m\u00e1s cercanas \u2014 GPS preciso a unos $1 pies"],
+  [/(\d+) at (\d+)" centro a centro/g, "$1 a $2\" centro a centro"],
+  [/callouts (\d+) vs schedule (\d+)/g, "anotaciones $1 contra programa $2"],
+  [/^4 on the plan, no schedule row - open with Corvus$/, "4 en el plano, sin rengl\u00f3n en el programa - pendiente con Corvus"],
+  [/^(\d+(?:\.\d+)?)\u00d7 the drawing's own pixels \u2014 magnified, not sharpened\.$/,
+    "$1\u00d7 los p\u00edxeles del propio plano \u2014 ampliado, no mejorado."],
+  [/^necesita (\d+) - tallied (\d+) - mapped to (.+)$/, "necesita $1 - contadas $2 - asignado a $3"],
+  [/^Which inventory item is (.+)\?$/, "\u00bfQu\u00e9 art\u00edculo del inventario es $1?"],
+  [/^not pulled - (.+)$/, "no se retir\u00f3 - $1"],
+  [/^asked (\d+), got (\d+) - (\d+) left$/, "pediste $1, se retiraron $2 - quedan $3"],
+  [/^pulled (\d+) - (\d+) left$/, "retiradas $1 - quedan $2"],
+  [/^PIN incorrecto - (\d+) tries left$/, "PIN incorrecto - quedan $1 intentos"],
+  [/^That profile is (.+)\.$/, "Ese perfil no est\u00e1 aprobado ($1)."],
+  [/^Nothing has changed since you logged at (.+)\. Anything you tap from here shows up in the next draft\.$/,
+    "Nada ha cambiado desde tu reporte de $1. Lo que toques desde aqu\u00ed sale en el siguiente borrador."],
+  [/^Saved as (.+)$/, "Guardado como $1"],
+  [/^(\d+) unidades counted across (\d+) species$/, "$1 unidades contadas en $2 especies"],
+  [/^(\d+) planted \u00b7 (\d+) staked$/, "$1 plantadas \u00b7 $2 marcadas"],
+  [/^(\d+) recorded shortfalls? at beds$/, "$1 faltantes anotados en camas"],
+  [/^Saved$/, "Guardado"],
+  [/^Cama (B\d+) on the plan$/, "Cama $1 en el plano"],
+];
+
+// Vendor lines keep what the vendor PRINTED -- the product name in quotes is
+// how their list spells it, and translating it would send someone hunting a
+// name that is on nobody's sheet. So the block is kept out of the phrase
+// pass (data-no-es) and only the words around the vendor's own are swapped.
+var VENDOR_ES = [
+  [/^Vendor lists not loaded\.$/, "Listas de proveedores no cargadas."],
+  [/^Not mapped yet \u2014 no vendor list has been matched to this species\.$/,
+    "Sin asignar todav\u00eda \u2014 ninguna lista de proveedor coincide con esta especie."],
+  [/^No vendor list has been read for this species yet\.$/,
+    "Todav\u00eda no se ha revisado ninguna lista de proveedor para esta especie."],
+  [/^([^:"]+?) as "/, "$1 como \""],
+  [/: not on list \(/, ": no est\u00e1 en la lista ("],
+  [/\((\d{4}-\d{2}) availability, no prices\)$/, "(disponibilidad $1, sin precios)"],
+  [/\((\d{4}) list, rec'd ([\d\/]+)\)$/, "(lista $1, recibida $2)"],
+  [/\((\d{4}) booking form\)$/, "(formulario de reserva $1)"],
+  [/\(list of ([\d\/]+)\)$/, "(lista del $1)"],
+  [/\(quote of ([\d\/]+)\)$/, "(cotizaci\u00f3n del $1)"],
+];
+function vendorLineEs(t){
+  if(lang !== "es") return t;
+  var out = String(t);
+  VENDOR_ES.forEach(function(r){ out = out.replace(r[0], r[1]); });
+  return out;
+}
 
 // Longest first, so "Both crews" cannot eat the front of "Both crews, last".
 var ES_KEYS = Object.keys(ES).sort(function(a, b){ return b.length - a.length; });
@@ -3066,37 +3412,185 @@ function esc_re(x){ return x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
 // inside a word that must not be touched -- and sorting longest-first does
 // nothing about that. Keys that begin or end on a word character get a \b
 // anchor on that side; keys carrying their own spaces match as written.
+//
+// One alternation, not one regex per key: with every screen translated there
+// are thousands of text nodes, and a single pass per node is what keeps a
+// phone from stalling when the language flips. It also means one swap can
+// never feed the next -- the old chained version could, in principle,
+// translate its own output.
 var ES_RE = null;
 function esRules(){
   if(ES_RE) return ES_RE;
-  ES_RE = ES_KEYS.map(function(k){
+  ES_RE = new RegExp(ES_KEYS.map(function(k){
     var pre  = /^[A-Za-z0-9]/.test(k) ? "\\b" : "";
     var post = /[A-Za-z0-9]$/.test(k) ? "\\b" : "";
-    return {re: new RegExp(pre + esc_re(k) + post, "g"), to: ES[k]};
-  });
+    return pre + esc_re(k) + post;
+  }).join("|"), "g");
   return ES_RE;
+}
+
+// A string in, its Spanish out. Whitespace is collapsed first: the static
+// markup wraps its sentences across lines, and HTML shows them collapsed, so
+// that is the text a key has to match.
+function translateString(v){
+  var s = String(v).replace(/\s+/g, " ");
+  var lead = /^\s/.test(v) ? " " : "", trail = /\s$/.test(v) ? " " : "";
+  s = s.trim();
+  if(!s) return v;
+  var out = s.replace(esRules(), function(m){ return ES[m]; });
+  ES_RULES.forEach(function(r){ out = out.replace(r[0], r[1]); });
+  return out === s ? v : lead + out + trail;
+}
+
+// What each translated node said in English, so switching back restores it
+// instead of waiting for a re-render that static markup never gets.
+var ES_ORIG = typeof WeakMap === "function" ? new WeakMap() : null;
+var ES_ATTRS = ["placeholder", "aria-label", "title", "alt"];
+var ES_SKIP = {SCRIPT: 1, STYLE: 1, TEXTAREA: 1};
+
+function translateText(node){
+  var v = node.nodeValue;
+  if(!v || !v.trim()) return;
+  var rec = ES_ORIG && ES_ORIG.get(node);
+  if(rec && v === rec.es) return;            // already ours
+  var es = translateString(v);
+  if(es === v) return;
+  if(ES_ORIG) ES_ORIG.set(node, {en: v, es: es});
+  node.nodeValue = es;
+}
+
+function translateAttrs(el){
+  ES_ATTRS.forEach(function(a){
+    var v = el.getAttribute(a);
+    if(!v) return;
+    var key = "esOrig" + a.replace(/-./g, function(m){ return m[1].toUpperCase(); });
+    if(el.dataset[key + "Es"] === v) return;
+    var es = translateString(v);
+    if(es === v) return;
+    el.dataset[key] = v;
+    el.dataset[key + "Es"] = es;
+    el.setAttribute(a, es);
+  });
+}
+
+// Paragraphs in the static markup carry their Spanish in data-es-html.
+function translateBlock(el){
+  if(el.dataset.esShown === "1") return;
+  el.dataset.enHtml = el.innerHTML;
+  el.innerHTML = el.dataset.esHtml;
+  el.dataset.esShown = "1";
 }
 
 function translateNode(root){
   if(lang !== "es" || !root) return;
-  var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+  if(root.nodeType === 3){ translateText(root); return; }
+  if(root.nodeType !== 1 || ES_SKIP[root.nodeName]) return;
+  if(root.closest && root.closest("[data-no-es]")) return;
+  if(root.dataset && root.dataset.esHtml !== undefined){ translateBlock(root); }
+  var blocks = root.querySelectorAll ? root.querySelectorAll("[data-es-html]") : [];
+  Array.prototype.forEach.call(blocks, translateBlock);
+  var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: function(n){
+      var p = n.parentNode;
+      if(p && ES_SKIP[p.nodeName]) return NodeFilter.FILTER_REJECT;
+      if(p && p.closest && p.closest("[data-no-es]")) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  }, false);
   var nodes = [], n;
   while((n = walker.nextNode())) nodes.push(n);
-  nodes.forEach(function(node){
-    var v = node.nodeValue;
-    if(!v || !v.trim()) return;
-    var rules = esRules();
-    for(var i = 0; i < rules.length; i++){
-      v = v.replace(rules[i].re, rules[i].to);
-    }
-    if(v !== node.nodeValue) node.nodeValue = v;
+  nodes.forEach(translateText);
+  translateAttrs(root);
+  Array.prototype.forEach.call(root.querySelectorAll("[" + ES_ATTRS.join("],[") + "]"), translateAttrs);
+}
+
+// Back to English without a reload. Built content is rebuilt by renderAll()
+// anyway; this is for the static header, buttons and panels, which are not.
+function restoreEnglish(){
+  Array.prototype.forEach.call(document.querySelectorAll("[data-es-shown]"), function(el){
+    el.innerHTML = el.dataset.enHtml;
+    delete el.dataset.esShown;
   });
+  var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false), n;
+  while((n = walker.nextNode())){
+    var rec = ES_ORIG && ES_ORIG.get(n);
+    if(rec && n.nodeValue === rec.es) n.nodeValue = rec.en;
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("*"), function(el){
+    ES_ATTRS.forEach(function(a){
+      var key = "esOrig" + a.replace(/-./g, function(m){ return m[1].toUpperCase(); });
+      if(el.dataset && el.dataset[key] !== undefined && el.getAttribute(a) === el.dataset[key + "Es"]){
+        el.setAttribute(a, el.dataset[key]);
+      }
+    });
+  });
+}
+
+// Every change to the screen, translated as it lands -- a save note set by
+// textContent, a sheet built on tap, an option relabelled by renderTabs(). The
+// observer is paused while it writes, so its own changes never call it back.
+var esObserver = null;
+function watchForSpanish(){
+  if(esObserver || typeof MutationObserver !== "function") return;
+  esObserver = new MutationObserver(function(list){
+    if(lang !== "es") return;
+    esObserver.disconnect();
+    list.forEach(function(m){
+      if(m.type === "characterData") translateText(m.target);
+      else if(m.type === "attributes") translateAttrs(m.target);
+      else Array.prototype.forEach.call(m.addedNodes, translateNode);
+    });
+    observeBody();
+  });
+  observeBody();
+}
+function observeBody(){
+  esObserver.observe(document.body, {childList: true, subtree: true, characterData: true,
+                                     attributes: true, attributeFilter: ES_ATTRS});
+}
+
+// The daily log is a textarea -- copied out and pasted into BuilderTrend -- so
+// it never passes through the text-node pass. draftDailyLog() keeps writing
+// English (its tests read that), and the Spanish is laid over the finished
+// text, line by line, only on the way into the box.
+var LOG_ES = [
+  [/^Planted: beds? /, function(m){ return /beds/.test(m) ? "Plantadas: camas " : "Plantada: cama "; }],
+  [/^Staked out: beds? /, function(m){ return /beds/.test(m) ? "Marcadas: camas " : "Marcada: cama "; }],
+  [/^Correction \u2014 no longer marked planted: beds? /, function(m){
+    return "Correcci\u00f3n \u2014 ya no marcada" + (/beds/.test(m) ? "s como plantadas: camas " : " como plantada: cama "); }],
+  [/^Received on site:$/, "Recibido en el sitio:"],
+  [/^Count corrections:$/, "Correcciones de conteo:"],
+  [/^Short at the bed \u2014 spots flagged, drop in when it lands:$/,
+    "Falta en la cama \u2014 puntos marcados, solo colocar cuando llegue:"],
+  [/^Filled since the last log:$/, "Completado desde el \u00faltimo reporte:"],
+  [/^Sub options \(record only, counts unchanged\):$/,
+    "Opciones de sustituci\u00f3n (solo registro, los conteos no cambian):"],
+  [/^\(Covers everything since (.+)\.\)$/, "(Cubre todo desde $1.)"],
+  [/^  Bed (\d+) \u2014 down to (\d+) (.+), from (\d+)$/, "  Cama $1 \u2014 baj\u00f3 a $2 $3, de $4"],
+  [/ \(was (\d+)\)$/, " (antes $1)"],
+  [/^  Bed (\d+) \u2014 /, "  Cama $1 \u2014 "],
+  [/: added /, ": se agreg\u00f3 "],
+  [/: dropped /, ": se quit\u00f3 "],
+  [/qty open/g, "cantidad pendiente"],
+  [/note cleared/g, "nota borrada"],
+  [/\bnote: /g, "nota: "],
+];
+function logToSpanish(text){
+  return String(text).split("\n").map(function(line){
+    var out = line;
+    LOG_ES.forEach(function(r){ out = out.replace(r[0], r[1]); });
+    return out.replace(esRules(), function(m){ return ES[m]; });
+  }).join("\n");
 }
 
 function setLang(next){
   lang = (next === "es") ? "es" : "en";
   try{ localStorage.setItem("wolf-lang", lang); }catch(e){}
   paintLangButtons();
+  // The static header and panels are never rebuilt, so English has to be put
+  // back by hand; everything renderAll() builds comes back English on its own.
+  if(lang !== "es") restoreEnglish();
+  document.documentElement.lang = lang;
   // renderAll, not renderBeds: the buttons are in the header and reachable
   // from either view, so whichever one is open has to be the one rebuilt.
   renderAll();
@@ -3232,7 +3726,7 @@ function renderBeds(){
 
   var how = document.createElement("div");
   how.className = "how-box";
-  how.innerHTML =
+  how.innerHTML = L(
     '<div class="how-head">Laying out the massed beds</div>' +
     "<ol class=\"how-list\">" +
       "<li>Every spacing on this sheet is <b>triangular</b>, not square rows. " +
@@ -3251,20 +3745,43 @@ function renderBeds(){
       "not spaced off a rule. Scale those off the drawing using the <b>bar scale</b>, " +
       "not the written ratio &mdash; the sheet says 1&Prime;=20&prime; at 22&times;34 " +
       "and the print you are holding is bigger, so the written ratio is wrong but the " +
-      "bar is always right.</div>";
+      "bar is always right.</div>",
+    '<div class="how-head">C\u00f3mo distribuir las camas en masa</div>' +
+    "<ol class=\"how-list\">" +
+      "<li>Todo el espaciado de este plano es en <b>tresbolillo</b>, no en hileras " +
+        "cuadradas. Recorre cada hilera la mitad del espaciado, para que cada planta " +
+        "quede en el hueco entre las dos de arriba.</li>" +
+      "<li><b>Las hileras van m\u00e1s juntas que el espaciado.</b> La separaci\u00f3n " +
+        "entre hileras es el espaciado &times; 0.866 &mdash; a 12&Prime; las hileras van a " +
+        rowSpacing(12) + "&Prime;, a 18&Prime; van a " + rowSpacing(18) +
+        "&Prime;, a 24&Prime; van a " + rowSpacing(24) + "&Prime;.</li>" +
+      "<li>Corta un palo al largo del espaciado y otro a la separaci\u00f3n entre " +
+        "hileras. Con esos dos palos marcas toda la cama sin cinta.</li>" +
+      "<li>Empieza por la orilla de la cama que la gente ve y trabaja hacia atr\u00e1s, " +
+        "para que cualquier hueco sobrante quede atr\u00e1s.</li>" +
+    "</ol>" +
+    '<div class="how-note">Los \u00e1rboles y arbustos est\u00e1n colocados uno por uno ' +
+      "en el plano, no con una regla de espaciado. M\u00eddelos en el plano con la " +
+      "<b>escala gr\u00e1fica</b>, no con la escala escrita &mdash; el plano dice " +
+      "1&Prime;=20&prime; en 22&times;34 y la copia que tienes es m\u00e1s grande, " +
+      "as\u00ed que la escala escrita est\u00e1 mal pero la gr\u00e1fica siempre est\u00e1 bien.</div>");
   container.appendChild(how);
 
   var hint = document.createElement("p");
   hint.className = "zone-intro";
-  hint.innerHTML = "Beds numbered <b>north to south</b>. Find your bed on the map, " +
+  hint.innerHTML = L("Beds numbered <b>north to south</b>. Find your bed on the map, " +
     "stake it, then tick <b>Staked</b>. <b>Planted</b> is separate, so plants can " +
-    "come up a few at a time later without losing the marking work.";
+    "come up a few at a time later without losing the marking work.",
+    "Camas numeradas <b>de norte a sur</b>. Busca tu cama en el mapa, m\u00e1rcala " +
+    "y luego toca <b>Marcada</b>. <b>Plantada</b> va aparte, as\u00ed las plantas " +
+    "pueden llegar de a pocas sin perder el trabajo de marcado.");
   container.appendChild(hint);
 
   var mapWrap = document.createElement("div");
   mapWrap.className = "map-wrap";
   mapWrap.innerHTML =
-    '<div class="map-title">Site map &mdash; all ' + BEDS.length + " beds</div>" +
+    '<div class="map-title">' + L("Site map &mdash; all " + BEDS.length + " beds",
+      "Mapa del sitio &mdash; las " + BEDS.length + " camas") + "</div>" +
     '<span class="map-stack">' +
       '<a href="' + BED_IMG + 'site-map.jpg" data-lb="1" data-title="Site map">' +
         imgOrNothing(BED_IMG + "site-map.jpg", "Site map with every bed numbered", "map-img") +
@@ -3272,8 +3789,10 @@ function renderBeds(){
       '<span class="map-dots-wrap">' + mapOverlaySVG() + "</span>" +
     "</span>" +
     mapLegendHTML() +
-    '<div class="map-hint">Tap the map to open it full size, then pinch to zoom. ' +
-      "The colours come with it. Back closes it.</div>";
+    '<div class="map-hint">' + L("Tap the map to open it full size, then pinch to zoom. " +
+      "The colours come with it. Back closes it.",
+      "Toca el mapa para abrirlo en grande y pellizca para acercar. Los colores " +
+      "tambi\u00e9n salen. Atr\u00e1s lo cierra.") + "</div>";
   container.appendChild(mapWrap);
 
   var offline = document.createElement("button");
@@ -3450,7 +3969,13 @@ function renderBeds(){
     });
     var note = document.createElement("div");
     note.className = "zone-note";
-    note.innerHTML = "<b>" + (parts.length === 1
+    note.innerHTML = lang === "es"
+      ? "<b>" + (parts.length === 1 ? "Una especie no cuadra."
+          : parts.length + " especies no cuadran.") +
+        "</b> " + parts.join("; ") + ". Los n\u00fameros de las camas de arriba son " +
+        "lo que el plano dibuja en realidad &mdash; resu\u00e9lvelo con Peter Briggs " +
+        "en Corvus, 907.222.2859, antes de pedir con esos n\u00fameros."
+      : "<b>" + (parts.length === 1
         ? "One species does not add up."
         : parts.length + " species do not add up.") +
       "</b> " + parts.join("; ") + ". The bed numbers above are what the sheet " +
@@ -3556,6 +4081,9 @@ function renderAll(){
     renderFlags();
     renderGroups();
   }
+  // Before returning, not left to the observer: its pass runs a moment later,
+  // and anything that reads the screen straight after a render would see English.
+  translateNode(document.body);
 }
 
 function generateReport(){
@@ -3755,8 +4283,8 @@ function bedNo(bed){ return String(bed).replace(/^B0*/, "") || String(bed); }
 function whenLabel(iso){
   try{
     var d = new Date(iso);
-    return d.toLocaleDateString(undefined, {month: "short", day: "numeric"}) +
-           ", " + d.toLocaleTimeString(undefined, {hour: "numeric", minute: "2-digit"});
+    return d.toLocaleDateString(uiLocale(), {month: "short", day: "numeric"}) +
+           ", " + d.toLocaleTimeString(uiLocale(), {hour: "numeric", minute: "2-digit"});
   }catch(e){ return "the last log"; }
 }
 
@@ -3839,7 +4367,7 @@ function draftDailyLog(){
   });
 
   var out = [];
-  out.push(new Date().toLocaleDateString(undefined,
+  out.push(new Date().toLocaleDateString(uiLocale(),
     {weekday: "long", month: "long", day: "numeric"}));
   out.push("");
   function beds(label, list){
@@ -3907,7 +4435,8 @@ function wireDailyLogUI(){
     }
     note.textContent = "The facts the app can vouch for. Edit it freely \u2014 " +
       "this box is yours, nothing here is sent anywhere.";
-    textarea.value = d.text;
+    // Spanish is laid over the finished English -- see logToSpanish().
+    textarea.value = lang === "es" ? logToSpanish(d.text) : d.text;
     show(textarea, true); show(copyBtn, true); show(prompts, true);
     markBtn.textContent = "Posted it \u2014 start next draft from here";
     show(markBtn, true);
@@ -4238,13 +4767,22 @@ function wireReportUI(){
 }
 
 function init(){
-  document.getElementById("dateLine").textContent = new Date().toLocaleDateString(undefined, {
-    weekday: "long", month: "long", day: "numeric"
-  });
-
+  // The language first, and on its own. applyPayload() also reads it, but it
+  // returns early when this phone has no saved counts -- so a fresh install
+  // painted its header in English and lit the EN button while set to Spanish.
+  try{
+    var savedLang = localStorage.getItem("wolf-lang");
+    if(savedLang === "es" || savedLang === "en") lang = savedLang;
+  }catch(e){}
   // 1. Paint straight away from the local mirror, or the 9/8 baseline.
   var local = readLocal();
   applyPayload(local);
+  // After applyPayload, which is where the saved language is read.
+  document.documentElement.lang = lang;
+  document.getElementById("dateLine").textContent = new Date().toLocaleDateString(uiLocale(), {
+    weekday: "long", month: "long", day: "numeric"
+  });
+  watchForSpanish();
   fillMissingFromSeed();
   // Bound once, on the static element. renderTabs() rewrites the option text on
   // every render, so a listener attached in there would stack up.
@@ -4276,6 +4814,8 @@ function init(){
   wireReportUI();
   wireDailyLogUI();
   wireBackupUI();
+  // The static header and panels, which no render touches.
+  translateNode(document.body);
   setSaveNote(local ? "Counts loaded from this device." : "Starting from the September 8 baseline.");
 
   // 2. Then reach for the shared store and take it if it is newer.

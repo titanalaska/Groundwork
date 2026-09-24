@@ -347,6 +347,76 @@ const MUTATIONS = [
     tag: 'vendors',
     caughtBy: 'names who carries the plant',
   },
+
+  // --- Spanish ---
+  {
+    name: 'read the language only inside applyPayload, which a fresh phone skips',
+    find: '  try{\n    var savedLang = localStorage.getItem("wolf-lang");\n' +
+          '    if(savedLang === "es" || savedLang === "en") lang = savedLang;\n' +
+          '  }catch(e){}\n  // 1. Paint',
+    replace: '  // 1. Paint',
+    tag: 'spanish',
+    caughtBy: 'fresh install set to Spanish',
+  },
+  {
+    name: 'store a count under the Spanish name on the Spanish screen',
+    find: '  var k = jobKey + ":" + slug(name);\n  var received = state[k] || 0;',
+    replace: '  var k = jobKey + ":" + slug(lang === "es" ? translateString(name) : name);\n  var received = state[k] || 0;',
+    tag: 'spanish',
+    caughtBy: 'stored under the English name',
+  },
+  {
+    name: 'leave the static header in Spanish after switching back',
+    find: '  if(lang !== "es") restoreEnglish();',
+    replace: '',
+    tag: 'spanish',
+    caughtBy: 'switching back to English restores',
+  },
+  {
+    name: 'stop watching the screen, so late messages stay English',
+    find: '  watchForSpanish();\n',
+    replace: '',
+    tag: 'spanish',
+    caughtBy: 'message set after the screen is drawn',
+  },
+  {
+    name: 'let the phrase pass into the vendor lines',
+    find: '    vend.setAttribute("data-no-es", "");\n',
+    replace: '',
+    tag: 'spanish',
+    caughtBy: 'vendor product name stays',
+  },
+  {
+    name: 'show the Spanish notes even when one is missing',
+    find: '  var shown = (lang === "es" && job.flagsEs && job.flagsEs.length === job.flags.length)',
+    replace: '  var shown = (lang === "es" && job.flagsEs)',
+    tag: 'spanish',
+    caughtBy: 'line up one-to-one',
+  },
+  {
+    name: 'put the English draft in the Spanish log box',
+    find: '    textarea.value = lang === "es" ? logToSpanish(d.text) : d.text;',
+    replace: '    textarea.value = d.text;',
+    tag: 'spanish',
+    caughtBy: 'daily log box is Spanish',
+  },
+  {
+    name: 'try short phrases first, so "Both crews" eats "Both crews, last"',
+    find: 'var ES_KEYS = Object.keys(ES).sort(function(a, b){ return b.length - a.length; });',
+    replace: 'var ES_KEYS = Object.keys(ES).sort(function(a, b){ return a.length - b.length; });',
+    tag: 'spanish',
+    caughtBy: 'longest phrase wins',
+  },
+  {
+    // Both anchors: dropping one alone still leaves "Go" pinned at its other end.
+    name: 'drop the word anchors, so "Go" turns "Goodbye" into "Irodbye"',
+    edits: [
+      { find: '    var pre  = /^[A-Za-z0-9]/.test(k) ? "\\\\b" : "";', replace: '    var pre  = "";' },
+      { find: '    var post = /[A-Za-z0-9]$/.test(k) ? "\\\\b" : "";', replace: '    var post = "";' },
+    ],
+    tag: 'spanish',
+    caughtBy: 'longest phrase wins',
+  },
 ];
 
 // MUTATE_ONLY=<text> runs just the mutations whose name contains it -- the
