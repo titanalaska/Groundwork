@@ -35,10 +35,10 @@ LISTS = {
     "mckay": {"label": "McKay", "dated": "list of 7/20/26",
               "file": "McKay Nursery Company Wholesale Availability & Sale Items 7.20.26.xlsx",
               "sheet": "McKay Availability"},
-    # Bailey: waiting on "TITAN AVAILABILITY QUOTE 8-4-26.xlsx" (Aaron Rivera's
-    # email of 8/4/26, Titan Outlook) to be saved to claudes room. Uncomment then.
-    # "bailey": {"label": "Bailey", "dated": "quote of 8/4/26",
-    #            "file": "TITAN AVAILABILITY QUOTE 8-4-26.xlsx"},
+    # Aaron Rivera's quote of 8/4/26 (Titan Outlook), saved 9/23. Cat Price is
+    # Bailey's 2026 catalog price; one row per site and ship date.
+    "bailey": {"label": "Bailey", "dated": "quote of 8/4/26",
+               "file": "TITAN AVAILABILITY QUOTE 8-4-26 for baileys.xlsx"},
     "stewart": {"label": "Stewart Bros", "dated": "2025-26 availability, no prices",
                 "file": "Stewart-Brothers-Availability.txt"},
 }

@@ -15,6 +15,10 @@ var VENDORS = {
    "label": "McKay",
    "dated": "list of 7/20/26"
   },
+  "bailey": {
+   "label": "Bailey",
+   "dated": "quote of 8/4/26"
+  },
   "stewart": {
    "label": "Stewart Bros",
    "dated": "2025-26 availability, no prices"
@@ -55,7 +59,8 @@ var VENDORS = {
        ]
       ]
      }
-    ]
+    ],
+    "bailey": null
    }
   },
   "alaska-flag-iris": {
@@ -84,7 +89,8 @@ var VENDORS = {
      }
     ],
     "mckay": null,
-    "stewart": null
+    "stewart": null,
+    "bailey": null
    }
   },
   "alpine-currant": {
@@ -131,7 +137,22 @@ var VENDORS = {
       ]
      }
     ],
-    "stewart": null
+    "stewart": null,
+    "bailey": [
+     {
+      "as": "Ribes alpinum Alpine Currant",
+      "forms": [
+       [
+        "#2 True",
+        18.2
+       ],
+       [
+        "#5",
+        27.85
+       ]
+      ]
+     }
+    ]
    }
   },
   "amur-maple": {
@@ -243,7 +264,18 @@ var VENDORS = {
       ]
      }
     ],
-    "stewart": null
+    "stewart": null,
+    "bailey": [
+     {
+      "as": "Spiraea bet Tor Birchleaf -white",
+      "forms": [
+       [
+        "#2 True",
+        16.5
+       ]
+      ]
+     }
+    ]
    }
   },
   "bishop-s-weed-goutweed": {
@@ -262,7 +294,8 @@ var VENDORS = {
      }
     ],
     "mckay": null,
-    "stewart": null
+    "stewart": null,
+    "bailey": null
    }
   },
   "colorado-green-spruce": {
@@ -411,6 +444,17 @@ var VENDORS = {
        ]
       ]
      }
+    ],
+    "bailey": [
+     {
+      "as": "Populus tremula Columnar Swedish Aspen",
+      "forms": [
+       [
+        "#10",
+        111.75
+       ]
+      ]
+     }
     ]
    }
   },
@@ -435,7 +479,8 @@ var VENDORS = {
     "seedntree": null,
     "bron": null,
     "mckay": null,
-    "stewart": null
+    "stewart": null,
+    "bailey": null
    }
   },
   "froebelii-spirea": {
@@ -462,7 +507,8 @@ var VENDORS = {
      }
     ],
     "mckay": null,
-    "stewart": null
+    "stewart": null,
+    "bailey": null
    }
   },
   "goatsbeard": {
@@ -481,7 +527,8 @@ var VENDORS = {
      }
     ],
     "mckay": null,
-    "stewart": null
+    "stewart": null,
+    "bailey": null
    }
   },
   "gold-crinkled-hair-grass": {
@@ -517,7 +564,8 @@ var VENDORS = {
       ]
      }
     ],
-    "stewart": null
+    "stewart": null,
+    "bailey": null
    }
   },
   "gold-drop-potentilla": {
@@ -544,7 +592,8 @@ var VENDORS = {
      }
     ],
     "mckay": null,
-    "stewart": null
+    "stewart": null,
+    "bailey": null
    }
   },
   "goldfinger-potentilla": {
@@ -591,7 +640,8 @@ var VENDORS = {
       ]
      }
     ],
-    "stewart": null
+    "stewart": null,
+    "bailey": null
    }
   },
   "goldflame-spirea": {
@@ -638,7 +688,8 @@ var VENDORS = {
       ]
      }
     ],
-    "stewart": null
+    "stewart": null,
+    "bailey": null
    }
   },
   "goldmound-spirea": {
@@ -685,7 +736,18 @@ var VENDORS = {
       ]
      }
     ],
-    "stewart": null
+    "stewart": null,
+    "bailey": [
+     {
+      "as": "Spiraea Goldmound-pink",
+      "forms": [
+       [
+        "#2 True",
+        15.65
+       ]
+      ]
+     }
+    ]
    }
   },
   "hardy-purple-common-lilac": {
@@ -734,7 +796,18 @@ var VENDORS = {
       ]
      }
     ],
-    "stewart": null
+    "stewart": null,
+    "bailey": [
+     {
+      "as": "Syr vulg Common Purple Lilac-purple",
+      "forms": [
+       [
+        "#3 True",
+        24.95
+       ]
+      ]
+     }
+    ]
    }
   },
   "hardy-purple-common-lilac-2-sub": {
@@ -783,7 +856,18 @@ var VENDORS = {
       ]
      }
     ],
-    "stewart": null
+    "stewart": null,
+    "bailey": [
+     {
+      "as": "Syr vulg Common Purple Lilac-purple",
+      "forms": [
+       [
+        "#3 True",
+        24.95
+       ]
+      ]
+     }
+    ]
    }
   },
   "hedge-cotoneaster": {
@@ -842,7 +926,22 @@ var VENDORS = {
       ]
      }
     ],
-    "stewart": null
+    "stewart": null,
+    "bailey": [
+     {
+      "as": "Cotoneaster lucidus Hedge",
+      "forms": [
+       [
+        "#2 True",
+        16.85
+       ],
+       [
+        "#5",
+        27.25
+       ]
+      ]
+     }
+    ]
    }
   },
   "helena-maple": {
@@ -869,7 +968,8 @@ var VENDORS = {
     ],
     "bron": null,
     "mckay": null,
-    "stewart": null
+    "stewart": null,
+    "bailey": null
    }
   },
   "hosta-patriot": {
@@ -902,7 +1002,18 @@ var VENDORS = {
       ]
      }
     ],
-    "stewart": null
+    "stewart": null,
+    "bailey": [
+     {
+      "as": "Hosta Patriot-lilac",
+      "forms": [
+       [
+        "#1 True",
+        9
+       ]
+      ]
+     }
+    ]
    }
   },
   "ivory-halo-dogwood": {
@@ -953,7 +1064,22 @@ var VENDORS = {
       ]
      }
     ],
-    "stewart": null
+    "stewart": null,
+    "bailey": [
+     {
+      "as": "Cornus alba Ivory Halo\u00ae Dogwood",
+      "forms": [
+       [
+        "#2 True",
+        19.8
+       ],
+       [
+        "#5",
+        29.75
+       ]
+      ]
+     }
+    ]
    }
   },
   "karl-foerster-reed-grass": {
@@ -1004,7 +1130,22 @@ var VENDORS = {
       ]
      }
     ],
-    "stewart": null
+    "stewart": null,
+    "bailey": [
+     {
+      "as": "Calamagrostis ac Karl Foerster Fea Reed Grass",
+      "forms": [
+       [
+        "#1 True",
+        9.65
+       ],
+       [
+        "#3 True",
+        18.65
+       ]
+      ]
+     }
+    ]
    }
   },
   "lady-fern": {
@@ -1023,7 +1164,8 @@ var VENDORS = {
      }
     ],
     "mckay": null,
-    "stewart": null
+    "stewart": null,
+    "bailey": null
    }
   },
   "late-lilac": {
@@ -1046,7 +1188,8 @@ var VENDORS = {
      }
     ],
     "mckay": null,
-    "stewart": null
+    "stewart": null,
+    "bailey": null
    }
   },
   "lodgepole-pine": {
@@ -1100,7 +1243,8 @@ var VENDORS = {
      }
     ],
     "mckay": null,
-    "stewart": null
+    "stewart": null,
+    "bailey": null
    }
   },
   "miss-canada-lilac": {
@@ -1133,7 +1277,18 @@ var VENDORS = {
      }
     ],
     "mckay": null,
-    "stewart": null
+    "stewart": null,
+    "bailey": [
+     {
+      "as": "Syr Miss Canada Lilac-pink",
+      "forms": [
+       [
+        "#3 True",
+        26.75
+       ]
+      ]
+     }
+    ]
    }
   },
   "miss-kim-lilac": {
@@ -1202,6 +1357,21 @@ var VENDORS = {
        ]
       ]
      }
+    ],
+    "bailey": [
+     {
+      "as": "Syr pat Miss Kim Lilac-lilac",
+      "forms": [
+       [
+        "#2 True",
+        20.35
+       ],
+       [
+        "#5",
+        29.75
+       ]
+      ]
+     }
     ]
    }
   },
@@ -1239,7 +1409,8 @@ var VENDORS = {
       ]
      }
     ],
-    "stewart": null
+    "stewart": null,
+    "bailey": null
    }
   },
   "paper-birch": {
@@ -1335,6 +1506,17 @@ var VENDORS = {
        ]
       ]
      }
+    ],
+    "bailey": [
+     {
+      "as": "Betula pap Paper Birch",
+      "forms": [
+       [
+        "#10 Cl",
+        108.15
+       ]
+      ]
+     }
     ]
    }
   },
@@ -1378,6 +1560,29 @@ var VENDORS = {
        ]
       ]
      }
+    ],
+    "bailey": [
+     {
+      "as": "Betula First Editions\u00aeParkland Pillar\u00aePP25468",
+      "forms": [
+       [
+        "#5",
+        67.15
+       ],
+       [
+        "#10",
+        124.5
+       ],
+       [
+        "#25 1\u00bd\"",
+        199
+       ],
+       [
+        "#25 1\u00be\"",
+        212
+       ]
+      ]
+     }
     ]
    }
   },
@@ -1415,7 +1620,18 @@ var VENDORS = {
      }
     ],
     "mckay": null,
-    "stewart": null
+    "stewart": null,
+    "bailey": [
+     {
+      "as": "Potentilla fr Pink Beauty-pink",
+      "forms": [
+       [
+        "#2 True",
+        17
+       ]
+      ]
+     }
+    ]
    }
   },
   "prairiefire-crabapple": {
@@ -1444,7 +1660,34 @@ var VENDORS = {
       ]
      }
     ],
-    "stewart": null
+    "stewart": null,
+    "bailey": [
+     {
+      "as": "Malus Prairifire Crab-red",
+      "forms": [
+       [
+        "#7",
+        69.15
+       ],
+       [
+        "#10",
+        101.45
+       ],
+       [
+        "#25 1\u00bc\"",
+        140.25
+       ],
+       [
+        "#25 1\u00bd\"",
+        155.95
+       ],
+       [
+        "#25 1\u00be\"",
+        175
+       ]
+      ]
+     }
+    ]
    }
   },
   "quaking-aspen": {
@@ -1575,6 +1818,29 @@ var VENDORS = {
        ]
       ]
      }
+    ],
+    "bailey": [
+     {
+      "as": "Populus trem Quaking Aspen",
+      "forms": [
+       [
+        "#10",
+        111.75
+       ],
+       [
+        "#25 1\u00bd\"",
+        171.9
+       ],
+       [
+        "#25 1\u00be\"",
+        180.85
+       ],
+       [
+        "#25 PG",
+        130.65
+       ]
+      ]
+     }
     ]
    }
   },
@@ -1666,6 +1932,21 @@ var VENDORS = {
        ]
       ]
      }
+    ],
+    "bailey": [
+     {
+      "as": "Cornus baileyi Red Twig Dogwood",
+      "forms": [
+       [
+        "#2 True",
+        16.5
+       ],
+       [
+        "#5",
+        27.85
+       ]
+      ]
+     }
     ]
    }
   },
@@ -1713,7 +1994,8 @@ var VENDORS = {
       ]
      }
     ],
-    "stewart": null
+    "stewart": null,
+    "bailey": null
    }
   },
   "savin-juniper": {
@@ -1735,7 +2017,8 @@ var VENDORS = {
       ]
      }
     ],
-    "stewart": null
+    "stewart": null,
+    "bailey": null
    }
   },
   "scotch-pine": {
@@ -1747,7 +2030,8 @@ var VENDORS = {
     "seedntree": null,
     "bron": null,
     "mckay": null,
-    "stewart": null
+    "stewart": null,
+    "bailey": null
    }
   },
   "subalpine-fir-arizonica": {
@@ -1756,7 +2040,8 @@ var VENDORS = {
     "seedntree": null,
     "bron": null,
     "mckay": null,
-    "stewart": null
+    "stewart": null,
+    "bailey": null
    }
   },
   "sweet-woodruff": {
@@ -1775,7 +2060,8 @@ var VENDORS = {
      }
     ],
     "mckay": null,
-    "stewart": null
+    "stewart": null,
+    "bailey": null
    }
   },
   "vanhoutte-spirea": {
@@ -1812,7 +2098,22 @@ var VENDORS = {
       ]
      }
     ],
-    "stewart": null
+    "stewart": null,
+    "bailey": [
+     {
+      "as": "Spiraea x vanhouttei Renaissance Bridalwreath",
+      "forms": [
+       [
+        "#2 True",
+        15.65
+       ],
+       [
+        "#5",
+        27.85
+       ]
+      ]
+     }
+    ]
    }
   },
   "white-spruce": {
