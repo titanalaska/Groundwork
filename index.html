@@ -633,6 +633,28 @@
     background:#fff;border:1px solid var(--line);border-radius:5px;
     object-fit:contain;padding:1px;
   }
+  /* One tick per plant line: in the ground or not. 40px so a gloved thumb
+     hits it; the row's baseline alignment would float it, so it centres. */
+  .in-b{
+    width:40px;height:40px;flex-shrink:0;align-self:center;
+    border:2px solid var(--line);border-radius:8px;background:var(--card);
+    color:var(--on-green);font-family:inherit;font-size:1.3rem;font-weight:700;
+    line-height:1;cursor:pointer;touch-action:manipulation;padding:0;
+  }
+  .in-b.on{border-color:var(--green);background:var(--green);}
+  .zrow.in .zname,.zrow.in .zqty{opacity:0.6;}
+  /* Tick + symbol + qty + owed stepper left the name 46px wide at 375px --
+     "Red-twig Dogwood" stacked one letter per line. The name now holds a
+     floor and the stepper and flag drop to a second line, pushed right. */
+  .zrow{flex-wrap:wrap;row-gap:6px;}
+  .zrow .zname{flex:1 1 9em;}
+  .zrow .zflag,.zrow .owe{margin-left:auto;}
+  .zrow .zflag + .owe{margin-left:8px;}
+  .zone-prog{
+    font-size:0.74rem;font-weight:700;color:var(--green-text);display:block;
+    margin-top:2px;font-variant-numeric:tabular-nums;
+  }
+  .zone.done .zone-prog,.zone.short .zone-prog{color:var(--on-green);}
   /* Per-bed "still owed here" stepper. Only on staked or planted beds. */
   .owe{
     display:inline-flex;align-items:center;gap:2px;flex-shrink:0;
@@ -670,6 +692,26 @@
   }
   .zone.done .bed-no{background:var(--on-green);color:var(--green);}
   .bed-pic{border-top:1px solid var(--line);background:var(--bg);}
+  /* Tape it out. Numbers big and tabular -- read with a tape in one hand. */
+  .tape-zero{padding:9px 14px;border-top:1px solid var(--line);font-size:0.84rem;}
+  .tape-zero span{color:var(--ink-soft);}
+  .tape-row{
+    display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;
+    padding:8px 14px;border-top:1px solid var(--line);
+  }
+  .tape-sp{flex:1 1 100%;font-size:0.84rem;}
+  .tape-n{font-variant-numeric:tabular-nums;font-size:0.8rem;color:var(--ink-soft);}
+  .tape-n b{font-size:1.05rem;color:var(--ink);}
+  .tape-flag{border-left:5px solid var(--amber);}
+  .tape-note{flex:1 1 100%;font-size:0.76rem;font-weight:700;color:var(--amber);}
+  .tape-foot{
+    padding:9px 14px;border-top:1px solid var(--line);font-size:0.74rem;
+    color:var(--ink-soft);
+  }
+  .run-label{
+    padding:7px 14px;font-size:0.76rem;font-weight:700;color:var(--ink-soft);
+    letter-spacing:0.03em;text-transform:uppercase;
+  }
   .bed-pic a{display:block;}
   .bed-img{width:100%;height:auto;display:block;}
   .zspace{
@@ -797,6 +839,21 @@
      orange ground with white type; dark mode flips to salmon with near-black.
      The badge is there so this does not rest on colour alone. */
   .zone.short{border-color:var(--amber);border-left-width:6px;}
+  /* ---- Where one bed stops and the next starts ---------------------------
+     Field test 9/25, WSRCC: scrolling Pull by bed, the cards ran together --
+     14px apart with a 1px hairline, and the tail of one bed's plant list read
+     as the top of the next. Bed cards only (.zone is shared with other views):
+     a real gap, a heavy top rule, and a bed number you can read at arm's
+     length. The rule takes the card's border colour, so it goes green once
+     staked and amber when short -- same as the map. */
+  .bed-card{
+    margin-top:34px;border-width:2px;border-top-width:7px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.18);
+  }
+  /* Not started: the hairline colour vanished on dark ground at 7px too. */
+  .bed-card:not(.partdone):not(.done){border-top-color:var(--ink-soft);}
+  .bed-card .bed-no{width:54px;height:54px;font-size:1.45rem;}
+  .bed-card .zone-name{font-size:1.2rem;}
   .zone.short .zone-head{background:var(--amber);border-bottom-color:var(--amber);}
   .zone.short .zone-name,
   .zone.short .zone-count{color:var(--on-green);}
@@ -1135,7 +1192,7 @@
 <div id="flagsSlot"></div>
 <div id="groups"></div>
 
-<footer>Counts save as you tap. &middot; build v30</footer>
+<footer>Counts save as you tap. &middot; build v31</footer>
 
 <!-- The plan data, shared with status.html. Must come BEFORE the script block
      below, which uses JOBS synchronously. sw.js precaches it as CRITICAL. -->
@@ -1251,7 +1308,7 @@ var DISCREPANCY = {
 // shrubs individually along the perimeter instead of massing them. The merge
 // radius is a JUDGEMENT (80pt -> 47 areas); it is not off the drawing. Re-run
 // the tool to change it, and re-bake the map, because MAP_XY must keep matching.
-var WSRCC_BEDS = [{"bed":"B01","where":"North side","units":90,"items":{"CA":46,"CS":44},"zone":"North"},{"bed":"B02","where":"North side","units":33,"items":{"CA":12,"CS":14,"PFP":6,"SP":1},"zone":"North"},{"bed":"B03","where":"North side","units":130,"items":{"CA":61,"CS":62,"PS":3,"SP":4},"zone":"North"},{"bed":"B04","where":"North side","units":1,"items":{"BP":1},"zone":"North"},{"bed":"B05","where":"West side","units":37,"items":{"PP":13,"PS":6,"SP":18},"zone":"North"},{"bed":"B06","where":"North side","units":26,"items":{"PP":6,"PS":7,"SP":13},"zone":"North"},{"bed":"B07","where":"West side","units":14,"items":{"PFA":6,"PFG":6,"SP":2},"zone":"North"},{"bed":"B08","where":"Interior","units":98,"items":{"CA":8,"CAK":21,"CAO":32,"SB":37},"zone":"North"},{"bed":"B09","where":"East side","units":19,"items":{"BP":1,"CA":7,"CL":10,"PT":1},"zone":"North"},{"bed":"B10","where":"East side","units":6,"items":{"CA":2,"CL":3,"PT":1},"zone":"North"},{"bed":"B11","where":"West side","units":30,"items":{"CL":20,"PFP":6,"SP":4},"zone":"Middle"},{"bed":"B12","where":"East side","units":15,"items":{"BP":2,"CA":5,"CL":7,"PT":1},"zone":"Middle"},{"bed":"B13","where":"Interior","units":106,"items":{"CAK":44,"CAO":34,"SB":28},"zone":"Middle"},{"bed":"B14","where":"East side","units":17,"items":{"BP":1,"CA":6,"CL":9,"PT":1},"zone":"Middle"},{"bed":"B15","where":"West side","units":14,"items":{"PFG":6,"PFP":6,"SP":2},"zone":"Middle"},{"bed":"B16","where":"West side","units":7,"items":{"PFA":6,"SP":1},"zone":"Middle"},{"bed":"B17","where":"Interior","units":2,"items":{"PTE":2},"zone":"Middle"},{"bed":"B18","where":"Interior","units":2,"items":{"PTE":2},"zone":"Middle"},{"bed":"B19","where":"Interior","units":33,"items":{"BP":2,"CAO":8,"PFA":6,"PFG":6,"PFP":10,"PTE":1},"zone":"Middle"},{"bed":"B20","where":"Interior","units":1,"items":{"PTE":1},"zone":"Middle"},{"bed":"B21","where":"West side","units":11,"items":{"PFA":4,"PFG":2,"PFP":3,"PTE":2},"zone":"South"},{"bed":"B22","where":"Interior","units":32,"items":{"PFA":18,"PFG":4,"PFP":6,"PTE":4},"zone":"South"},{"bed":"B23","where":"East side","units":13,"items":{"PFA":5,"PFG":2,"PFP":3,"PTE":3},"zone":"Middle"},{"bed":"B24","where":"East side","units":10,"items":{"AP":1,"CA":4,"CL":5},"zone":"Middle"},{"bed":"B25","where":"West side","units":14,"items":{"PFG":6,"PFP":6,"SP":2},"zone":"South"},{"bed":"B26","where":"East side","units":18,"items":{"AP":3,"CA":4,"CL":5,"PFG":6},"zone":"South"},{"bed":"B27","where":"South frontage","units":15,"items":{"PFA":14,"SP":1},"zone":"South"},{"bed":"B28","where":"Interior","units":11,"items":{"PFG":4,"PFP":7},"zone":"South"},{"bed":"B29","where":"Interior","units":19,"items":{"PFG":8,"PFP":11},"zone":"South"},{"bed":"B30","where":"Interior","units":10,"items":{"PFA":4,"PFP":6},"zone":"South"},{"bed":"B31","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B32","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B33","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B34","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B35","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B36","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B37","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B38","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B39","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B40","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B41","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B42","where":"South frontage","units":6,"items":{"PFA":5,"SP":1},"zone":"South"},{"bed":"B43","where":"South frontage","units":32,"items":{"PFA":7,"PFG":9,"PFP":16},"zone":"South"},{"bed":"B44","where":"South frontage","units":29,"items":{"PFA":12,"PFG":9,"PFP":8},"zone":"South"},{"bed":"B45","where":"South frontage","units":35,"items":{"PFA":11,"PFG":10,"PFP":14},"zone":"South"},{"bed":"B46","where":"South frontage","units":31,"items":{"PFA":10,"PFG":12,"PFP":9},"zone":"South"},{"bed":"B47","where":"South frontage","units":19,"items":{"PFA":9,"PFG":6,"PFP":4},"zone":"South"}];
+var WSRCC_BEDS = [{"bed":"B01","where":"North side","units":90,"items":{"CA":46,"CS":44},"zone":"North"},{"bed":"B02","where":"North side","units":33,"items":{"CA":12,"CS":14,"PFP":6,"SP":1},"zone":"North"},{"bed":"B03","where":"North side","units":130,"items":{"CA":61,"CS":62,"PS":3,"SP":4},"zone":"North"},{"bed":"B04","where":"North side","units":1,"items":{"BP":1},"zone":"North"},{"bed":"B05","where":"North side","units":37,"items":{"PP":13,"PS":6,"SP":18},"zone":"North"},{"bed":"B06","where":"North side","units":26,"items":{"PP":6,"PS":7,"SP":13},"zone":"North"},{"bed":"B07","where":"West side","units":14,"items":{"PFA":6,"PFG":6,"SP":2},"zone":"North"},{"bed":"B08","where":"Interior","units":98,"items":{"CA":8,"CAK":21,"CAO":32,"SB":37},"zone":"North"},{"bed":"B09","where":"East side","units":19,"items":{"BP":1,"CA":7,"CL":10,"PT":1},"zone":"North"},{"bed":"B10","where":"East side","units":6,"items":{"CA":2,"CL":3,"PT":1},"zone":"North"},{"bed":"B11","where":"West side","units":30,"items":{"CL":20,"PFP":6,"SP":4},"zone":"Middle"},{"bed":"B12","where":"East side","units":15,"items":{"BP":2,"CA":5,"CL":7,"PT":1},"zone":"Middle"},{"bed":"B13","where":"Interior","units":106,"items":{"CAK":44,"CAO":34,"SB":28},"zone":"Middle"},{"bed":"B14","where":"East side","units":17,"items":{"BP":1,"CA":6,"CL":9,"PT":1},"zone":"Middle"},{"bed":"B15","where":"West side","units":14,"items":{"PFG":6,"PFP":6,"SP":2},"zone":"Middle"},{"bed":"B16","where":"West side","units":7,"items":{"PFA":6,"SP":1},"zone":"Middle"},{"bed":"B17","where":"Interior","units":2,"items":{"PTE":2},"zone":"Middle"},{"bed":"B18","where":"Interior","units":2,"items":{"PTE":2},"zone":"Middle"},{"bed":"B19","where":"Interior","units":33,"items":{"BP":2,"CAO":8,"PFA":6,"PFG":6,"PFP":10,"PTE":1},"zone":"Middle"},{"bed":"B20","where":"Interior","units":1,"items":{"PTE":1},"zone":"Middle"},{"bed":"B21","where":"West side","units":11,"items":{"PFA":4,"PFG":2,"PFP":3,"PTE":2},"zone":"South"},{"bed":"B22","where":"Interior","units":32,"items":{"PFA":18,"PFG":4,"PFP":6,"PTE":4},"zone":"South"},{"bed":"B23","where":"East side","units":13,"items":{"PFA":5,"PFG":2,"PFP":3,"PTE":3},"zone":"Middle"},{"bed":"B24","where":"East side","units":10,"items":{"AP":1,"CA":4,"CL":5},"zone":"Middle"},{"bed":"B25","where":"West side","units":14,"items":{"PFG":6,"PFP":6,"SP":2},"zone":"South"},{"bed":"B26","where":"East side","units":18,"items":{"AP":3,"CA":4,"CL":5,"PFG":6},"zone":"South"},{"bed":"B27","where":"South frontage","units":15,"items":{"PFA":14,"SP":1},"zone":"South"},{"bed":"B28","where":"Interior","units":11,"items":{"PFG":4,"PFP":7},"zone":"South"},{"bed":"B29","where":"Interior","units":19,"items":{"PFG":8,"PFP":11},"zone":"South"},{"bed":"B30","where":"Interior","units":10,"items":{"PFA":4,"PFP":6},"zone":"South"},{"bed":"B31","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B32","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B33","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B34","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B35","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B36","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B37","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B38","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B39","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B40","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B41","where":"South frontage","units":2,"items":{"SP":2},"zone":"South"},{"bed":"B42","where":"South frontage","units":6,"items":{"PFA":5,"SP":1},"zone":"South"},{"bed":"B43","where":"South frontage","units":32,"items":{"PFA":7,"PFG":9,"PFP":16},"zone":"South"},{"bed":"B44","where":"South frontage","units":29,"items":{"PFA":12,"PFG":9,"PFP":8},"zone":"South"},{"bed":"B45","where":"South frontage","units":35,"items":{"PFA":11,"PFG":10,"PFP":14},"zone":"South"},{"bed":"B46","where":"South frontage","units":31,"items":{"PFA":10,"PFG":12,"PFP":9},"zone":"South"},{"bed":"B47","where":"South frontage","units":19,"items":{"PFA":9,"PFG":6,"PFP":4},"zone":"South"}];
 var WSRCC_SPECIES = {"AP":"Helena Maple","BP":"Paper Birch","PTE":"Columnar Swedish Aspen","PP":"Fat Albert Colorado Blue Spruce","PS":"Scotch Pine","CS":"Red-twig Dogwood","CA":"'Ivory Halo' Dogwood","CL":"Hedge Cotoneaster","PFA":"Abbottswood Potentilla","PFG":"Goldfinger Potentilla","PFP":"Pink Beauty Potentilla","SB":"Birch-Leaved Spirea","SP":"'Miss Canada' Lilac","CAK":"Karl Foerster Feather Reed Grass","CAO":"Overdam Variegated Reed Grass","PT":"UNSCHEDULED - confirm with Corvus"};
 var WSRCC_SPACING = {"CAK":"18\" OC triangular","CAO":"18\" OC triangular"};
 // Geometric bands only. There is no build order or crew split for this job yet
@@ -1296,6 +1353,12 @@ var measured = {};         // bed -> {l, w} in feet, as paced out on site
 // goes, and it is what lets a bed read "planted, spots staked, waiting on 8
 // Miss Kim" instead of just "planted".
 var owed = {};
+// bed -> {code: true|false}, one tick per plant line. Asked for on WSRCC 9/25:
+// Matt stakes ahead with no Scotch Pine on site and the crew plants behind him,
+// and one Planted button per bed could not say "the dogwoods are in, the pine
+// is not". false is stored, not deleted -- on a bed marked planted before these
+// existed, an untick has to beat the old whole-bed default. See lineIn().
+var plantedLine = {};
 
 // Bed ids repeat across jobs -- Home2Suites numbers B01-B44 and WSRCC B01-B47 --
 // so these per-bed maps MUST be namespaced or one job's marks appear on the
@@ -1531,7 +1594,7 @@ function setOffline(isOffline, msg){
 
 function payload(){
   return {counts: state, notes: notes, staked: staked, planted: planted,
-          measured: measured, owed: owed, lastLogged: lastLogged,
+          measured: measured, owed: owed, plantedLine: plantedLine, lastLogged: lastLogged,
           itemMap: itemMap, pulls: pulls,
           updatedAt: new Date().toISOString()};
 }
@@ -1576,6 +1639,7 @@ function applyPayload(p){
   if(p.planted && typeof p.planted === "object") planted = Object.assign({}, p.planted);
   if(p.measured && typeof p.measured === "object") measured = Object.assign({}, p.measured);
   if(p.owed && typeof p.owed === "object") owed = Object.assign({}, p.owed);
+  if(p.plantedLine && typeof p.plantedLine === "object") plantedLine = Object.assign({}, p.plantedLine);
   if(p.lastLogged && typeof p.lastLogged === "object") lastLogged = p.lastLogged;
   // Merged, not replaced: another phone may have mapped a species this device
   // has never seen, and a straight assignment would throw that away on the next
@@ -2330,12 +2394,18 @@ function owedControl(bed, code, qty){
     "</span>";
 }
 
-function bedRow(code, qty, bed, showOwe){
+function bedRow(code, qty, bed, showOwe, isIn){
   var sp = SPACING[code]
     ? '<span class="zspace">' + spacingLine(code, qty) + "</span>" : "";
   var flag = DISCREPANCY[code] ? '<span class="zflag">check plan</span>' : "";
   var oc = showOwe ? owedControl(bed, code, qty) : "";
-  return '<div class="zrow">' +
+  return '<div class="zrow' + (isIn ? " in" : "") + '">' +
+    // One tick per line. A box, not a word: it has to fit beside the owed
+    // stepper at phone width, and it reads the same in Spanish.
+    '<button class="in-b' + (isIn ? " on" : "") + '" data-bed="' + bed +
+      '" data-code="' + code + '" aria-pressed="' + (isIn ? "true" : "false") +
+      '" aria-label="' + (isIn ? "In the ground" : "Not in yet") + '">' +
+      (isIn ? "✓" : "") + "</button>" +
     // Codes in NO_SYM have no symbol on the sheet at all, so do not request one:
     // onerror hides it, but the phone still pays for four 404s every render.
     (NO_SYM.indexOf(code) === -1
@@ -2346,6 +2416,44 @@ function bedRow(code, qty, bed, showOwe){
     '<span class="zname">' + SPECIES[code] +
       ' <span class="zcode">' + code + "</span>" + sp + "</span>" +
     flag + oc + "</div>";
+}
+
+// 18.0 -> 18' 0". Inches, not tenths: that is what is on the crew's tape.
+function feetIn(ft){
+  var inch = Math.round(ft * 12);
+  return Math.floor(inch / 12) + "′ " + (inch % 12) + "″";
+}
+
+// "Tape it out": every tree and lilac in this bed as a distance along the fence
+// from a hard zero, and a distance off it. Field ask 9/25 -- see
+// tools/wsrcc-stakes.py for where every number comes from.
+function stakeTableHTML(b){
+  var st = BED_STAKES && BED_STAKES.beds[b.bed];
+  var ex = (BED_STAKES && BED_STAKES.extra[b.bed]) || [];
+  if(!st && !ex.length) return "";
+  function row(r){
+    return '<div class="tape-row' + (r.note ? " tape-flag" : "") + '">' +
+      '<span class="tape-sp">' + (SPECIES[r.code] || r.code) +
+        ' <span class="zcode">' + r.code + "</span></span>" +
+      '<span class="tape-n"><b>' + feetIn(r.along) + "</b> <span>going " + r.dir + "</span></span>" +
+      '<span class="tape-n"><b>' + feetIn(r.off) + "</b> <span>" +
+        ({site: "inside the fence", street: "outside the fence",
+          paving: "in from the paving, centred"}[r.side]) + "</span></span>" +
+      (r.note ? '<span class="tape-note">' + r.note + "</span>" : "") +
+      "</div>";
+  }
+  var h = '<div class="sub-head">Tape it out</div>';
+  if(st){
+    h += '<div class="tape-zero"><span>Zero:</span> <b>' + st.ref + "</b></div>" +
+         st.rows.map(row).join("");
+  }
+  if(ex.length){
+    h += '<div class="tape-zero"><span>Zero:</span> <b>' + ex[0].ref + "</b></div>" +
+         ex.map(row).join("");
+  }
+  return h + '<div class="tape-foot">Plan distances, to the trunk, along the ' +
+    "fence line and square off it. If the ground is out by more than a foot, " +
+    "stop and check before you stake.</div>";
 }
 
 function bedSplit(items){
@@ -2901,7 +3009,10 @@ function setOwed(bed, code, qty, max){
   scheduleSave();
 }
 
-function bedOutstanding(b, job){
+// What a bed is short on MATERIAL: nothing received, or recorded owed. This was
+// bedOutstanding() until 9/25; it is still the whole answer for a bed with no
+// line ticks, and the part of the answer that says "there is nothing to plant".
+function bedShortfall(b, job){
   var out = [];
   // Counts are keyed "<job>:<row>". This read was pinned to "h2s:" and so
   // answered every WSRCC bed with Home2Suites' stock -- the same mistake the
@@ -2928,6 +3039,90 @@ function bedOutstanding(b, job){
     if(q) out.push({code: c, name: decode(row[0]), qty: q, recorded: true});
   });
   return out.sort(function(x, y){ return y.qty - x.qty; });
+}
+
+// Nothing received for this line at all -- there is nothing to put in the ground.
+function noMaterial(b, c, job){
+  return bedShortfall(b, job).some(function(o){ return o.code === c && !o.recorded; });
+}
+
+// Is this line in the ground? A tick answers it. With no tick, a bed marked
+// planted with the old single button reads the way it always did: every line
+// that had material is in, a line with none is not.
+function lineIn(b, c, job){
+  var m = plantedLine[bedKeyFor(job || currentJob, b.bed)];
+  if(m && m[c] !== undefined) return !!m[c];
+  return !!planted[bedKeyFor(job || currentJob, b.bed)] && !noMaterial(b, c, job);
+}
+
+// What a bed still owes: the material it is short, PLUS, once it is planted,
+// every line nobody has ticked. The second half is the point. The shortfall is
+// worked out from what has been RECEIVED, so the day the pine lands it drops
+// out -- and a planted bed went green with the pine still on the truck.
+// A ticked line owes only what the stepper records against it.
+function bedOutstanding(b, job){
+  var jk = job || currentJob, k = bedKeyFor(jk, b.bed);
+  var short = bedShortfall(b, job), out = [];
+  var ticks = plantedLine[k] || {};
+  Object.keys(b.items).forEach(function(c){
+    var s = short.filter(function(o){ return o.code === c; })[0];
+    if(ticks[c] === true){ if(s && s.recorded) out.push(s); return; }
+    if(s){ out.push(s); return; }
+    if(planted[k] && !lineIn(b, c, job)){
+      var row = codeRow(c, jk);
+      if(row) out.push({code: c, name: decode(row[0]), qty: b.items[c],
+                        recorded: false, notIn: true});
+    }
+  });
+  return out.sort(function(x, y){ return y.qty - x.qty; });
+}
+
+// "127 of 130 in". A ticked line with some recorded owed is in less that many.
+function bedLineProgress(b){
+  var inQty = 0, total = 0;
+  Object.keys(b.items).forEach(function(c){
+    total += b.items[c];
+    if(lineIn(b, c)) inQty += Math.max(0, b.items[c] - owedIn(b.bed, c));
+  });
+  return {inQty: inQty, total: total};
+}
+
+// A bed is planted once something is in AND every line left has nothing to
+// plant. A line with material on site and not ticked is the crew's work still
+// to do, and a bed hiding that behind "planted" is the thing to avoid.
+function settleBed(b){
+  var k = bedKey(b.bed), codes = Object.keys(b.items);
+  var anyIn = codes.some(function(c){ return lineIn(b, c); });
+  var rest = codes.every(function(c){ return lineIn(b, c) || noMaterial(b, c); });
+  if(anyIn && rest) planted[k] = true; else delete planted[k];
+}
+
+function setLineIn(b, c, on){
+  var k = bedKey(b.bed);
+  // Pin every line first, so the whole-bed default on an older planted bed
+  // cannot flip underneath the tick when received counts change later.
+  if(!plantedLine[k]){
+    plantedLine[k] = {};
+    Object.keys(b.items).forEach(function(x){ plantedLine[k][x] = lineIn(b, x); });
+  }
+  plantedLine[k][c] = !!on;
+  settleBed(b);
+  scheduleSave();
+}
+
+// The whole-bed button. Marking ticks every line that has material and leaves
+// the rest open, written out so that material arriving later cannot tick them.
+function setBedPlanted(b, on){
+  var k = bedKey(b.bed);
+  if(on){
+    plantedLine[k] = {};
+    Object.keys(b.items).forEach(function(c){ plantedLine[k][c] = !noMaterial(b, c); });
+    planted[k] = true;
+  } else {
+    delete planted[k];
+    delete plantedLine[k];
+  }
+  scheduleSave();
 }
 
 function shortText(list){
@@ -3184,6 +3379,8 @@ var ES = {
   "\u00b7 rows ": "\u00b7 hileras a ",
   "Not a separate bed.": "No es una cama aparte.",
   "This callout covers two planters.": "Esta anotaci\u00f3n cubre dos jardineras.",
+  "The 3 Scotch Pine and 4 lilacs are in the northwest corner, west of the driveway, where the 3 marker is. The 61 Ivory Halo and 62 Red-twig Dogwood are the hedge across the driveway, on the Boundary Ave strip running east to the walkway.":
+    "Los 3 pinos silvestres y las 4 lilas est\u00e1n en la esquina noroeste, al oeste de la entrada, donde est\u00e1 el marcador 3. Los 61 cornejos Ivory Halo y los 62 cornejos rojos son el seto al otro lado de la entrada, en la franja de Boundary Ave que corre al este hasta la banqueta.",
   "Same planter as bed ": "Misma jardinera que la cama ",
   "One callout stack on the sheet, 86 units together": "Una sola anotaci\u00f3n en el plano, 86 unidades juntas",
   "walk it as one bed.": "rec\u00f3rrela como una sola cama.",
@@ -3218,6 +3415,33 @@ var ES = {
   " ft": " pies",
   "Mark staked": "Marcar como marcada",
   "Mark planted": "Marcar como plantada",
+  "Tape it out": "Medir con cinta",
+  "Zero:": "Cero:",
+  "going west": "hacia el oeste", "going east": "hacia el este",
+  "going north": "hacia el norte", "going south": "hacia el sur",
+  "inside the fence": "dentro de la cerca", "outside the fence": "fuera de la cerca",
+  "in from the paving, centred": "desde el pavimento, al centro",
+  "east end of the planter, at the walkway": "extremo este de la jardinera, en la banqueta",
+  "fence angles away here: this one is OUTSIDE it":
+    "aquí la cerca da la vuelta: esta queda AFUERA",
+  "On the drawing with NO callout -- the 72nd lilac":
+    "En el plano SIN etiqueta -- la lila número 72",
+  "NW fence corner post": "poste de la esquina NO de la cerca",
+  "SW fence corner post": "poste de la esquina SO de la cerca",
+  "SE fence corner post": "poste de la esquina SE de la cerca",
+  "NE fence post where the angled piece meets the Newel St run":
+    "poste NE de la cerca, donde el tramo en diagonal llega a Newel St",
+  "Newel St gate, north post": "portón de Newel St, poste norte",
+  "Newel St gate, south post": "portón de Newel St, poste sur",
+  "west edge of the walkway": "orilla oeste de la banqueta",
+  "east edge of the walkway": "orilla este de la banqueta",
+  "driveway curb, west side": "bordillo de la entrada, lado oeste",
+  "driveway curb, east side": "bordillo de la entrada, lado este",
+  "Plan distances, to the trunk, along the fence line and square off it. If the ground is out by more than a foot, stop and check before you stake.":
+    "Distancias del plano, al tronco, a lo largo de la cerca y en escuadra. Si el terreno no cuadra por más de un pie, para y revisa antes de marcar.",
+  "Whole run — tap to zoom in": "Todo el tramo — toca para acercar",
+  "In the ground": "Ya plantada",
+  "Not in yet": "Todavía no plantada",
   "Staked": "Marcada",
   "Planted": "Plantada",
   "Stake each one": "Marca cada uno",
@@ -3372,6 +3596,7 @@ var ES_RULES = [
   [/^Saved as (.+)$/, "Guardado como $1"],
   [/^(\d+) unidades counted across (\d+) species$/, "$1 unidades contadas en $2 especies"],
   [/^(\d+) planted \u00b7 (\d+) staked$/, "$1 plantadas \u00b7 $2 marcadas"],
+  [/^(\d+) of (\d+) in$/, "$1 de $2 plantadas"],
   [/^(\d+) recorded shortfalls? at beds$/, "$1 faltantes anotados en camas"],
   [/^Saved$/, "Guardado"],
   [/^Cama (B\d+) on the plan$/, "Cama $1 en el plano"],
@@ -3635,7 +3860,21 @@ function wireLangButtons(){
 // Add a pair here as each one is confirmed in the field. Do NOT renumber beds
 // to fix this: the numbers are on printed material and in people's heads, and
 // renumbering mid-job is how the wrong thing gets planted.
-var WSRCC_BED_LINKS = {};   // no linked beds on this job
+// Bed 3's callouts cover two planters on either side of the Boundary Ave
+// driveway: the "3" marker and the pines/lilacs are in the NW corner, the 123
+// dogwoods are the hedge across the drive. A crew following the marker found
+// 7 plants, not 130. (Field check 9/25, off the vector plan.)
+var WSRCC_BED_LINKS = {
+  B03: {kind: "shared", other: null,
+        note: "The 3 Scotch Pine and 4 lilacs are in the northwest corner, west of the driveway, where the 3 marker is. The 61 Ivory Halo and 62 Red-twig Dogwood are the hedge across the driveway, on the Boundary Ave strip running east to the walkway."}
+};
+// Tape-out distances for every tree and lilac, off the vector plan: a hard zero
+// (fence corner/gate post, walkway edge, driveway curb), feet along the fence
+// and which way, feet off the fence line and which side. GENERATED -- edit
+// tools/wsrcc-stakes.py and re-run it; do not hand-edit between the markers.
+/* STAKES:BEGIN (tools/wsrcc-stakes.py) */
+var WSRCC_STAKES = {"beds":{"B02":{"ref":"driveway curb, west side","rows":[{"code":"SP","along":41.45,"dir":"west","off":12.02,"side":"site"}]},"B03":{"ref":"driveway curb, west side","rows":[{"code":"PS","along":7.73,"dir":"west","off":2.24,"side":"street","note":"fence angles away here: this one is OUTSIDE it"},{"code":"SP","along":13.73,"dir":"west","off":6.58,"side":"street"},{"code":"PS","along":19.73,"dir":"west","off":2.2,"side":"site"},{"code":"SP","along":25.73,"dir":"west","off":6.62,"side":"street"},{"code":"PS","along":31.73,"dir":"west","off":2.16,"side":"site"},{"code":"SP","along":37.73,"dir":"west","off":6.66,"side":"street"},{"code":"SP","along":43.63,"dir":"west","off":3.67,"side":"site"}]},"B04":{"ref":"NE fence post where the angled piece meets the Newel St run","rows":[{"code":"BP","along":4.43,"dir":"south","off":1.57,"side":"street"}]},"B05":{"ref":"west edge of the walkway","rows":[{"code":"PP","along":5.97,"dir":"west","off":3.13,"side":"site"},{"code":"SP","along":11.97,"dir":"west","off":7.63,"side":"street"},{"code":"PS","along":17.97,"dir":"west","off":3.06,"side":"site"},{"code":"SP","along":23.97,"dir":"west","off":7.71,"side":"street"},{"code":"PS","along":29.97,"dir":"west","off":2.99,"side":"site"},{"code":"SP","along":35.97,"dir":"west","off":7.95,"side":"street"},{"code":"PS","along":41.97,"dir":"west","off":2.92,"side":"site"},{"code":"SP","along":47.97,"dir":"west","off":7.85,"side":"street"},{"code":"PP","along":54.97,"dir":"west","off":2.82,"side":"site"},{"code":"SP","along":60.97,"dir":"west","off":8.0,"side":"street"},{"code":"PP","along":66.97,"dir":"west","off":2.82,"side":"site"},{"code":"SP","along":72.97,"dir":"west","off":7.95,"side":"street"},{"code":"PP","along":78.97,"dir":"west","off":2.79,"side":"site"},{"code":"SP","along":84.97,"dir":"west","off":8.06,"side":"street"},{"code":"PP","along":92.97,"dir":"west","off":2.76,"side":"site"},{"code":"SP","along":98.97,"dir":"west","off":8.01,"side":"street"},{"code":"PP","along":104.97,"dir":"west","off":2.76,"side":"site"},{"code":"SP","along":110.97,"dir":"west","off":8.01,"side":"street"},{"code":"PP","along":116.97,"dir":"west","off":2.75,"side":"site"},{"code":"SP","along":122.97,"dir":"west","off":8.02,"side":"street"},{"code":"PP","along":130.97,"dir":"west","off":2.64,"side":"site"},{"code":"SP","along":136.97,"dir":"west","off":8.18,"side":"street"},{"code":"PP","along":142.97,"dir":"west","off":2.61,"side":"site"},{"code":"SP","along":148.97,"dir":"west","off":8.22,"side":"street"},{"code":"PP","along":154.97,"dir":"west","off":2.59,"side":"site"},{"code":"SP","along":160.97,"dir":"west","off":8.25,"side":"street"},{"code":"PP","along":169.97,"dir":"west","off":2.56,"side":"site"},{"code":"SP","along":175.97,"dir":"west","off":8.21,"side":"street"},{"code":"PP","along":181.97,"dir":"west","off":2.55,"side":"site"},{"code":"SP","along":187.97,"dir":"west","off":8.22,"side":"street"},{"code":"PP","along":193.97,"dir":"west","off":2.54,"side":"site"},{"code":"SP","along":199.97,"dir":"west","off":8.23,"side":"street"},{"code":"PS","along":207.97,"dir":"west","off":2.43,"side":"site"},{"code":"SP","along":213.97,"dir":"west","off":8.37,"side":"street"},{"code":"PS","along":219.97,"dir":"west","off":2.41,"side":"street","note":"fence angles away here: this one is OUTSIDE it"},{"code":"SP","along":225.97,"dir":"west","off":8.36,"side":"street"},{"code":"PS","along":231.97,"dir":"west","off":2.38,"side":"street","note":"fence angles away here: this one is OUTSIDE it"}]},"B06":{"ref":"NE fence post where the angled piece meets the Newel St run","rows":[{"code":"SP","along":1.31,"dir":"east","off":6.65,"side":"street"},{"code":"PS","along":7.41,"dir":"west","off":3.65,"side":"site"},{"code":"SP","along":7.46,"dir":"west","off":6.68,"side":"street"},{"code":"PS","along":17.18,"dir":"west","off":3.59,"side":"site"},{"code":"SP","along":20.46,"dir":"west","off":6.72,"side":"street"},{"code":"PS","along":26.96,"dir":"west","off":3.57,"side":"site"},{"code":"SP","along":33.46,"dir":"west","off":6.77,"side":"street"},{"code":"PP","along":39.26,"dir":"west","off":3.53,"side":"site"},{"code":"SP","along":45.76,"dir":"west","off":6.81,"side":"street"},{"code":"PP","along":52.26,"dir":"west","off":3.49,"side":"site"},{"code":"SP","along":58.76,"dir":"west","off":6.85,"side":"street"},{"code":"PP","along":65.26,"dir":"west","off":3.44,"side":"site"},{"code":"SP","along":71.76,"dir":"west","off":6.89,"side":"street"},{"code":"PS","along":78.26,"dir":"west","off":3.4,"side":"site"},{"code":"SP","along":84.76,"dir":"west","off":6.94,"side":"street"},{"code":"PS","along":91.26,"dir":"west","off":3.36,"side":"site"},{"code":"SP","along":97.76,"dir":"west","off":6.98,"side":"street"},{"code":"PS","along":104.26,"dir":"west","off":3.32,"side":"site"},{"code":"SP","along":110.76,"dir":"west","off":7.02,"side":"street"},{"code":"PP","along":117.26,"dir":"west","off":3.27,"side":"site"},{"code":"SP","along":123.77,"dir":"west","off":7.07,"side":"street"},{"code":"PP","along":130.26,"dir":"west","off":3.23,"side":"site"},{"code":"SP","along":136.76,"dir":"west","off":7.11,"side":"street"},{"code":"PS","along":143.26,"dir":"west","off":3.19,"side":"site"},{"code":"SP","along":149.76,"dir":"west","off":7.15,"side":"street"},{"code":"PP","along":156.26,"dir":"west","off":3.14,"side":"site"}]},"B07":{"ref":"NW fence corner post","rows":[{"code":"SP","along":29.97,"dir":"south","off":5.89,"side":"site"},{"code":"SP","along":47.97,"dir":"south","off":6.0,"side":"site"}]},"B09":{"ref":"NE fence post where the angled piece meets the Newel St run","rows":[{"code":"PT","along":18.58,"dir":"south","off":2.25,"side":"street"},{"code":"BP","along":35.75,"dir":"south","off":2.53,"side":"street"}]},"B10":{"ref":"NE fence post where the angled piece meets the Newel St run","rows":[{"code":"PT","along":53.75,"dir":"south","off":2.54,"side":"street"}]},"B11":{"ref":"NW fence corner post","rows":[{"code":"SP","along":65.97,"dir":"south","off":5.99,"side":"site"},{"code":"SP","along":89.92,"dir":"south","off":3.55,"side":"site"},{"code":"SP","along":105.92,"dir":"south","off":3.52,"side":"site"},{"code":"SP","along":121.92,"dir":"south","off":3.51,"side":"site"}]},"B12":{"ref":"Newel St gate, north post","rows":[{"code":"BP","along":53.57,"dir":"north","off":3.03,"side":"street"},{"code":"PT","along":69.56,"dir":"north","off":2.52,"side":"street"},{"code":"BP","along":87.57,"dir":"north","off":3.26,"side":"street"}]},"B14":{"ref":"Newel St gate, north post","rows":[{"code":"BP","along":15.56,"dir":"north","off":2.51,"side":"street"},{"code":"PT","along":33.56,"dir":"north","off":2.52,"side":"street"}]},"B15":{"ref":"SW fence corner post","rows":[{"code":"SP","along":127.11,"dir":"north","off":6.04,"side":"site"},{"code":"SP","along":151.14,"dir":"north","off":6.07,"side":"site"}]},"B16":{"ref":"SW fence corner post","rows":[{"code":"SP","along":103.11,"dir":"north","off":6.03,"side":"site"}]},"B19":{"ref":"east end of the planter, at the walkway","rows":[{"code":"BP","along":10.54,"dir":"west","off":6.65,"side":"paving"},{"code":"BP","along":38.04,"dir":"west","off":6.68,"side":"paving"}]},"B24":{"ref":"Newel St gate, south post","rows":[{"code":"AP","along":10.06,"dir":"south","off":5.43,"side":"street"}]},"B25":{"ref":"SW fence corner post","rows":[{"code":"SP","along":61.39,"dir":"north","off":6.02,"side":"site"},{"code":"SP","along":81.39,"dir":"north","off":6.02,"side":"site"}]},"B26":{"ref":"SE fence corner post","rows":[{"code":"AP","along":28.21,"dir":"north","off":6.18,"side":"street"},{"code":"AP","along":50.44,"dir":"north","off":5.39,"side":"street"},{"code":"AP","along":70.44,"dir":"north","off":5.39,"side":"street"}]},"B27":{"ref":"SW fence corner post","rows":[{"code":"SP","along":41.39,"dir":"north","off":6.0,"side":"site"}]},"B31":{"ref":"SW fence corner post","rows":[{"code":"SP","along":25.3,"dir":"east","off":2.86,"side":"site"},{"code":"SP","along":45.3,"dir":"east","off":2.86,"side":"site"}]},"B32":{"ref":"SW fence corner post","rows":[{"code":"SP","along":65.3,"dir":"east","off":2.86,"side":"site"},{"code":"SP","along":85.3,"dir":"east","off":2.86,"side":"site"}]},"B33":{"ref":"SW fence corner post","rows":[{"code":"SP","along":105.3,"dir":"east","off":2.86,"side":"site"},{"code":"SP","along":125.3,"dir":"east","off":2.86,"side":"site"}]},"B34":{"ref":"SW fence corner post","rows":[{"code":"SP","along":145.3,"dir":"east","off":2.86,"side":"site"},{"code":"SP","along":165.3,"dir":"east","off":2.86,"side":"site"}]},"B35":{"ref":"SW fence corner post","rows":[{"code":"SP","along":185.32,"dir":"east","off":2.88,"side":"site"},{"code":"SP","along":205.3,"dir":"east","off":2.86,"side":"site"}]},"B36":{"ref":"SW fence corner post","rows":[{"code":"SP","along":225.27,"dir":"east","off":2.86,"side":"site"},{"code":"SP","along":245.3,"dir":"east","off":2.86,"side":"site"}]},"B37":{"ref":"SE fence corner post","rows":[{"code":"SP","along":198.03,"dir":"west","off":2.86,"side":"site"},{"code":"SP","along":218.03,"dir":"west","off":2.86,"side":"site"}]},"B38":{"ref":"SE fence corner post","rows":[{"code":"SP","along":158.03,"dir":"west","off":2.86,"side":"site"},{"code":"SP","along":178.03,"dir":"west","off":2.86,"side":"site"}]},"B39":{"ref":"SE fence corner post","rows":[{"code":"SP","along":118.03,"dir":"west","off":2.86,"side":"site"},{"code":"SP","along":138.03,"dir":"west","off":2.86,"side":"site"}]},"B40":{"ref":"SE fence corner post","rows":[{"code":"SP","along":78.03,"dir":"west","off":2.86,"side":"site"},{"code":"SP","along":98.03,"dir":"west","off":2.86,"side":"site"}]},"B41":{"ref":"SE fence corner post","rows":[{"code":"SP","along":38.03,"dir":"west","off":2.86,"side":"site"},{"code":"SP","along":58.03,"dir":"west","off":2.86,"side":"site"}]},"B42":{"ref":"SE fence corner post","rows":[{"code":"SP","along":5.98,"dir":"north","off":6.19,"side":"street"}]}},"extra":{"B27":[{"code":"SP","along":9.58,"dir":"north","off":4.09,"side":"site","note":"On the drawing with NO callout -- the 72nd lilac","ref":"SW fence corner post"}]}};
+/* STAKES:END */
 var H2S_BED_LINKS = {
   B41: {kind: "split", other: "44",
         note: "Same planter as bed 44. One callout stack on the sheet, 86 units together \u2014 walk it as one bed."},
@@ -3658,12 +3897,20 @@ var BED_LINKS = {};
 var H2S = {beds: BEDS, species: SPECIES, spacing: SPACING, zones: ZONES,
            disc: DISCREPANCY, mapPlan: MAP_PLAN, mapXY: MAP_XY,
            bedImg: "./beds/", symImg: "./symbols/", offlineMB: 17,
-           links: H2S_BED_LINKS, noSym: []};
+           links: H2S_BED_LINKS, noSym: [], runs: [], stakes: null};
 var WSRCC = {beds: WSRCC_BEDS, species: WSRCC_SPECIES, spacing: WSRCC_SPACING,
              zones: WSRCC_ZONES, disc: WSRCC_DISCREPANCY,
              mapPlan: WSRCC_MAP_PLAN, mapXY: WSRCC_MAP_XY,
-             bedImg: "./beds-wsrcc/", symImg: "./symbols-wsrcc/", offlineMB: 10,
+             // v2/ carries the site fence in red (9/25). A NEW folder, not the
+             // old files replaced: the bed cache is cache-first and never
+             // revalidates, so replaced-in-place pictures never reach a phone.
+             bedImg: "./beds-wsrcc/v2/", symImg: "./symbols-wsrcc/", offlineMB: 11,
              links: WSRCC_BED_LINKS,
+             // Beds that run ~250 ft along Boundary Ave. Their crop shows only
+             // the driveway or walkway end, so each also gets <bed>-run.jpg,
+             // a strip of the whole length. Built by tools/wsrcc-pills.py RUNS.
+             runs: ["B01", "B03", "B05", "B06"],
+             stakes: WSRCC_STAKES,
              // PT has callouts on L102 but no row in the L501 schedule, so
              // there is no symbol on the sheet to cut. Not a missing file.
              noSym: ["PT"]};
@@ -3674,7 +3921,8 @@ function applyJobData(){
   BEDS = d.beds; SPECIES = d.species; SPACING = d.spacing; ZONES = d.zones;
   DISCREPANCY = d.disc; MAP_PLAN = d.mapPlan; MAP_XY = d.mapXY;
   BED_IMG = d.bedImg; SYM_IMG = d.symImg; OFFLINE_MB = d.offlineMB;
-  BED_LINKS = d.links; NO_SYM = d.noSym;
+  BED_LINKS = d.links; NO_SYM = d.noSym; BED_RUNS = d.runs || [];
+  BED_STAKES = d.stakes || null;
   SPECIES_ALIAS = (currentJob === "wsrcc") ? WSRCC_SPECIES_ALIAS : H2S_SPECIES_ALIAS;
   NAME_CODE = null;   // rebuilt against the SPECIES now loaded
   // CODE_ROW_BY_JOB is deliberately NOT cleared: it is keyed by job, so each
@@ -3682,6 +3930,8 @@ function applyJobData(){
 }
 var OFFLINE_MB = 17;
 var NO_SYM = [];
+var BED_RUNS = [];
+var BED_STAKES = null;
 function hasBedView(job){ return job === "h2s" || job === "wsrcc"; }
 
 function renderBeds(){
@@ -3845,9 +4095,10 @@ function renderBeds(){
 
     var shortList = bedOutstanding(b);
     var isShort = shortList.length > 0;
+    var prog = bedLineProgress(b);
 
     var card = document.createElement("section");
-    card.className = "zone" +
+    card.className = "zone bed-card" +
       (isPlanted && isShort ? " done short" :
        isPlanted ? " done" : isStakedDone ? " partdone" : "");
     card.id = "bed-" + b.bed;
@@ -3862,6 +4113,9 @@ function renderBeds(){
           " " + ZONES[b.zone].crew + "</span>" +
         '<span class="zone-count">' + nStake + " to stake &middot; " +
           b.units + " units total" +
+          (prog.inQty && prog.inQty < prog.total
+            ? '</span><span class="zone-prog">' + prog.inQty + " of " + prog.total + " in"
+            : "") +
           (myPos ? " &middot; " + Math.round(distFt(myPos.lat, myPos.lon, b.lat, b.lon)) +
             " ft away" : "") + "</span>" +
       "</span>";
@@ -3874,8 +4128,9 @@ function renderBeds(){
       btn.className = "act-btn" + (t[2] ? " on" : "");
       btn.textContent = t[2] ? t[0] : "Mark " + t[0].toLowerCase();
       btn.addEventListener("click", function(){
-        t[1][bedKey(b.bed)] = !t[1][bedKey(b.bed)];
-        scheduleSave();
+        // Planted goes through setBedPlanted so the line ticks move with it.
+        if(t[1] === planted) setBedPlanted(b, !t[2]);
+        else { t[1][bedKey(b.bed)] = !t[1][bedKey(b.bed)]; scheduleSave(); }
         renderBeds();
       });
       acts.appendChild(btn);
@@ -3915,12 +4170,24 @@ function renderBeds(){
       "</a>";
     card.appendChild(pic);
 
+    if(BED_RUNS.indexOf(b.bed) !== -1){
+      var run = document.createElement("div");
+      run.className = "bed-pic bed-run";
+      run.innerHTML = '<div class="run-label">Whole run &mdash; tap to zoom in</div>' +
+        '<a href="' + BED_IMG + b.bed + '-run.jpg" data-lb="1"' +
+        ' data-title="Bed ' + b.bed.replace("B", "") + ' — whole run">' +
+        imgOrNothing(BED_IMG + b.bed + "-run.jpg",
+          "Bed " + b.bed + " whole run on the plan", "bed-img") +
+        "</a>";
+      card.appendChild(run);
+    }
+
     if(split.stake.length){
       card.insertAdjacentHTML("beforeend",
         '<div class="sub-head">Stake each one &mdash; ' + nStake + " spots</div>");
       card.insertAdjacentHTML("beforeend",
         split.stake.map(function(c){
-          return bedRow(c, b.items[c], b.bed, isStakedDone || isPlanted);
+          return bedRow(c, b.items[c], b.bed, isStakedDone || isPlanted, lineIn(b, c));
         }).join(""));
     }
     if(split.mass.length){
@@ -3928,10 +4195,11 @@ function renderBeds(){
         '<div class="sub-head">Mass planting &mdash; mark the bed edge</div>');
       card.insertAdjacentHTML("beforeend",
         split.mass.map(function(c){
-          return bedRow(c, b.items[c], b.bed, isStakedDone || isPlanted);
+          return bedRow(c, b.items[c], b.bed, isStakedDone || isPlanted, lineIn(b, c));
         }).join(""));
       card.insertAdjacentHTML("beforeend", renderFit(b, split.mass));
     }
+    card.insertAdjacentHTML("beforeend", stakeTableHTML(b));
 
     container.appendChild(card);
   });
@@ -4003,6 +4271,18 @@ function renderBeds(){
     setTimeout(function(){ el.classList.remove("bed-flash"); }, 1600);
     jb.blur();
   }
+  Array.prototype.forEach.call(container.querySelectorAll(".in-b"),
+    function(btn){
+      btn.addEventListener("click", function(){
+        var bed = btn.dataset.bed;
+        var b = BEDS.filter(function(x){ return x.bed === bed; })[0];
+        if(!b) return;
+        setLineIn(b, btn.dataset.code, !lineIn(b, btn.dataset.code));
+        renderBeds();
+        var back = document.getElementById("bed-" + bed);
+        if(back) back.scrollIntoView({block: "center"});
+      });
+    });
   Array.prototype.forEach.call(container.querySelectorAll(".owe-b"),
     function(btn){
       btn.addEventListener("click", function(){
@@ -4040,6 +4320,8 @@ function saveMapsOffline(btn){
     symCodes.map(function(c){ return SYM_IMG + c + ".png"; })
   ).concat(BEDS.map(function(b){
     return BED_IMG + b.bed + ".jpg";
+  })).concat(BED_RUNS.map(function(id){
+    return BED_IMG + id + "-run.jpg";
   }));
   var done = 0, failed = 0;
   btn.disabled = true;
