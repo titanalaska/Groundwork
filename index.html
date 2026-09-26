@@ -1192,7 +1192,7 @@
 <div id="flagsSlot"></div>
 <div id="groups"></div>
 
-<footer>Counts save as you tap. &middot; build v33</footer>
+<footer>Counts save as you tap. &middot; build v34</footer>
 
 <!-- The plan data, shared with status.html. Must come BEFORE the script block
      below, which uses JOBS synchronously. sw.js precaches it as CRITICAL. -->
@@ -3918,10 +3918,11 @@ var H2S = {beds: BEDS, species: SPECIES, spacing: SPACING, zones: ZONES,
 var WSRCC = {beds: WSRCC_BEDS, species: WSRCC_SPECIES, spacing: WSRCC_SPACING,
              zones: WSRCC_ZONES, disc: WSRCC_DISCREPANCY,
              mapPlan: WSRCC_MAP_PLAN, mapXY: WSRCC_MAP_XY,
-             // v2/ carries the site fence in red (9/25). A NEW folder, not the
-             // old files replaced: the bed cache is cache-first and never
-             // revalidates, so replaced-in-place pictures never reach a phone.
-             bedImg: "./beds-wsrcc/v2/", symImg: "./symbols-wsrcc/", offlineMB: 11,
+             // v3/: the Newel St "PT" pills read PTE, as aspen (9/25). v2/ was
+             // the fence. Each is a NEW folder, never the old files replaced:
+             // the bed cache is cache-first and never revalidates, so a
+             // replaced-in-place picture never reaches a phone.
+             bedImg: "./beds-wsrcc/v3/", symImg: "./symbols-wsrcc/", offlineMB: 11,
              links: WSRCC_BED_LINKS,
              // Beds that run ~250 ft along Boundary Ave. Their crop shows only
              // the driveway or walkway end, so each also gets <bed>-run.jpg,

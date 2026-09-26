@@ -33,10 +33,11 @@ test('every WSRCC picture the app asks for is on disk', async ({ page }) => {
   expect(missing, 'these would render as no picture at all').toEqual([]);
 });
 
-test('the WSRCC pictures are the fenced set, not the old files', async ({ page }) => {
-  // The old ones are still on disk for installs on the previous shell, so
-  // pointing back at them would pass the file check and quietly drop the fence.
-  expect(await page.evaluate(() => BED_IMG)).toBe('./beds-wsrcc/v2/');
+test('the WSRCC pictures are the current set (fence + PTE pills), not an old one', async ({ page }) => {
+  // v2/ (fence, but "PT" pills) and the unfenced originals are still on disk
+  // for installs on an older shell, so pointing back at either would pass the
+  // file check and quietly bring back "PT" -- or drop the fence.
+  expect(await page.evaluate(() => BED_IMG)).toBe('./beds-wsrcc/v3/');
 });
 
 test('the whole-run strip is on the four long beds and no others', async ({ page }) => {
@@ -46,7 +47,7 @@ test('the whole-run strip is on the four long beds and no others', async ({ page
       .map((a) => a.closest('section').id.replace('bed-', '')).sort());
   expect(withRun).toEqual(RUN_BEDS);
   const href = await page.locator('#bed-B03 .bed-run a').getAttribute('href');
-  expect(href).toBe('./beds-wsrcc/v2/B03-run.jpg');
+  expect(href).toBe('./beds-wsrcc/v3/B03-run.jpg');
 });
 
 test('Home2Suites has no strips', async ({ page }) => {
@@ -65,6 +66,6 @@ test('Save for offline takes the strips too', async ({ page }) => {
     saveMapsOffline(b);
     return seen;
   });
-  RUN_BEDS.forEach((id) => expect(asked).toContain('./beds-wsrcc/v2/' + id + '-run.jpg'));
-  expect(asked).toContain('./beds-wsrcc/v2/site-map.jpg');
+  RUN_BEDS.forEach((id) => expect(asked).toContain('./beds-wsrcc/v3/' + id + '-run.jpg'));
+  expect(asked).toContain('./beds-wsrcc/v3/site-map.jpg');
 });

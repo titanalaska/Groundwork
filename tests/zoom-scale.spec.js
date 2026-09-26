@@ -24,17 +24,17 @@ test.beforeEach(async ({ page }) => { await loadApp(page); });
 
 test('WSRCC bed picture: 0.8 in a pixel', async ({ page }) => {
   await openJob(page, 'wsrcc');
-  expect(await hintAt1x(page, './beds-wsrcc/v2/B03.jpg')).toContain('about 0.8 in');
+  expect(await hintAt1x(page, './beds-wsrcc/v3/B03.jpg')).toContain('about 0.8 in');
 });
 
 test('WSRCC whole-run strip: 0.8 in a pixel', async ({ page }) => {
   await openJob(page, 'wsrcc');
-  expect(await hintAt1x(page, './beds-wsrcc/v2/B05-run.jpg')).toContain('about 0.8 in');
+  expect(await hintAt1x(page, './beds-wsrcc/v3/B05-run.jpg')).toContain('about 0.8 in');
 });
 
 test('WSRCC site map: 1.7 in a pixel', async ({ page }) => {
   await openJob(page, 'wsrcc');
-  expect(await hintAt1x(page, './beds-wsrcc/v2/site-map.jpg')).toContain('about 1.7 in');
+  expect(await hintAt1x(page, './beds-wsrcc/v3/site-map.jpg')).toContain('about 1.7 in');
 });
 
 test('Home2Suites keeps its 1.6 in', async ({ page }) => {

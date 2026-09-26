@@ -150,10 +150,10 @@ const MUTATIONS = [
     tag: 'runs',
   },
   {
-    name: 'point WSRCC back at the pictures without the fence',
-    find: 'bedImg: "./beds-wsrcc/v2/"',
-    replace: 'bedImg: "./beds-wsrcc/"',
-    caughtBy: 'the fenced set',
+    name: 'point WSRCC back at the pictures that still say PT',
+    find: 'bedImg: "./beds-wsrcc/v3/"',
+    replace: 'bedImg: "./beds-wsrcc/v2/"',
+    caughtBy: 'the current set',
     tag: 'runs',
   },
   {
