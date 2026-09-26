@@ -80,6 +80,13 @@ const MUTATIONS = [
     tag: 'line-ticks',
   },
   {
+    name: 'use the Home2Suites zoom figure on WSRCC',
+    find: '  if(currentJob !== "wsrcc") return "1.6";',
+    replace: '  return "1.6";',
+    caughtBy: 'WSRCC bed picture: 0.8 in a pixel',
+    tag: 'zoom',
+  },
+  {
     name: 'put bed 5 back on the west side',
     find: '{"bed":"B05","where":"North side","units":37,',
     replace: '{"bed":"B05","where":"West side","units":37,',

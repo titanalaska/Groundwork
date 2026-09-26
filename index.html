@@ -1192,7 +1192,7 @@
 <div id="flagsSlot"></div>
 <div id="groups"></div>
 
-<footer>Counts save as you tap. &middot; build v31</footer>
+<footer>Counts save as you tap. &middot; build v32</footer>
 
 <!-- The plan data, shared with status.html. Must come BEFORE the script block
      below, which uses JOBS synchronously. sw.js precaches it as CRITICAL. -->
@@ -2766,6 +2766,17 @@ var lbZoom = "fit";
 // 1x means one image pixel per screen pixel: on this sheet that is 1.6 inches
 // of ground per pixel, and it is the most real detail there is. 2x and 3x
 // magnify honestly; nothing is invented.
+// Ground inches per pixel at 1x. The 1.6 was Home2Suites' figure and read
+// twice too coarse on WSRCC (field report 9/25). WSRCC's are worked from
+// tools/wsrcc-pills.py and the bar scale (3.6 pt = 1 ft):
+//   bed crops and whole-run strips: 1500 px / 360 pt = 4.167 px/pt
+//     x 3.6 = 15.0 px/ft -> 12 / 15.0 = 0.8 in
+//   site map: 4013 px / 2100 pt = 1.911 px/pt x 3.6 = 6.88 px/ft -> 1.7 in
+function inchesPerPixel(src){
+  if(currentJob !== "wsrcc") return "1.6";
+  return String(src || "").indexOf("site-map.jpg") !== -1 ? "1.7" : "0.8";
+}
+
 function applyZoom(){
   var img = document.getElementById("lbImg");
   var scroll = document.getElementById("lbScroll");
@@ -2789,7 +2800,8 @@ function applyZoom(){
     if(stack){ stack.style.maxWidth = "none"; stack.style.width = img.style.width; }
     scroll.classList.add("zoomed");
     hint.textContent = f === 1
-      ? "Actual size of the drawing. 1 pixel is about 1.6 in on the ground."
+      ? "Actual size of the drawing. 1 pixel is about " + inchesPerPixel(lightboxSrc) +
+        " in on the ground."
       : f + "\u00d7 the drawing's own pixels \u2014 magnified, not sharpened.";
     // Centre on the middle of the picture when stepping in.
     scroll.scrollLeft = (scroll.scrollWidth - scroll.clientWidth) / 2;
@@ -3465,6 +3477,10 @@ var ES = {
     "Toda la cama. Toca 2\u00d7 o 3\u00d7 para acercarte y arrastra para moverte.",
   "Actual size of the drawing. 1 pixel is about 1.6 in on the ground.":
     "Tama\u00f1o real del plano. 1 p\u00edxel es como 1.6 pulgadas en el terreno.",
+  "Actual size of the drawing. 1 pixel is about 0.8 in on the ground.":
+    "Tama\u00f1o real del plano. 1 p\u00edxel es como 0.8 pulgadas en el terreno.",
+  "Actual size of the drawing. 1 pixel is about 1.7 in on the ground.":
+    "Tama\u00f1o real del plano. 1 p\u00edxel es como 1.7 pulgadas en el terreno.",
 
   // --- short-bed banners
   "Planted, short ": "Plantada, faltan ",
