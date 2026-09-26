@@ -23,7 +23,15 @@ test.beforeEach(async ({ page }) => {
   await openJob(page, 'wsrcc');
 });
 
-const STAKED = ['PS', 'PP', 'BP', 'AP', 'SP', 'PT'];
+// Aspen (PTE) is checked on its own below: only the Newel St four are taped,
+// the 15 in the lot islands are placed off the island curbs.
+const STAKED = ['PS', 'PP', 'BP', 'AP', 'SP'];
+
+test('the four Newel St aspen each have a tape row', async ({ page }) => {
+  const rows = await page.evaluate(() => ['B09', 'B10', 'B12', 'B14'].map((b) =>
+    BED_STAKES.beds[b].rows.filter((r) => r.code === 'PTE').length));
+  expect(rows).toEqual([1, 1, 1, 1]);
+});
 
 test('every tree and lilac on a card has exactly one tape row', async ({ page }) => {
   // The table and the card are built separately. If they disagree, a crew

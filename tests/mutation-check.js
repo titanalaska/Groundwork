@@ -80,6 +80,13 @@ const MUTATIONS = [
     tag: 'line-ticks',
   },
   {
+    name: 'put bed 10 back on the unscheduled PT',
+    find: '"items":{"CA":2,"CL":3,"PTE":1}',
+    replace: '"items":{"CA":2,"CL":3,"PT":1}',
+    caughtBy: 'carry all 19 aspen',
+    tag: 'aspen',
+  },
+  {
     name: 'use the Home2Suites zoom figure on WSRCC',
     find: '  if(currentJob !== "wsrcc") return "1.6";',
     replace: '  return "1.6";',
