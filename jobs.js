@@ -84,14 +84,19 @@ var JOBS = {
       "&#9888;&#65039; <strong>Hair grass &mdash; 64 short, NOT settled. Top priority.</strong> Tufted Hair Grass is the approved substitute for Gold Crinkled, but there are only <strong>68 of 132</strong> and no more to be had. The remaining <strong>64</strong> have to go in as a <strong>different species</strong>. Matt&#39;s pick: <strong>forget-me-nots from Bell&#39;s Nursery</strong> &mdash; <strong>not approved yet</strong>. Route it through Chris the way the Tufted was: this is a permit set, and the sheet says to contact the landscape architect before any revision.",
       // Matt, 9/28/26: bought for this job and on site. /net-need reads this so
       // the yard's Blue Rug/Wilton (#147) is not counted against Home2.
-      "&#9989; <strong>Creeping Juniper &mdash; bought and on site.</strong> The <strong>70</strong> for this job were bought for it and are on site, not planted yet. <strong>Do not pull juniper from the yard for Home2Suites.</strong>"
+      "&#9989; <strong>Creeping Juniper &mdash; bought and on site.</strong> The <strong>70</strong> for this job were bought for it and are on site, not planted yet. <strong>Do not pull juniper from the yard for Home2Suites.</strong>",
+      // Matt, 9/28/26: 19 Helena were bought for WSRCC; its revision cut it to 4.
+      // The other 15 are staged on THIS site until moved to the pit -- and this
+      // job needs 22 Helena of its own, so the crew has to be told they are not.
+      "&#9888;&#65039; <strong>15 Helena Maple on this site belong to Raspberry.</strong> They were bought for WSRCC and are staged here until they move to the pit nursery. <strong>Do not plant them at Home2Suites.</strong>"
     ],
     // Spanish, one per note above, same order. Shown only while the count
     // matches -- a note added in English alone shows the English set.
     flagsEs: [
       "&#9989; <strong>Lila 'Miss Kim' &mdash; resuelto.</strong> Las anotaciones suman 73 contra un programa de 45. Las 46 que hab&iacute;a ya se plantaron; las <strong>27</strong> restantes van como <strong>lila com&uacute;n morada en contenedores #2</strong>. La especificaci&oacute;n de arbustos en este trabajo es <strong>#5, m&iacute;nimo 18&quot; al plantar</strong>, as&iacute; que es una excepci&oacute;n de tama&ntilde;o y ya fue <strong>aceptada</strong> &mdash; se anota aqu&iacute; porque una maceta m&aacute;s chica es lo que sale en la revisi&oacute;n final, y la respuesta no deber&iacute;a depender de la memoria.",
       "&#9888;&#65039; <strong>Pasto (hair grass) &mdash; faltan 64, NO est&aacute; resuelto. Prioridad n&uacute;mero uno.</strong> El pasto de mech&oacute;n es el sustituto aprobado del ondulado dorado, pero solo hay <strong>68 de 132</strong> y no se consiguen m&aacute;s. Las <strong>64</strong> restantes tienen que ser de <strong>otra especie</strong>. La propuesta de Matt: <strong>nomeolvides (forget-me-not) de Bell&#39;s Nursery</strong> &mdash; <strong>todav&iacute;a no aprobada</strong>. P&aacute;salo por Chris como se hizo con el pasto de mech&oacute;n: es un juego de planos de permiso, y la hoja dice que hay que consultar al arquitecto paisajista antes de cualquier cambio.",
-      "&#9989; <strong>Enebro rastrero &mdash; comprado y en el sitio.</strong> Los <strong>70</strong> de este trabajo se compraron para &eacute;l y ya est&aacute;n en el sitio, todav&iacute;a sin plantar. <strong>No saques enebro del vivero para Home2Suites.</strong>"
+      "&#9989; <strong>Enebro rastrero &mdash; comprado y en el sitio.</strong> Los <strong>70</strong> de este trabajo se compraron para &eacute;l y ya est&aacute;n en el sitio, todav&iacute;a sin plantar. <strong>No saques enebro del vivero para Home2Suites.</strong>",
+      "&#9888;&#65039; <strong>15 arces 'Helena' en este sitio son de Raspberry.</strong> Se compraron para WSRCC y est&aacute;n aqu&iacute; hasta que se lleven al vivero del pit. <strong>No los plantes en Home2Suites.</strong>"
     ]
   },
   charter: {
@@ -298,13 +303,18 @@ var JOBS = {
     },
     flags: [
       "&#128209; <strong>These counts come from the proposal</strong> printed 7/7/26, not from a plan set. It cites drawings dated 1.21.25 and sheet <strong>L503-1</strong>, so a set exists &mdash; ask Chris for the planting plan and the plant schedule before treating these as final.",
-      "&#9888;&#65039; <strong>94 trees at 2&quot; caliper.</strong> That is the size wall in the 2027 sourcing work, where Martin is the only vendor breaking it. Raise availability before this job is scheduled, not after."
+      "&#9888;&#65039; <strong>94 trees at 2&quot; caliper.</strong> That is the size wall in the 2027 sourcing work, where Martin is the only vendor breaking it. Raise availability before this job is scheduled, not after.",
+      // Matt, 9/28/26. /net-need reads this: these 15 are not in the Inventory
+      // sheet (#89 reads 0) until they reach the pit, so without this note it
+      // would tell Matt to buy 15 Helena Titan already owns.
+      "&#9989; <strong>Helena Maple &mdash; all 15 already bought.</strong> Bought for WSRCC and not needed after its revision. Staged at Home2Suites until they move to the pit nursery. <strong>Check caliper when they move:</strong> this job specs 2&quot;."
     ],
     // Spanish, one per note above, same order. Shown only while the count
     // matches -- a note added in English alone shows the English set.
     flagsEs: [
       "&#128209; <strong>Estos conteos salen de la propuesta</strong> impresa el 7/7/26, no de un juego de planos. Cita planos del 1.21.25 y la hoja <strong>L503-1</strong>, as&iacute; que s&iacute; existe un juego &mdash; p&iacute;dele a Chris el plano de plantaci&oacute;n y el programa de plantas antes de tomar esto como final.",
-      "&#9888;&#65039; <strong>94 &aacute;rboles de 2&quot; de calibre.</strong> Es el l&iacute;mite de tama&ntilde;o del trabajo de compras de 2027, donde Martin es el &uacute;nico proveedor que lo rompe. Pregunta por disponibilidad antes de programar este trabajo, no despu&eacute;s."
+      "&#9888;&#65039; <strong>94 &aacute;rboles de 2&quot; de calibre.</strong> Es el l&iacute;mite de tama&ntilde;o del trabajo de compras de 2027, donde Martin es el &uacute;nico proveedor que lo rompe. Pregunta por disponibilidad antes de programar este trabajo, no despu&eacute;s.",
+      "&#9989; <strong>Arce 'Helena' &mdash; los 15 ya est&aacute;n comprados.</strong> Se compraron para WSRCC y no se usaron despu&eacute;s de su revisi&oacute;n. Est&aacute;n en Home2Suites hasta que se lleven al vivero del pit. <strong>Revisa el calibre al moverlos:</strong> este trabajo pide 2&quot;."
     ]
   },
   // Titan's own new building at the pit. Counts are Chris's scope list from
