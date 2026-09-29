@@ -41,3 +41,26 @@ test('Home2Suites keeps its 1.6 in', async ({ page }) => {
   await openJob(page, 'h2s');
   expect(await hintAt1x(page, './beds/B03.jpg')).toContain('about 1.6 in');
 });
+
+// Double-tap. It went Fit -> 2x, and 2x counts the DRAWING's pixels, not the
+// screen's: a 1500 px bed picture on a 375 px phone is 4x Fit at "1x", so 2x
+// was 8x what the eye had just seen (21x on the site map). Matt, 9/28/26:
+// "2x is too strong". Double-tap now goes to 1x; the buttons are unchanged.
+test('double-tap steps Fit -> 1x -> Fit, never straight to 2x', async ({ page }) => {
+  await openJob(page, 'h2s');
+  const steps = await page.evaluate(async () => {
+    showLightbox('./beds/B03.jpg', '');
+    const img = document.getElementById('lbImg');
+    await new Promise((r) => (img.complete && img.naturalWidth ? r() : (img.onload = r)));
+    const out = [lbZoom];
+    img.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    out.push(lbZoom, document.querySelector('.lb-z.on').dataset.z);
+    img.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    out.push(lbZoom);
+    return out;
+  });
+  expect(steps[0], 'a picture opens at Fit').toBe('fit');
+  expect(steps[1], 'one double-tap lands on 1x').toBe('1');
+  expect(steps[2], 'and the 1x button lights up to say so').toBe('1');
+  expect(steps[3], 'a second double-tap goes back to Fit').toBe('fit');
+});

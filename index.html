@@ -5198,8 +5198,12 @@ function init(){
   document.querySelectorAll(".lb-z").forEach(function(b){
     b.addEventListener("click", function(){ lbZoom = b.dataset.z; applyZoom(); });
   });
+  // Fit <-> 1x, not 2x. The steps count the DRAWING's pixels, so on a phone
+  // 1x is already about 4x Fit on a bed picture (11x on the site map), and 2x
+  // was twice that -- "2x is too strong" (Matt, 9/28/26). The buttons still
+  // reach 2x and 3x.
   document.getElementById("lbImg").addEventListener("dblclick", function(){
-    lbZoom = (lbZoom === "fit") ? "2" : "fit";
+    lbZoom = (lbZoom === "fit") ? "1" : "fit";
     applyZoom();
   });
   document.getElementById("lbClose").addEventListener("click", closePicture);
