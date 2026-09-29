@@ -151,7 +151,15 @@ var JOBS = {
       note: "&#128247; <strong>No placement plan yet.</strong> Chris asked H5 (Jeff) for one twice and it has not come. <strong>Take a photo of the layout when on site</strong> &mdash; Chris says that is the fastest way.",
       noteEs: "&#128247; <strong>Todav&iacute;a no hay plano de ubicaci&oacute;n.</strong> Chris le pidi&oacute; uno a H5 (Jeff) dos veces y no ha llegado. <strong>Toma una foto de la distribuci&oacute;n cuando est&eacute;s en el sitio</strong> &mdash; Chris dice que es lo m&aacute;s r&aacute;pido."
     },
-    flags: []
+    flags: [
+      // Matt, 9/28/26. The 38 were bought on Dan's list for this job, so they
+      // are not a claim on the yard. /net-need reads this note: without it the
+      // Bailey rugosa gets split three ways and Palmer is told to buy 37.
+      "&#9989; <strong>Rugosa Rose &mdash; covered by Danny&#39;s order.</strong> The <strong>38</strong> for this job came from Danny (Alaska Trees). <strong>Do not pull Bailey rugosa from the yard for Baxter</strong> &mdash; that stock is allocated to Home2Suites and Palmer."
+    ],
+    flagsEs: [
+      "&#9989; <strong>Rosa rugosa &mdash; cubierta por el pedido de Danny.</strong> Las <strong>38</strong> de este trabajo vinieron de Danny (Alaska Trees). <strong>No saques rugosa de Bailey del vivero para Baxter</strong> &mdash; ese material est&aacute; asignado a Home2Suites y Palmer."
+    ]
   },
   wsrcc: {
     label: "WSRCC &mdash; 5800 Boundary Ave",
