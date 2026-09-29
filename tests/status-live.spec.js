@@ -83,7 +83,12 @@ test('the totals are the sum of the rows, not a typed number', async ({ page }) 
   await open(page, serve(RECORD));
   const sums = await page.evaluate(() => {
     let short = 0, done = 0, rows = 0;
-    document.querySelectorAll('#sections section tr').forEach((tr) => {
+    // Plant rows only. The headline counts plants and species; the boulder
+    // table (9/28) sits in the same section and is left out of it on purpose.
+    if (!document.querySelector('#sections table.rocks tr td')) {
+      throw new Error('no boulder rows rendered -- this test would not know the difference');
+    }
+    document.querySelectorAll('#sections section table:not(.rocks) tr').forEach((tr) => {
       const td = tr.querySelectorAll('td');
       if (!td.length) return;
       rows++;

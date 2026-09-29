@@ -59,6 +59,18 @@ var JOBS = {
         ["Goatsbeard", 10]
       ]}
     },
+    // Boulders are NOT a plant group, on purpose. Every loop over `groups`
+    // means plants -- the status page's "plants still needed", the Subs picker,
+    // the Pull button, the vendor lookup -- and a rock in any of them is wrong.
+    // Counts are Chris's, by email 9/28/26. The size is the L501 detail 7
+    // schedule, identical on the Home2Suites, WSRCC and Charter sheets.
+    boulders: {
+      plan: "./beds-boulders/h2s-v1.jpg",
+      items: [
+        ["Type A Boulder (Class 4)", 18, "12&#39; &plusmn;1&#39; around &middot; 45&quot; &plusmn;3&quot; tall"],
+        ["Type B Boulder (Class 3)", 28, "9&#39; &plusmn;1&#39; around &middot; 33&quot; &plusmn;3&quot; tall"]
+      ]
+    },
     flags: [
       // Four of these closed out 9/20. Miss Kim and False Spirea were the two
       // schedule-vs-callout shortages; both are settled now, so only Miss Kim
@@ -67,13 +79,15 @@ var JOBS = {
       // knows about the load, and the number was only ever "probably reissued".
       // A note nobody still needs is the reason this panel grew.
       "&#9989; <strong>Miss Kim Lilac &mdash; handled.</strong> Callouts total 73 against a schedule of 45. The 46 on hand went in; the remaining <strong>27</strong> go in as <strong>common purple lilac in #2 containers</strong>. The shrub spec on this job is <strong>#5, 18&quot; minimum at planting</strong>, so that is a size exception and it has been <strong>accepted</strong> &mdash; written down here because a smaller pot is the kind of thing that gets raised at walkthrough, and the answer should not have to be remembered.",
-      "&#127807; <strong>Hair grass</strong> &mdash; <strong>Tufted Hair Grass is the APPROVED substitute</strong> for Gold Crinkled, routed through Chris. 68 on hand of 132, <strong>64 still to come</strong>. The species question is closed &mdash; order the balance as Tufted."
+      // Rewritten 9/28: the old note called this closed. Tufted IS approved, but
+      // there is not enough of it, so the balance is an open substitution again.
+      "&#9888;&#65039; <strong>Hair grass &mdash; 64 short, NOT settled. Top priority.</strong> Tufted Hair Grass is the approved substitute for Gold Crinkled, but there are only <strong>68 of 132</strong> and no more to be had. The remaining <strong>64</strong> have to go in as a <strong>different species</strong>. Matt&#39;s pick: <strong>forget-me-nots from Bell&#39;s Nursery</strong> &mdash; <strong>not approved yet</strong>. Route it through Chris the way the Tufted was: this is a permit set, and the sheet says to contact the landscape architect before any revision."
     ],
     // Spanish, one per note above, same order. Shown only while the count
     // matches -- a note added in English alone shows the English set.
     flagsEs: [
       "&#9989; <strong>Lila 'Miss Kim' &mdash; resuelto.</strong> Las anotaciones suman 73 contra un programa de 45. Las 46 que hab&iacute;a ya se plantaron; las <strong>27</strong> restantes van como <strong>lila com&uacute;n morada en contenedores #2</strong>. La especificaci&oacute;n de arbustos en este trabajo es <strong>#5, m&iacute;nimo 18&quot; al plantar</strong>, as&iacute; que es una excepci&oacute;n de tama&ntilde;o y ya fue <strong>aceptada</strong> &mdash; se anota aqu&iacute; porque una maceta m&aacute;s chica es lo que sale en la revisi&oacute;n final, y la respuesta no deber&iacute;a depender de la memoria.",
-      "&#127807; <strong>Pasto (hair grass)</strong> &mdash; <strong>el pasto de mech&oacute;n es el sustituto APROBADO</strong> del ondulado dorado, aprobado a trav&eacute;s de Chris. Hay 68 de 132, <strong>faltan 64</strong>. La pregunta de la especie ya est&aacute; cerrada &mdash; pide el resto como pasto de mech&oacute;n."
+      "&#9888;&#65039; <strong>Pasto (hair grass) &mdash; faltan 64, NO est&aacute; resuelto. Prioridad n&uacute;mero uno.</strong> El pasto de mech&oacute;n es el sustituto aprobado del ondulado dorado, pero solo hay <strong>68 de 132</strong> y no se consiguen m&aacute;s. Las <strong>64</strong> restantes tienen que ser de <strong>otra especie</strong>. La propuesta de Matt: <strong>nomeolvides (forget-me-not) de Bell&#39;s Nursery</strong> &mdash; <strong>todav&iacute;a no aprobada</strong>. P&aacute;salo por Chris como se hizo con el pasto de mech&oacute;n: es un juego de planos de permiso, y la hoja dice que hay que consultar al arquitecto paisajista antes de cualquier cambio."
     ]
   },
   charter: {
@@ -91,6 +105,17 @@ var JOBS = {
       grasses: { label: "Grasses", items: [
         ["Karl Foerster Reed Grass", 134]
       ]}
+    },
+    boulders: {
+      plan: "./beds-boulders/charter-v1.jpg",
+      items: [
+        ["Type A Boulder (Class 4)", 6, "12&#39; &plusmn;1&#39; around &middot; 45&quot; &plusmn;3&quot; tall"],
+        ["Type B Boulder (Class 3)", 13, "9&#39; &plusmn;1&#39; around &middot; 33&quot; &plusmn;3&quot; tall"]
+      ],
+      // Targets follow Chris's email. The plan disagrees in one place, and the
+      // app records the disagreement rather than picking a side.
+      note: "&#9888;&#65039; <strong>Type C?</strong> Chris counts <strong>6 Type A and 13 Type B</strong>, no Type C. But one callout on the plan reads <strong>(2) Type A, (3) Type B, (3) Type C</strong>. Settle with Chris before the rocks are ordered.",
+      noteEs: "&#9888;&#65039; <strong>&iquest;Tipo C?</strong> Chris cuenta <strong>6 tipo A y 13 tipo B</strong>, sin tipo C. Pero una anotaci&oacute;n del plano dice <strong>(2) tipo A, (3) tipo B, (3) tipo C</strong>. Hay que aclararlo con Chris antes de pedir las rocas."
     },
     flags: []
   },
@@ -114,6 +139,17 @@ var JOBS = {
       grasses: { label: "Iris", items: [
         ["Alaska Flag Iris", 36]
       ]}
+    },
+    // No plan and no size for Baxter: Chris has asked H5 for one twice. Class 3
+    // is Type B on the other three jobs, but Baxter's own schedule has not been
+    // seen, so no size is shown rather than one borrowed from another sheet.
+    boulders: {
+      plan: null,
+      items: [
+        ["Class 3 Boulder", 9, null]
+      ],
+      note: "&#128247; <strong>No placement plan yet.</strong> Chris asked H5 (Jeff) for one twice and it has not come. <strong>Take a photo of the layout when on site</strong> &mdash; Chris says that is the fastest way.",
+      noteEs: "&#128247; <strong>Todav&iacute;a no hay plano de ubicaci&oacute;n.</strong> Chris le pidi&oacute; uno a H5 (Jeff) dos veces y no ha llegado. <strong>Toma una foto de la distribuci&oacute;n cuando est&eacute;s en el sitio</strong> &mdash; Chris dice que es lo m&aacute;s r&aacute;pido."
     },
     flags: []
   },
@@ -151,6 +187,14 @@ var JOBS = {
         ["Karl Foerster Reed Grass", 65],
         ["Overdam Reed Grass", 74]
       ]}
+    },
+    boulders: {
+      plan: "./beds-boulders/wsrcc-v1.jpg",
+      items: [
+        ["Type A Boulder (Class 4)", 4, "12&#39; &plusmn;1&#39; around &middot; 45&quot; &plusmn;3&quot; tall"],
+        ["Type B Boulder (Class 3)", 16, "9&#39; &plusmn;1&#39; around &middot; 33&quot; &plusmn;3&quot; tall"],
+        ["Type C Boulder (Class 2)", 4, "6&#39; &plusmn;1&#39; around &middot; 21&quot; &plusmn;3&quot; tall"]
+      ]
     },
     flags: [
       "&#9888;&#65039; <strong>The plan changed and these targets moved.</strong> The current set is dated 01/29/2026 and was approved by the Municipality on 04/21/26; it reached Titan on 09/16/26. <strong>Quaking Aspen is off this job entirely</strong> &mdash; it was 35, it is now not on the drawing. Trees dropped by 75 and shrubs rose by 75, because zone N sits under overhead lines: the revision replaced 71 required trees with 6&#39; utility shrubs.",
@@ -206,13 +250,15 @@ var JOBS = {
     },
     flags: [
       "&#128209; <strong>These counts come from the proposal</strong> printed 2/9/26, not from a plan set. There are no bed callouts, so there is no bed view for this job yet. Ask Chris for the planting plan and the plant schedule &mdash; WSRCC only reconciled because it had both.",
-      "&#127807; <strong>Gold Crinkled Hair Grass, 76</strong> &mdash; the same species Home2Suites is substituting with Tufted through Chris. Expect the same call here before ordering."
+      // Rewritten 9/28. Matt: order the right plant for this job, this fall or
+      // for spring delivery -- no substitution. The old note predicted one.
+      "&#127807; <strong>Gold Crinkled Hair Grass, 76 &mdash; order the SPECIFIED plant, no substitute.</strong> Home2Suites ran out of options on this grass and had to sub; Palmer will not. Book it this fall or for spring delivery. <strong>No source yet:</strong> none of the five vendor lists read so far (Seed-n-Tree, Bron, McKay, Bailey, Stewart) carry it."
     ],
     // Spanish, one per note above, same order. Shown only while the count
     // matches -- a note added in English alone shows the English set.
     flagsEs: [
       "&#128209; <strong>Estos conteos salen de la propuesta</strong> impresa el 2/9/26, no de un juego de planos. No hay anotaciones de camas, as&iacute; que todav&iacute;a no hay vista por cama para este trabajo. P&iacute;dele a Chris el plano de plantaci&oacute;n y el programa de plantas &mdash; WSRCC solo cuadr&oacute; porque ten&iacute;a los dos.",
-      "&#127807; <strong>Pasto ondulado dorado, 76</strong> &mdash; la misma especie que Home2Suites est&aacute; sustituyendo con pasto de mech&oacute;n a trav&eacute;s de Chris. Espera la misma decisi&oacute;n aqu&iacute; antes de pedir."
+      "&#127807; <strong>Pasto ondulado dorado, 76 &mdash; pide la planta ESPECIFICADA, sin sustituto.</strong> En Home2Suites se acabaron las opciones con este pasto y hubo que sustituir; en Palmer no. P&iacute;delo este oto&ntilde;o o para entrega en primavera. <strong>Todav&iacute;a no hay proveedor:</strong> ninguna de las cinco listas le&iacute;das hasta ahora (Seed-n-Tree, Bron, McKay, Bailey, Stewart) lo tiene."
     ]
   },
   raspberry: {

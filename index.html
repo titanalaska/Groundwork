@@ -293,6 +293,11 @@
   .item-info{flex:1 1 auto;min-width:0;}
   .item-name{font-size:0.95rem;font-weight:600;}
   .item-target{font-size:0.78rem;color:var(--ink-soft);margin-top:1px;}
+  .rock-note{margin:0 0 10px;}
+  .rock-pic{display:block;margin-top:12px;text-decoration:none;color:var(--ink-soft);}
+  .rock-cap{font-size:0.8rem;margin-bottom:4px;}
+  .rock-pic img{display:block;width:100%;height:auto;background:#fff;
+    border:1px solid var(--line);border-radius:8px;}
 
   .sheet-back{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;
     align-items:flex-end;justify-content:center;z-index:50;}
@@ -1662,8 +1667,14 @@ function applyPayload(p){
 
 function fillMissingFromSeed(){
   Object.keys(JOBS).forEach(function(jobKey){
-    Object.keys(JOBS[jobKey].groups).forEach(function(gk){
-      JOBS[jobKey].groups[gk].items.forEach(function(row){
+    var job = JOBS[jobKey];
+    // Boulders too. The daily log skips any key missing from its baseline as
+    // "added since the last log", so a boulder row with no key yet would have
+    // its first delivery swallowed rather than reported.
+    var lists = Object.keys(job.groups).map(function(gk){ return job.groups[gk].items; });
+    if(job.boulders) lists.push(job.boulders.items);
+    lists.forEach(function(items){
+      items.forEach(function(row){
         var k = jobKey + ":" + slug(row[0]);
         if(state[k] === undefined || state[k] === null){
           state[k] = SEED[k] !== undefined ? SEED[k] : 0;
@@ -2150,13 +2161,16 @@ function attachSubs(wrap, info, counter, jobKey, name){
   buildPanel();
 }
 
-function renderItem(jobKey, name, target, isAlt){
+// `rock` is set for a boulder row: {size: "..."} (size may be null). A boulder
+// counts exactly like a plant but gets no symbol, no Pull and no Subs -- the
+// Pull goes to plant Inventory and the Subs picker offers species.
+function renderItem(jobKey, name, target, isAlt, rock){
   var k = jobKey + ":" + slug(name);
   var received = state[k] || 0;
   var wrap = document.createElement("div");
   wrap.className = itemClass(received, target);
 
-  var symCode = hasBedView(jobKey) ? codeForName(name) : null;
+  var symCode = (hasBedView(jobKey) && !rock) ? codeForName(name) : null;
   if(symCode){
     var sym = document.createElement("img");
     sym.className = "item-sym";
@@ -2175,7 +2189,8 @@ function renderItem(jobKey, name, target, isAlt){
   var info = document.createElement("div");
   info.className = "item-info";
   info.innerHTML = '<div class="item-name">' + name + '</div><div class="item-target">need ' +
-    target + (isAlt ? " (alt / optional)" : "") + "</div>";
+    target + (isAlt ? " (alt / optional)" : "") + "</div>" +
+    (rock && rock.size ? '<div class="item-target rock-size">' + rock.size + "</div>" : "");
 
   // What this tool has already sent to Inventory for this species. Shown so
   // nobody has to remember at 6am whether they already pulled these.
@@ -2248,6 +2263,13 @@ function renderItem(jobKey, name, target, isAlt){
   counter.appendChild(input);
   counter.appendChild(plus);
 
+  if(rock){
+    wrap.appendChild(info);
+    wrap.appendChild(flag);
+    wrap.appendChild(counter);
+    return wrap;
+  }
+
   var pullBtn = document.createElement("button");
   pullBtn.className = "pull-btn";
   pullBtn.textContent = "Pull";
@@ -2259,6 +2281,62 @@ function renderItem(jobKey, name, target, isAlt){
   wrap.appendChild(counter);
   attachSubs(wrap, info, counter, jobKey, name);
   return wrap;
+}
+
+// The Boulders section: Chris's counts, then his marked-up plan showing where
+// each one goes, then the size schedule. Biggest shortfall first, the same as
+// every plant group -- the list is read off the office TV and one rule for the
+// whole screen beats a special case. Ties keep plan order, A-B-C.
+//
+// The pictures live in beds-boulders/, which sw.js serves cache-first from the
+// bed cache: once opened they are there with no signal. Each is a link to the
+// full-size file, because a phone pinch-zooms an image far better than a page.
+// Never replace one in place -- the bed cache never revalidates. Bump -v1.
+var BOULDER_SCHEDULE = "./beds-boulders/schedule-v1.jpg";
+function renderBoulders(jobKey, b){
+  var section = document.createElement("section");
+  section.className = "group rocks";
+  var title = document.createElement("div");
+  title.className = "group-title";
+  title.textContent = "Boulders";
+  section.appendChild(title);
+  var note = (lang === "es" && b.noteEs) ? b.noteEs : b.note;
+  if(note){
+    var n = document.createElement("div");
+    n.className = "flags rock-note";
+    n.innerHTML = note;
+    section.appendChild(n);
+  }
+  b.items.slice().sort(function(x, y){
+    var xs = Math.max(0, x[1] - (state[jobKey + ":" + slug(x[0])] || 0));
+    var ys = Math.max(0, y[1] - (state[jobKey + ":" + slug(y[0])] || 0));
+    return (ys - xs) || (b.items.indexOf(x) - b.items.indexOf(y));
+  }).forEach(function(row){
+    section.appendChild(renderItem(jobKey, row[0], row[1], false, {size: row[2]}));
+  });
+  function pic(src, caption){
+    var a = document.createElement("a");
+    a.className = "rock-pic";
+    a.href = src;
+    a.target = "_blank";
+    a.rel = "noopener";
+    var cap = document.createElement("div");
+    cap.className = "rock-cap";
+    cap.textContent = caption;
+    var img = document.createElement("img");
+    img.src = src;
+    img.alt = caption;
+    img.loading = "lazy";
+    img.decoding = "async";
+    // Same rule as the bed crops: a missing picture hides, the counts stay.
+    img.onerror = function(){ a.remove(); };
+    a.appendChild(cap);
+    a.appendChild(img);
+    section.appendChild(a);
+  }
+  if(b.plan) pic(b.plan, "Where they go — Chris’s marked-up plan. Tap to zoom.");
+  if(b.items.some(function(r){ return r[2]; })) pic(BOULDER_SCHEDULE, "Size schedule — L501 detail 7");
+  return section;
 }
 
 function renderGroups(){
@@ -2305,6 +2383,7 @@ function renderGroups(){
     });
     container.appendChild(section);
   });
+  if(job.boulders) container.appendChild(renderBoulders(currentJob, job.boulders));
   if(refocus){
     var back = container.querySelector('[data-focus="' + refocus.tag.replace(/"/g, '\\"') + '"]');
     if(back){
@@ -3238,6 +3317,17 @@ var ES = {
   // --- the species list
   "Trees": "\u00c1rboles", "Shrubs": "Arbustos", "Grasses": "Pastos",
   "Iris, perennials & grasses": "Iris, perennes y pastos",
+  // --- boulders (jobs.js `boulders`)
+  "Boulders": "Rocas",
+  "Type A Boulder (Class 4)": "Roca tipo A (clase 4)",
+  "Type B Boulder (Class 3)": "Roca tipo B (clase 3)",
+  "Type C Boulder (Class 2)": "Roca tipo C (clase 2)",
+  "Class 3 Boulder": "Roca clase 3",
+  " around \u00b7 ": " de contorno \u00b7 ",
+  " tall": " de alto",
+  "Where they go \u2014 Chris\u2019s marked-up plan. Tap to zoom.":
+    "D\u00f3nde van \u2014 el plano marcado de Chris. Toca para ampliar.",
+  "Size schedule \u2014 L501 detail 7": "Tabla de tama\u00f1os \u2014 L501 detalle 7",
   "need ": "necesita ",
   " (alt / optional)": " (alterna / opcional)",
   "NONE YET \u00b7 ": "NADA A\u00daN \u00b7 ",
@@ -4439,6 +4529,15 @@ function generateReport(){
         });
       });
     });
+    if(job.boulders){
+      lines.push("Boulders:");
+      job.boulders.items.forEach(function(row){
+        var got = state[jobKey + ":" + slug(row[0])] || 0;
+        lines.push("- " + row[0] + ": " + got + "/" + row[1] +
+          (got >= row[1] ? (got > row[1] ? " -- OVER by " + (got - row[1]) : " -- complete")
+                         : " -- short " + (row[1] - got)));
+      });
+    }
     if(job.flags && job.flags.length){
       lines.push("Flags:");
       job.flags.forEach(function(f){
@@ -4607,8 +4706,12 @@ function draftDailyLog(){
   var received = [], corrected = [];
   Object.keys(JOBS).forEach(function(jobKey){
     var job = JOBS[jobKey];
-    Object.keys(job.groups).forEach(function(gk){
-      job.groups[gk].items.forEach(function(row){
+    // Boulders ride along as one more list of rows: a rock delivered is a
+    // count that moved, the same as a plant.
+    var lists = Object.keys(job.groups).map(function(gk){ return job.groups[gk].items; });
+    if(job.boulders) lists.push(job.boulders.items);
+    lists.forEach(function(items){
+      items.forEach(function(row){
         var k = jobKey + ":" + slug(row[0]);
         // No baseline for this one -- a species added to the app since the last
         // log. Reporting "0 -> 45" would claim 45 arrived today. Skip it.

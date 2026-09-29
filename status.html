@@ -177,7 +177,7 @@ th:last-child{padding-left:10px}
 // left on the page, and it is here because it is editorial, not data.
 var NOTES = {
   "h2s:gold-crinkled-hair-grass-sub":
-    "Tufted Hair Grass is the approved substitute, routed through Chris. Order the balance as Tufted.",
+    "Tufted Hair Grass is the approved substitute, but there is not enough of it. The balance needs a DIFFERENT species, not approved yet - Matt's pick is forget-me-nots from Bell's Nursery.",
   "h2s:columnar-swedish-aspen":
     "14 on hand as of 9/16 - 5 from Danny and 9 from Titan&#x27;s own nursery.",
   "h2s:miss-kim-lilac":
@@ -263,7 +263,65 @@ function renderJob(jobKey, counts, notes){
       '<td><span class="pill ' + p.cls + '">' + p.text + '</span></td></tr>';
   });
 
-  return {html: html + '</table></div></div></section>', short: short, done: done, rows: rows.length};
+  html += '</table></div></div>';
+
+  // Boulders get their own table under the plants, and stay out of the plant
+  // numbers above -- "plants still needed" must not count a rock.
+  var rocks = boulderRowsFor(jobKey, counts);
+  if (rocks.length) {
+    var b = JOBS[jobKey].boulders;
+    html += '<div class="sub"><b>Boulders</b> &middot; ' + boulderSummary(rocks) + '</div>' +
+      // Trusted plan prose from jobs.js, like NOTES.
+      (b.note ? '<div class="sub">' + b.note + '</div>' : '') +
+      '<div class="card"><div class="scroll"><table class="rocks">' +
+      '<tr><th>Boulder</th><th class="n">Plan</th><th class="n">On site</th>' +
+      '<th class="n">Short</th><th>Status</th></tr>';
+    rocks.forEach(function(r){
+      var p = pillFor(r);
+      html += '<tr><td>' + escapeHtml(r.name) +
+        (r.size ? '<span class="nt">' + r.size + '</span>' : '') + '</td>' +
+        '<td class="n">' + r.target + '</td>' +
+        '<td class="n">' + r.got + '</td>' +
+        '<td class="n">' + (r.short ? '<b>' + r.short + '</b>' : '&mdash;') + '</td>' +
+        '<td><span class="pill ' + p.cls + '">' + p.text + '</span></td></tr>';
+    });
+    html += '</table></div></div>';
+  }
+
+  return {html: html + '</section>', short: short, done: done, rows: rows.length};
+}
+
+// Same shape as rowsFor(), for a job's boulders, and ranked the same way:
+// biggest shortfall first, ties in plan order (A, B, C).
+function boulderRowsFor(jobKey, counts){
+  var b = JOBS[jobKey].boulders;
+  if (!b) return [];
+  return b.items.map(function(it){
+    var got = counts[jobKey + ":" + slugOf(it[0])];
+    var known = typeof got === "number";
+    return {
+      name: decodeEntities(it[0]),
+      size: it[2] || "",
+      target: it[1],
+      got: known ? got : 0,
+      short: known ? Math.max(0, it[1] - got) : it[1],
+    };
+  }).sort(function(x, y){ return y.short - x.short; });   // stable: ties keep A-B-C
+}
+
+// The one line under "Boulders" on this page -- what Chris and Todd read
+// before they read the table. `rocks` is boulderRowsFor()'s list: each has
+// name, target, got, short.
+//
+// Broken out by type, because rock is ordered by class: "still need 16 Type B
+// (Class 3), 4 Type A (Class 4)". rocks arrive biggest-short first, so the
+// line reads in the same order as the table under it.
+function boulderSummary(rocks){
+  var owed = rocks.filter(function(r){ return r.short > 0; });
+  if (!owed.length) return "all on site";
+  return "still need <b>" + owed.map(function(r){
+    return r.short + " " + escapeHtml(r.name.replace(/ Boulder\b/, ""));
+  }).join(", ") + "</b>";
 }
 
 // The bed rows stay hand-written -- the bed list is plan data this page does
