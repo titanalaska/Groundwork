@@ -81,13 +81,17 @@ var JOBS = {
       "&#9989; <strong>Miss Kim Lilac &mdash; handled.</strong> Callouts total 73 against a schedule of 45. The 46 on hand went in; the remaining <strong>27</strong> go in as <strong>common purple lilac in #2 containers</strong>. The shrub spec on this job is <strong>#5, 18&quot; minimum at planting</strong>, so that is a size exception and it has been <strong>accepted</strong> &mdash; written down here because a smaller pot is the kind of thing that gets raised at walkthrough, and the answer should not have to be remembered.",
       // Rewritten 9/28: the old note called this closed. Tufted IS approved, but
       // there is not enough of it, so the balance is an open substitution again.
-      "&#9888;&#65039; <strong>Hair grass &mdash; 64 short, NOT settled. Top priority.</strong> Tufted Hair Grass is the approved substitute for Gold Crinkled, but there are only <strong>68 of 132</strong> and no more to be had. The remaining <strong>64</strong> have to go in as a <strong>different species</strong>. Matt&#39;s pick: <strong>forget-me-nots from Bell&#39;s Nursery</strong> &mdash; <strong>not approved yet</strong>. Route it through Chris the way the Tufted was: this is a permit set, and the sheet says to contact the landscape architect before any revision."
+      "&#9888;&#65039; <strong>Hair grass &mdash; 64 short, NOT settled. Top priority.</strong> Tufted Hair Grass is the approved substitute for Gold Crinkled, but there are only <strong>68 of 132</strong> and no more to be had. The remaining <strong>64</strong> have to go in as a <strong>different species</strong>. Matt&#39;s pick: <strong>forget-me-nots from Bell&#39;s Nursery</strong> &mdash; <strong>not approved yet</strong>. Route it through Chris the way the Tufted was: this is a permit set, and the sheet says to contact the landscape architect before any revision.",
+      // Matt, 9/28/26: bought for this job and on site. /net-need reads this so
+      // the yard's Blue Rug/Wilton (#147) is not counted against Home2.
+      "&#9989; <strong>Creeping Juniper &mdash; bought and on site.</strong> The <strong>70</strong> for this job were bought for it and are on site, not planted yet. <strong>Do not pull juniper from the yard for Home2Suites.</strong>"
     ],
     // Spanish, one per note above, same order. Shown only while the count
     // matches -- a note added in English alone shows the English set.
     flagsEs: [
       "&#9989; <strong>Lila 'Miss Kim' &mdash; resuelto.</strong> Las anotaciones suman 73 contra un programa de 45. Las 46 que hab&iacute;a ya se plantaron; las <strong>27</strong> restantes van como <strong>lila com&uacute;n morada en contenedores #2</strong>. La especificaci&oacute;n de arbustos en este trabajo es <strong>#5, m&iacute;nimo 18&quot; al plantar</strong>, as&iacute; que es una excepci&oacute;n de tama&ntilde;o y ya fue <strong>aceptada</strong> &mdash; se anota aqu&iacute; porque una maceta m&aacute;s chica es lo que sale en la revisi&oacute;n final, y la respuesta no deber&iacute;a depender de la memoria.",
-      "&#9888;&#65039; <strong>Pasto (hair grass) &mdash; faltan 64, NO est&aacute; resuelto. Prioridad n&uacute;mero uno.</strong> El pasto de mech&oacute;n es el sustituto aprobado del ondulado dorado, pero solo hay <strong>68 de 132</strong> y no se consiguen m&aacute;s. Las <strong>64</strong> restantes tienen que ser de <strong>otra especie</strong>. La propuesta de Matt: <strong>nomeolvides (forget-me-not) de Bell&#39;s Nursery</strong> &mdash; <strong>todav&iacute;a no aprobada</strong>. P&aacute;salo por Chris como se hizo con el pasto de mech&oacute;n: es un juego de planos de permiso, y la hoja dice que hay que consultar al arquitecto paisajista antes de cualquier cambio."
+      "&#9888;&#65039; <strong>Pasto (hair grass) &mdash; faltan 64, NO est&aacute; resuelto. Prioridad n&uacute;mero uno.</strong> El pasto de mech&oacute;n es el sustituto aprobado del ondulado dorado, pero solo hay <strong>68 de 132</strong> y no se consiguen m&aacute;s. Las <strong>64</strong> restantes tienen que ser de <strong>otra especie</strong>. La propuesta de Matt: <strong>nomeolvides (forget-me-not) de Bell&#39;s Nursery</strong> &mdash; <strong>todav&iacute;a no aprobada</strong>. P&aacute;salo por Chris como se hizo con el pasto de mech&oacute;n: es un juego de planos de permiso, y la hoja dice que hay que consultar al arquitecto paisajista antes de cualquier cambio.",
+      "&#9989; <strong>Enebro rastrero &mdash; comprado y en el sitio.</strong> Los <strong>70</strong> de este trabajo se compraron para &eacute;l y ya est&aacute;n en el sitio, todav&iacute;a sin plantar. <strong>No saques enebro del vivero para Home2Suites.</strong>"
     ]
   },
   charter: {
@@ -155,10 +159,13 @@ var JOBS = {
       // Matt, 9/28/26. The 38 were bought on Dan's list for this job, so they
       // are not a claim on the yard. /net-need reads this note: without it the
       // Bailey rugosa gets split three ways and Palmer is told to buy 37.
-      "&#9989; <strong>Rugosa Rose &mdash; covered by Danny&#39;s order.</strong> The <strong>38</strong> for this job came from Danny (Alaska Trees). <strong>Do not pull Bailey rugosa from the yard for Baxter</strong> &mdash; that stock is allocated to Home2Suites and Palmer."
+      "&#9989; <strong>Rugosa Rose &mdash; covered by Danny&#39;s order.</strong> The <strong>38</strong> for this job came from Danny (Alaska Trees). <strong>Do not pull Bailey rugosa from the yard for Baxter</strong> &mdash; that stock is allocated to Home2Suites and Palmer.",
+      // Matt, 9/28/26, same as Home2's: bought for this job, on site.
+      "&#9989; <strong>Creeping Juniper &mdash; bought and on site.</strong> The <strong>11</strong> for this job were bought for it and are on site, not planted yet. <strong>Do not pull juniper from the yard for Baxter.</strong>"
     ],
     flagsEs: [
-      "&#9989; <strong>Rosa rugosa &mdash; cubierta por el pedido de Danny.</strong> Las <strong>38</strong> de este trabajo vinieron de Danny (Alaska Trees). <strong>No saques rugosa de Bailey del vivero para Baxter</strong> &mdash; ese material est&aacute; asignado a Home2Suites y Palmer."
+      "&#9989; <strong>Rosa rugosa &mdash; cubierta por el pedido de Danny.</strong> Las <strong>38</strong> de este trabajo vinieron de Danny (Alaska Trees). <strong>No saques rugosa de Bailey del vivero para Baxter</strong> &mdash; ese material est&aacute; asignado a Home2Suites y Palmer.",
+      "&#9989; <strong>Enebro rastrero &mdash; comprado y en el sitio.</strong> Los <strong>11</strong> de este trabajo se compraron para &eacute;l y ya est&aacute;n en el sitio, todav&iacute;a sin plantar. <strong>No saques enebro del vivero para Baxter.</strong>"
     ]
   },
   wsrcc: {
