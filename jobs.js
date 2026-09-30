@@ -272,13 +272,19 @@ var JOBS = {
       "&#128209; <strong>These counts come from the proposal</strong> printed 2/9/26, not from a plan set. There are no bed callouts, so there is no bed view for this job yet. Ask Chris for the planting plan and the plant schedule &mdash; WSRCC only reconciled because it had both.",
       // Rewritten 9/28. Matt: order the right plant for this job, this fall or
       // for spring delivery -- no substitution. The old note predicted one.
-      "&#127807; <strong>Gold Crinkled Hair Grass, 76 &mdash; order the SPECIFIED plant, no substitute.</strong> Home2Suites ran out of options on this grass and had to sub; Palmer will not. Book it this fall or for spring delivery. <strong>No source yet:</strong> none of the five vendor lists read so far (Seed-n-Tree, Bron, McKay, Bailey, Stewart) carry it."
+      "&#127807; <strong>Gold Crinkled Hair Grass, 76 &mdash; order the SPECIFIED plant, no substitute.</strong> Home2Suites ran out of options on this grass and had to sub; Palmer will not. Book it this fall or for spring delivery. <strong>No source yet:</strong> none of the five vendor lists read so far (Seed-n-Tree, Bron, McKay, Bailey, Stewart) carry it.",
+      // Matt, 9/29/26: the 3 Helena in the nursery (Inventory #89, 1.5" B&B) go
+      // to this job. They are older yard stock, which the spec rule does not
+      // credit on its own -- this note is Matt's exception, and /net-need reads
+      // it, so Palmer buys 0 Helena instead of 3.
+      "&#9989; <strong>Helena Maple &mdash; all 3 from the nursery.</strong> The 3 in the yard (Inventory #89, 1.5&quot; B&amp;B) are held for Palmer. <strong>Buy 0. Do not pull them for another job.</strong>"
     ],
     // Spanish, one per note above, same order. Shown only while the count
     // matches -- a note added in English alone shows the English set.
     flagsEs: [
       "&#128209; <strong>Estos conteos salen de la propuesta</strong> impresa el 2/9/26, no de un juego de planos. No hay anotaciones de camas, as&iacute; que todav&iacute;a no hay vista por cama para este trabajo. P&iacute;dele a Chris el plano de plantaci&oacute;n y el programa de plantas &mdash; WSRCC solo cuadr&oacute; porque ten&iacute;a los dos.",
-      "&#127807; <strong>Pasto ondulado dorado, 76 &mdash; pide la planta ESPECIFICADA, sin sustituto.</strong> En Home2Suites se acabaron las opciones con este pasto y hubo que sustituir; en Palmer no. P&iacute;delo este oto&ntilde;o o para entrega en primavera. <strong>Todav&iacute;a no hay proveedor:</strong> ninguna de las cinco listas le&iacute;das hasta ahora (Seed-n-Tree, Bron, McKay, Bailey, Stewart) lo tiene."
+      "&#127807; <strong>Pasto ondulado dorado, 76 &mdash; pide la planta ESPECIFICADA, sin sustituto.</strong> En Home2Suites se acabaron las opciones con este pasto y hubo que sustituir; en Palmer no. P&iacute;delo este oto&ntilde;o o para entrega en primavera. <strong>Todav&iacute;a no hay proveedor:</strong> ninguna de las cinco listas le&iacute;das hasta ahora (Seed-n-Tree, Bron, McKay, Bailey, Stewart) lo tiene.",
+      "&#9989; <strong>Arce 'Helena' &mdash; los 3 salen del vivero.</strong> Los 3 del vivero (inventario #89, 1.5&quot; B&amp;B) est&aacute;n apartados para Palmer. <strong>No se compran. No los saques para otro trabajo.</strong>"
     ]
   },
   raspberry: {
