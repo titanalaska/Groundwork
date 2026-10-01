@@ -149,16 +149,24 @@ var JOBS = {
         ["Alaska Flag Iris", 36]
       ]}
     },
-    // No plan and no size for Baxter: Chris has asked H5 for one twice. Class 3
-    // is Type B on the other three jobs, but Baxter's own schedule has not been
-    // seen, so no size is shown rather than one borrowed from another sheet.
+    // Plan found 9/30/26 on the Trello card: "Baxter Landscaping Bid Set.pdf",
+    // sheet L1 (The Boutet Company). Its schedule: "9 Boulders, 3' min diameter
+    // (To protect plant materials from snow removal equipment. Seasonally
+    // install reflective edge markers)". The size is Baxter's OWN, not borrowed
+    // from the L501 detail the other three jobs share -- so `schedule: null`.
+    //
+    // The sheet DRAWS 10 symbols (counted by eye at 600 dpi, bed by bed; each is
+    // rotated differently, so shape-matching could not do it). The target stays
+    // at 9 -- the schedule's number and Chris's -- and the gap is a note.
     boulders: {
-      plan: null,
+      plan: "./beds-boulders/baxter-v1.jpg",
+      planCaption: "Where they go — H5 sheet L1, all 10 drawn circled. Tap to zoom.",
+      schedule: null,
       items: [
-        ["Class 3 Boulder", 9, null]
+        ["Class 3 Boulder", 9, "3&#39; min diameter"]
       ],
-      note: "&#128247; <strong>No placement plan yet.</strong> Chris asked H5 (Jeff) for one twice and it has not come. <strong>Take a photo of the layout when on site</strong> &mdash; Chris says that is the fastest way.",
-      noteEs: "&#128247; <strong>Todav&iacute;a no hay plano de ubicaci&oacute;n.</strong> Chris le pidi&oacute; uno a H5 (Jeff) dos veces y no ha llegado. <strong>Toma una foto de la distribuci&oacute;n cuando est&eacute;s en el sitio</strong> &mdash; Chris dice que es lo m&aacute;s r&aacute;pido."
+      note: "&#9888;&#65039; <strong>Plan draws 10, schedule says 9.</strong> Found on sheet L1 of the H5 bid set: 1 at the west bed end (McLean Pl stop sign), 2 in the mailbox light-pole island, 2 in Area A (fire hydrant), 2 in Area B (light pole), 3 on the Baxter Rd beds. The schedule and Chris both say <strong>9</strong>. They sit at bed ends <strong>to protect plants from the snow plows</strong> &mdash; reflective edge markers go on seasonally. Ask Chris which one comes off, or place 10.",
+      noteEs: "&#9888;&#65039; <strong>El plano dibuja 10, el programa dice 9.</strong> Est&aacute; en la hoja L1 del juego de H5: 1 al final de la cama oeste (se&ntilde;al de alto de McLean Pl), 2 en la isla del poste de luz junto a los buzones, 2 en el &Aacute;rea A (hidrante), 2 en el &Aacute;rea B (poste de luz), 3 en las camas de Baxter Rd. El programa y Chris dicen <strong>9</strong>. Van al final de las camas <strong>para proteger las plantas de las m&aacute;quinas quitanieves</strong> &mdash; los marcadores reflectantes se ponen por temporada. Preg&uacute;ntale a Chris cu&aacute;l se quita, o coloca 10."
     },
     flags: [
       // Matt, 9/28/26. The 38 were bought on Dan's list for this job, so they

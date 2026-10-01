@@ -60,7 +60,7 @@ function cachesToDelete(names, keep){
 }
 // ---- /PURE ----
 
-const CACHE_VERSION = 'v34';
+const CACHE_VERSION = 'v35';
 const SHELL_CACHE = `${CACHE_PREFIX}${CACHE_VERSION}`;
 
 // Bed crops and site maps: ~17 MB over 45 files for Home2Suites and ~10 MB over
@@ -86,8 +86,8 @@ const SHELL_CACHE = `${CACHE_PREFIX}${CACHE_VERSION}`;
 const BED_CACHE = 'wolf-beds-v2';
 // Home2Suites: 44 pictures + site map + 22 symbols = 67.
 // WSRCC:        47 pictures + site map + 15 symbols = 63.
-// Boulders:     3 marked-up plans + 1 size schedule = 4, in /beds-boulders/.
-// 134 together. The cap was 100 when WSRCC landed, which would have silently
+// Boulders:     4 marked-up plans + 1 size schedule = 5, in /beds-boulders/.
+// 135 together. The cap was 100 when WSRCC landed, which would have silently
 // evicted the job a crew was not currently looking at -- the exact failure the
 // last bump was for. Keep headroom ahead of the next job, and remember the trim
 // deletes oldest-first with no warning.

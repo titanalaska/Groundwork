@@ -110,7 +110,9 @@ test('the 72nd lilac, drawn with no callout, shows on bed 27', async ({ page }) 
   expect(txt).toContain('NO callout');
 });
 
-test('the table is on the card, and Home2Suites has none', async ({ page }) => {
+// Home2Suites got its own tape-out 9/30 (tests/h2s-tape.spec.js); this test
+// used to assert it had none, which was true until the vector sheet turned up.
+test('the table is on the card', async ({ page }) => {
   await page.evaluate(() => { view = 'zones'; renderAll(); });
   await expect(page.locator('#bed-B05 .tape-row')).toHaveCount(37);   // 13 PP + 6 PS + 18 SP
   // The words, not just the data: a swapped label stakes a tree on the wrong
@@ -118,7 +120,4 @@ test('the table is on the card, and Home2Suites has none', async ({ page }) => {
   await expect(page.locator('#bed-B09 .tape-row').first()).toContainText('outside the fence');
   await expect(page.locator('#bed-B31 .tape-row').first()).toContainText('inside the fence');
   await expect(page.locator('#bed-B31 .tape-row').first()).toContainText('25′ 4″');
-  await openJob(page, 'h2s');
-  await page.evaluate(() => { view = 'zones'; renderAll(); });
-  await expect(page.locator('.tape-row')).toHaveCount(0);
 });

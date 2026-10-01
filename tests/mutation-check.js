@@ -116,8 +116,9 @@ const MUTATIONS = [
   },
   {
     name: 'swap inside and outside the fence on the card',
-    find: '({site: "inside the fence", street: "outside the fence",',
-    replace: '({site: "outside the fence", street: "inside the fence",',
+    // 9/30: the line now starts "(r.sideText ||" -- Home2 carries its own words.
+    find: '(r.sideText || {site: "inside the fence", street: "outside the fence",',
+    replace: '(r.sideText || {site: "outside the fence", street: "inside the fence",',
     caughtBy: 'the table is on the card',
     tag: 'stakes',
   },
@@ -528,6 +529,42 @@ const MUTATIONS = [
     ],
     tag: 'spanish',
     caughtBy: 'longest phrase wins',
+  },
+  // ---- Home2 tape-out + boulders, 9/30 ---------------------------------------
+  {
+    name: 'never hand Home2 its tape table',
+    find: 'stakes: H2S_STAKES,',
+    replace: 'stakes: null,',
+    caughtBy: 'every staked plant on a Home2 card has exactly one tape row',
+    tag: 'stakes',
+  },
+  {
+    name: 'never hand Home2 its boulders',
+    find: 'boulders: H2S_BOULDERS};',
+    replace: 'boulders: null};',
+    caughtBy: 'all 45 drawn are on a card',
+    tag: 'stakes',
+  },
+  {
+    name: 'label boulder rows as plants (A is Goatsbeard on Home2)',
+    find: '    var rock = !!ROCK[r.code];',
+    replace: '    var rock = false;',
+    caughtBy: 'boulders show on the card',
+    tag: 'stakes',
+  },
+  {
+    name: 'drop the Miss Kim hold note',
+    find: '  var held = BED_STAKES.held && BED_STAKES.held.SPA && b.items && b.items.SPA',
+    replace: '  var held = false && BED_STAKES.held && BED_STAKES.held.SPA && b.items && b.items.SPA',
+    caughtBy: 'Miss Kim gets no distances',
+    tag: 'stakes',
+  },
+  {
+    name: "show another architect's L501 size table on Baxter",
+    find: 'var sched = ("schedule" in b) ? b.schedule : BOULDER_SCHEDULE;',
+    replace: 'var sched = BOULDER_SCHEDULE;',
+    caughtBy: 'Baxter shows its own plan and size',
+    tag: 'boulders',
   },
 ];
 

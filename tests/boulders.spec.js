@@ -71,20 +71,27 @@ test('the Boulders section renders rows, sizes and the plan, with no Pull or Sub
   expect(s.pics).toEqual(['./beds-boulders/wsrcc-v1.jpg', './beds-boulders/schedule-v1.jpg']);
 });
 
-test('Baxter shows the missing-plan note and borrows no size from another sheet', async ({ page }) => {
+// Baxter's plan turned up 9/30 on the Trello card (H5 bid set, sheet L1). Its
+// schedule reads "9 Boulders, 3' min diameter", and the sheet draws 10. The
+// target stays Chris's 9; the 10 is a note, not a number anyone typed in.
+test('Baxter shows its own plan and size, and the 10-drawn-vs-9 note', async ({ page }) => {
   await openJob(page, 'baxter');
   const s = await page.evaluate(() => {
     view = 'species'; renderAll();
     const sec = document.querySelector('section.rocks');
     return {
       note: sec.querySelector('.rock-note').textContent,
-      sizes: sec.querySelectorAll('.rock-size').length,
-      pics: sec.querySelectorAll('.rock-pic').length,
+      size: sec.querySelector('.rock-size').textContent,
+      target: sec.querySelector('.item-target').textContent,
+      pics: [...sec.querySelectorAll('.rock-pic img')].map((i) => i.getAttribute('src')),
     };
   });
-  expect(s.note).toContain('No placement plan yet');
-  expect(s.sizes).toBe(0);
-  expect(s.pics, 'no plan, and no schedule without a size').toBe(0);
+  expect(s.note).toContain('Plan draws 10, schedule says 9');
+  expect(s.size).toBe("3' min diameter");
+  expect(s.target).toContain('need 9');
+  // Its own plan, and NOT the L501 schedule the other three jobs share -- that
+  // table is another architect's, and would put 9' / 33" beside a 3' rock.
+  expect(s.pics).toEqual(['./beds-boulders/baxter-v1.jpg']);
 });
 
 test('Charter records the Type C disagreement instead of picking a side', async ({ page }) => {
