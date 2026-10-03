@@ -118,13 +118,16 @@ var JOBS = {
     boulders: {
       plan: "./beds-boulders/charter-v1.jpg",
       items: [
-        ["Type A Boulder (Class 4)", 6, "12&#39; &plusmn;1&#39; around &middot; 45&quot; &plusmn;3&quot; tall"],
-        ["Type B Boulder (Class 3)", 13, "9&#39; &plusmn;1&#39; around &middot; 33&quot; &plusmn;3&quot; tall"]
+        ["Type A Boulder (Class 4)", 7, "12&#39; &plusmn;1&#39; around &middot; 45&quot; &plusmn;3&quot; tall"],
+        ["Type B Boulder (Class 3)", 13, "9&#39; &plusmn;1&#39; around &middot; 33&quot; &plusmn;3&quot; tall"],
+        ["Type C Boulder (Class 2)", 8, "6&#39; &plusmn;1&#39; around &middot; 21&quot; &plusmn;3&quot; tall"]
       ],
-      // Targets follow Chris's email. The plan disagrees in one place, and the
-      // app records the disagreement rather than picking a side.
-      note: "&#9888;&#65039; <strong>Type C?</strong> Chris counts <strong>6 Type A and 13 Type B</strong>, no Type C. But one callout on the plan reads <strong>(2) Type A, (3) Type B, (3) Type C</strong>. Settle with Chris before the rocks are ordered.",
-      noteEs: "&#9888;&#65039; <strong>&iquest;Tipo C?</strong> Chris cuenta <strong>6 tipo A y 13 tipo B</strong>, sin tipo C. Pero una anotaci&oacute;n del plano dice <strong>(2) tipo A, (3) tipo B, (3) tipo C</strong>. Hay que aclararlo con Chris antes de pedir las rocas."
+      // Matt, 10/3/26: the plan wins over Chris's 9/28 email (6 A, 13 B, no C).
+      // Corvus L1.1 has three callouts -- (2)A (3)B (3)C, (4)A (8)B (5)C,
+      // (1)A (2)B -- for 7 / 13 / 8. Jeremi's 10/2 map package agrees. The
+      // sheet draws only 6 a's, so one Type A has no spot.
+      note: "&#9888;&#65039; <strong>One Type A has no spot.</strong> The plan calls for 7 Type A but draws 6. Bring all 7; the owner&#39;s rep places boulders in the field anyway.",
+      noteEs: "&#9888;&#65039; <strong>Una roca tipo A no tiene lugar.</strong> El plano pide 7 tipo A pero dibuja 6. Trae las 7; el representante del due&ntilde;o ubica las rocas en el sitio de todos modos."
     },
     flags: []
   },

@@ -4,8 +4,14 @@
 // app renders:
 //   Home2 Suites        Type A 18 (Class 4), Type B 28 (Class 3)          = 46
 //   Carpenters (WSRCC)  Type A 4, Type B 16, Type C 4 (Class 2)           = 24
-//   Wasilla Charter     6 Type A (class 4), 13 Type B (Class 3)           = 19
 //   Baxter              9 Class 3, no placement plan yet (waiting on H5)  =  9
+//
+// EXCEPT Charter, which Matt moved to the plan on 10/3/26. Chris's email said
+// 6 A + 13 B and no C. Corvus L1.1 has three boulder callouts:
+//   (2) A, (3) B, (3) C  +  (4) A, (8) B, (5) C  +  (1) A, (2) B
+//   A = 2+4+1 = 7,  B = 3+8+2 = 13,  C = 3+5 = 8                       = 28
+// The sheet DRAWS 6 a's, 13 b's, 8 c's -- one A is called out with no spot.
+// Jeremi's map package (10/2) reads it the same way.
 //
 // The other half of this file is what boulders must NOT do: they are not
 // plants, and every plant total, picker and button has to stay as it was.
@@ -27,7 +33,8 @@ test('each job carries Chris\'s boulder counts', async ({ page }) => {
   });
   expect(got).toEqual({
     h2s: [['Type A Boulder (Class 4)', 18], ['Type B Boulder (Class 3)', 28]],
-    charter: [['Type A Boulder (Class 4)', 6], ['Type B Boulder (Class 3)', 13]],
+    charter: [['Type A Boulder (Class 4)', 7], ['Type B Boulder (Class 3)', 13],
+              ['Type C Boulder (Class 2)', 8]],
     baxter: [['Class 3 Boulder', 9]],
     wsrcc: [['Type A Boulder (Class 4)', 4], ['Type B Boulder (Class 3)', 16],
             ['Type C Boulder (Class 2)', 4]],
@@ -94,14 +101,16 @@ test('Baxter shows its own plan and size, and the 10-drawn-vs-9 note', async ({ 
   expect(s.pics).toEqual(['./beds-boulders/baxter-v1.jpg']);
 });
 
-test('Charter records the Type C disagreement instead of picking a side', async ({ page }) => {
+// The Type C question is settled (plan wins), so the note now carries the one
+// thing still loose: the 7th Type A has no spot on the drawing.
+test('Charter notes the Type A called out but not drawn', async ({ page }) => {
   await openJob(page, 'charter');
   const note = await page.evaluate(() => {
     view = 'species'; renderAll();
     return document.querySelector('section.rocks .rock-note').textContent;
   });
-  expect(note).toContain('6 Type A and 13 Type B');
-  expect(note).toContain('(3) Type C');
+  expect(note).toContain('calls for 7 Type A but draws 6');
+  expect(note).not.toContain('Settle with Chris');
 });
 
 test('a boulder count saves under its own key and reaches the report', async ({ page }) => {
@@ -151,7 +160,7 @@ test.describe('status page', () => {
   // Worked on paper, against Chris's targets:
   //   WSRCC   A 4 - 4 = 0,  B 16 - 10 = 6,  C 4 - 1 = 3  -> "6 Type B (Class 3), 3 Type C (Class 2)"
   //           (A is done, so it is left off; B leads because 6 > 3)
-  //   Charter A 6 - 6 = 0,  B 13 - 13 = 0                -> "all on site"
+  //   Charter A 7 - 7 = 0,  B 13 - 13 = 0,  C 8 - 8 = 0  -> "all on site"
   //   Baxter  nothing counted, 9 - 0 = 9                 -> "9 Class 3"
   const RECORD = {
     ok: true,
@@ -161,8 +170,9 @@ test.describe('status page', () => {
         'wsrcc:type-a-boulder-class-4': 4,
         'wsrcc:type-b-boulder-class-3': 10,
         'wsrcc:type-c-boulder-class-2': 1,
-        'charter:type-a-boulder-class-4': 6,
+        'charter:type-a-boulder-class-4': 7,
         'charter:type-b-boulder-class-3': 13,
+        'charter:type-c-boulder-class-2': 8,
       },
       planted: {}, staked: {},
     },
@@ -175,7 +185,9 @@ test.describe('status page', () => {
     await page.waitForFunction(() => document.querySelectorAll('#sections section').length > 0);
   });
 
-  const summary = (page, job) => page.locator(`#${job} .sub`, { hasText: 'Boulders' });
+  // Anchored: the summary line STARTS with "Boulders ·". A plain 'Boulders'
+  // also matches a plan note that mentions boulders (Charter's does).
+  const summary = (page, job) => page.locator(`#${job} .sub`, { hasText: /^Boulders ·/ });
 
   test('the summary breaks the shortfall out by type, worst first', async ({ page }) => {
     await expect(summary(page, 'wsrcc'))
