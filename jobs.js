@@ -116,7 +116,9 @@ var JOBS = {
       ]}
     },
     boulders: {
-      plan: "./beds-boulders/charter-v1.jpg",
+      // Jeremi's L1.1 overlay (10/2/26): a red, b blue, c orange. Chris's v1
+      // markup left the c's uncoloured under the b circles.
+      plan: "./beds-boulders/charter-v2.jpg",
       items: [
         ["Type A Boulder (Class 4)", 7, "12&#39; &plusmn;1&#39; around &middot; 45&quot; &plusmn;3&quot; tall"],
         ["Type B Boulder (Class 3)", 13, "9&#39; &plusmn;1&#39; around &middot; 33&quot; &plusmn;3&quot; tall"],

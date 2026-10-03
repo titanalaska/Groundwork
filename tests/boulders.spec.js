@@ -113,6 +113,17 @@ test('Charter notes the Type A called out but not drawn', async ({ page }) => {
   expect(note).not.toContain('Settle with Chris');
 });
 
+// v1 was Chris's markup: a and b coloured, the 8 c's left plain under his pink
+// circles. v2 is Jeremi's L1.1 overlay (10/2), which colours all three types.
+test('Charter shows the picture that colours Type C', async ({ page }) => {
+  await openJob(page, 'charter');
+  const pics = await page.evaluate(() => {
+    view = 'species'; renderAll();
+    return [...document.querySelectorAll('section.rocks .rock-pic img')].map((i) => i.getAttribute('src'));
+  });
+  expect(pics).toEqual(['./beds-boulders/charter-v2.jpg', './beds-boulders/schedule-v1.jpg']);
+});
+
 test('a boulder count saves under its own key and reaches the report', async ({ page }) => {
   await openJob(page, 'h2s');
   const r = await page.evaluate(() => {
