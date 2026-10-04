@@ -71,6 +71,15 @@ var JOBS = {
         ["Type B Boulder (Class 3)", 28, "9&#39; &plusmn;1&#39; around &middot; 33&quot; &plusmn;3&quot; tall"]
       ]
     },
+    // L102 General Note 5: moose fence at every deciduous tree, detail 4/L501.
+    // Every tree on this job is deciduous, so the count is the tree list's.
+    // stakesPerTree 0: detail 1/L501 shows no stakes; "Wood Stakes and Ties"
+    // appears only in the submittal list. Jeremi flagged it 10/2/26 -- open.
+    moose: {
+      stakesPerTree: 0,
+      note: "&#10067; <strong>Tree stakes?</strong> The tree planting detail shows <strong>none</strong>; only the submittal list mentions wood stakes. Ask Chris or Corvus before buying stakes.",
+      noteEs: "&#10067; <strong>&iquest;Estacas para los &aacute;rboles?</strong> El detalle de plantaci&oacute;n <strong>no muestra ninguna</strong>; solo la lista de entregas menciona estacas de madera. Preg&uacute;ntale a Chris o a Corvus antes de comprar estacas."
+    },
     flags: [
       // Four of these closed out 9/20. Miss Kim and False Spirea were the two
       // schedule-vs-callout shortages; both are settled now, so only Miss Kim
@@ -130,6 +139,11 @@ var JOBS = {
       // sheet draws only 6 a's, so one Type A has no spot.
       note: "&#9888;&#65039; <strong>One Type A has no spot.</strong> The plan calls for 7 Type A but draws 6. Bring all 7; the owner&#39;s rep places boulders in the field anyway.",
       noteEs: "&#9888;&#65039; <strong>Una roca tipo A no tiene lugar.</strong> El plano pide 7 tipo A pero dibuja 6. Trae las 7; el representante del due&ntilde;o ubica las rocas en el sitio de todos modos."
+    },
+    // L5.1 detail 4, the same moose detail as Home2's. Unlike Home2 this sheet
+    // has a staked tree detail: "(3) 2x2x6' wood stakes embedded 24" in ground."
+    moose: {
+      stakesPerTree: 3
     },
     flags: []
   },
@@ -370,3 +384,56 @@ var JOBS = {
     ]
   }
 };
+
+// ---- Moose fence ----------------------------------------------------------
+// A job opts in with a `moose` block. Like `boulders`, it is NOT a plant group:
+// every loop over `groups` means plants, and a cage in one is wrong.
+//
+// Corvus "Moose Protection" detail (4/L501 Home2Suites, 4/L5.1 Charter):
+// "Four posts required per tree", "7'-0" between poles", 10' green steel
+// T-post with spade, 4'-0" welded wire 2"x4" PVC coated, "two (2) metal ties
+// per post". Bottom of wire 3'-2" above grade -- post set 2'-10" deep.
+var MOOSE_DETAIL = { postsPerTree: 4, sideFt: 7, tiesPerPost: 2 };
+
+// One cage per tree, and the tree count is the job's own tree list -- typed
+// once, so a corrected tree count corrects the fence with it. Both jobs that
+// carry a fence are all-deciduous; a conifer added to one would need this to
+// change, because the detail covers deciduous trees only.
+function mooseTrees(job){
+  return job.groups.trees.items.reduce(function(n, r){ return n + r[1]; }, 0);
+}
+
+// The whole-job material list for `trees` cages.
+// Returns {posts, wireFt, ties, stakes}. moose.test.js has the worked numbers.
+// Wire is the bare perimeter (4 sides x 7' = 28 LF a cage), the same as
+// Jeremi's takeoff: no overlap where the cage closes, no roll waste. Matt,
+// 10/3/26 -- if an allowance is wanted, it goes in as its own number.
+function mooseMaterials(trees, stakesPerTree){
+  var d = MOOSE_DETAIL;
+  var posts = trees * d.postsPerTree;
+  return {
+    posts: posts,
+    wireFt: trees * d.postsPerTree * d.sideFt,
+    ties: posts * d.tiesPerPost,
+    stakes: trees * (stakesPerTree || 0)
+  };
+}
+
+// The material line both pages print, off mooseMaterials(). Called with one
+// tree it is the per-cage line; with the job's trees it is the order.
+// `es` writes it in Spanish -- built here, not by the app's word-swap
+// translator, because the numbers sit in the middle of every phrase.
+function mooseKitText(m, es, lead){
+  function n(v){ return v.toLocaleString("en-US"); }
+  var parts = es ? [
+    n(m.posts) + " postes T (10' verdes, con pala)",
+    n(m.wireFt) + " pies lineales de malla (4' de alto, 2\"x4\", PVC)",
+    n(m.ties) + " amarres de metal"
+  ] : [
+    n(m.posts) + " T-posts (10' green, with spade)",
+    n(m.wireFt) + " LF wire (4' tall, 2\"x4\" mesh, PVC coated)",
+    n(m.ties) + " ties (metal)"
+  ];
+  if(m.stakes) parts.push(n(m.stakes) + (es ? " estacas de madera (2x2x6')" : " wood stakes (2x2x6')"));
+  return (lead ? lead + " " : "") + parts.join(" · ");
+}

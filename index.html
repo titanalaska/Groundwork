@@ -294,6 +294,7 @@
   .item-name{font-size:0.95rem;font-weight:600;}
   .item-target{font-size:0.78rem;color:var(--ink-soft);margin-top:1px;}
   .rock-note{margin:0 0 10px;}
+  .moose-kit{margin:10px 0 0;}
   .rock-pic{display:block;margin-top:12px;text-decoration:none;color:var(--ink-soft);}
   .rock-cap{font-size:0.8rem;margin-bottom:4px;}
   .rock-pic img{display:block;width:100%;height:auto;background:#fff;
@@ -1665,14 +1666,26 @@ function applyPayload(p){
   }
 }
 
+// The counted rows that are NOT plants: boulders, and the one "Trees caged"
+// row a moose fence adds. Every place that walks all counted rows -- seeding,
+// the daily log -- adds these to the plant groups through here, so a new kind
+// of row is one edit, not a hunt.
+var MOOSE_ROW = "Trees caged";
+function extraRowLists(job){
+  var out = [];
+  if(job.boulders) out.push(job.boulders.items);
+  if(job.moose) out.push([[MOOSE_ROW, mooseTrees(job)]]);
+  return out;
+}
+
 function fillMissingFromSeed(){
   Object.keys(JOBS).forEach(function(jobKey){
     var job = JOBS[jobKey];
     // Boulders too. The daily log skips any key missing from its baseline as
     // "added since the last log", so a boulder row with no key yet would have
     // its first delivery swallowed rather than reported.
-    var lists = Object.keys(job.groups).map(function(gk){ return job.groups[gk].items; });
-    if(job.boulders) lists.push(job.boulders.items);
+    var lists = Object.keys(job.groups).map(function(gk){ return job.groups[gk].items; })
+      .concat(extraRowLists(job));
     lists.forEach(function(items){
       items.forEach(function(row){
         var k = jobKey + ":" + slug(row[0]);
@@ -2343,6 +2356,39 @@ function renderBoulders(jobKey, b){
   return section;
 }
 
+// The Moose fence section: one counter, "Trees caged", against the job's tree
+// count -- a cage is a yes/no per tree, so counting posts and feet of wire on
+// a phone would be tapping 340 times to say the same thing. Under it, the
+// whole-job material from the Corvus detail, for ordering.
+function renderMoose(jobKey, m){
+  var job = JOBS[jobKey];
+  var es = lang === "es";
+  var trees = mooseTrees(job);
+  var section = document.createElement("section");
+  section.className = "group moose";
+  var title = document.createElement("div");
+  title.className = "group-title";
+  title.textContent = "Moose fence";
+  section.appendChild(title);
+  var note = (es && m.noteEs) ? m.noteEs : m.note;
+  if(note){
+    var n = document.createElement("div");
+    n.className = "flags rock-note";
+    n.innerHTML = note;
+    section.appendChild(n);
+  }
+  // One tree's worth is the per-cage line under the counter. renderItem puts
+  // `size` in as HTML; this text is built in jobs.js from numbers and fixed
+  // words, with quotes but no < or &, so it goes in as-is.
+  var each = mooseKitText(mooseMaterials(1, m.stakesPerTree), es, es ? "Cada cerca:" : "Each cage:");
+  section.appendChild(renderItem(jobKey, MOOSE_ROW, trees, false, {size: each}));
+  var kit = document.createElement("div");
+  kit.className = "flags moose-kit";
+  kit.textContent = mooseKitText(mooseMaterials(trees, m.stakesPerTree), es, es ? "Todo el trabajo:" : "Whole job:");
+  section.appendChild(kit);
+  return section;
+}
+
 function renderGroups(){
   var container = document.getElementById("groups");
   // A sync from another phone lands here and rebuilds every row. If somebody
@@ -2388,6 +2434,7 @@ function renderGroups(){
     container.appendChild(section);
   });
   if(job.boulders) container.appendChild(renderBoulders(currentJob, job.boulders));
+  if(job.moose) container.appendChild(renderMoose(currentJob, job.moose));
   if(refocus){
     var back = container.querySelector('[data-focus="' + refocus.tag.replace(/"/g, '\\"') + '"]');
     if(back){
@@ -3358,6 +3405,10 @@ var ES = {
   "Where they go \u2014 Chris\u2019s marked-up plan. Tap to zoom.":
     "D\u00f3nde van \u2014 el plano marcado de Chris. Toca para ampliar.",
   "Size schedule \u2014 L501 detail 7": "Tabla de tama\u00f1os \u2014 L501 detalle 7",
+  // --- moose fence (jobs.js `moose`; the material lines are built in Spanish
+  // by mooseKitText, so only the two fixed labels live here)
+  "Moose fence": "Cerca contra alces",
+  "Trees caged": "\u00c1rboles con cerca",
   "Where they go \u2014 H5 sheet L1, all 10 drawn circled. Tap to zoom.":
     "D\u00f3nde van \u2014 hoja L1 de H5, las 10 dibujadas en c\u00edrculo. Toca para ampliar.",
   " min diameter": " de di\u00e1metro m\u00ednimo",
@@ -4610,6 +4661,15 @@ function generateReport(){
                          : " -- short " + (row[1] - got)));
       });
     }
+    if(job.moose){
+      var trees = mooseTrees(job);
+      var caged = state[jobKey + ":" + slug(MOOSE_ROW)] || 0;
+      lines.push("Moose fence:");
+      lines.push("- " + MOOSE_ROW + ": " + caged + "/" + trees +
+        (caged >= trees ? (caged > trees ? " -- OVER by " + (caged - trees) : " -- complete")
+                        : " -- short " + (trees - caged)));
+      lines.push("  " + mooseKitText(mooseMaterials(trees, job.moose.stakesPerTree), false, "Whole job:"));
+    }
     if(job.flags && job.flags.length){
       lines.push("Flags:");
       job.flags.forEach(function(f){
@@ -4778,10 +4838,10 @@ function draftDailyLog(){
   var received = [], corrected = [];
   Object.keys(JOBS).forEach(function(jobKey){
     var job = JOBS[jobKey];
-    // Boulders ride along as one more list of rows: a rock delivered is a
-    // count that moved, the same as a plant.
-    var lists = Object.keys(job.groups).map(function(gk){ return job.groups[gk].items; });
-    if(job.boulders) lists.push(job.boulders.items);
+    // Boulders and cages ride along as more lists of rows: a rock delivered
+    // or a tree caged is a count that moved, the same as a plant.
+    var lists = Object.keys(job.groups).map(function(gk){ return job.groups[gk].items; })
+      .concat(extraRowLists(job));
     lists.forEach(function(items){
       items.forEach(function(row){
         var k = jobKey + ":" + slug(row[0]);

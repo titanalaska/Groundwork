@@ -288,6 +288,20 @@ function renderJob(jobKey, counts, notes){
     html += '</table></div></div>';
   }
 
+  // Moose fence: one line for progress, one for the order. Kept out of the
+  // plant numbers like the boulders -- a cage is not a plant.
+  var job = JOBS[jobKey];
+  if (job.moose) {
+    var trees = mooseTrees(job);
+    var cagedRaw = counts[jobKey + ":" + slugOf("Trees caged")];
+    var caged = typeof cagedRaw === "number" ? cagedRaw : 0;
+    html += '<div class="sub"><b>Moose fence</b> &middot; ' + mooseSummary(caged, trees) + '</div>' +
+      (job.moose.note ? '<div class="sub">' + job.moose.note + '</div>' : '') +
+      '<div class="sub moose-kit">' +
+      escapeHtml(mooseKitText(mooseMaterials(trees, job.moose.stakesPerTree), false, "Whole job:")) +
+      '</div>';
+  }
+
   return {html: html + '</section>', short: short, done: done, rows: rows.length};
 }
 
@@ -322,6 +336,13 @@ function boulderSummary(rocks){
   return "still need <b>" + owed.map(function(r){
     return r.short + " " + escapeHtml(r.name.replace(/ Boulder\b/, ""));
   }).join(", ") + "</b>";
+}
+
+// "12 of 85 trees caged, 73 to go" -- or "all 85 trees caged". Extra cages
+// past the tree count read as done; nobody cages a tree twice on purpose.
+function mooseSummary(caged, trees){
+  if (caged >= trees) return "all " + trees + " trees caged";
+  return caged + " of " + trees + " trees caged, <b>" + (trees - caged) + " to go</b>";
 }
 
 // The bed rows stay hand-written -- the bed list is plan data this page does
