@@ -46,6 +46,15 @@
 // here that reached outside for a constant would not be extractable at all.
 const CACHE_PREFIX = 'groundwork-shell-';
 
+// Per-job asset folders, served cache-first out of the bed cache: /beds/ +
+// /symbols/ for Home2Suites, /beds-wsrcc/ + /symbols-wsrcc/ for WSRCC,
+// /beds-baxter/ + /symbols-baxter/ for Baxter, /beds-boulders/ for every job's
+// boulder plan. Matching the bare names missed every WSRCC file, so none of
+// that job's maps cached for offline -- the whole point of this worker out in
+// the yard. Inside the sentinels so tests/sw-folders.test.js reads this exact
+// expression.
+const JOB_ASSET_RE = /\/(beds|symbols)(-[a-z0-9]+)?\//;
+
 // Which caches are OURS to remove.
 //
 // The Cache API is scoped to the ORIGIN, and titanalaska.github.io carries
@@ -60,7 +69,7 @@ function cachesToDelete(names, keep){
 }
 // ---- /PURE ----
 
-const CACHE_VERSION = 'v37';
+const CACHE_VERSION = 'v38';
 const SHELL_CACHE = `${CACHE_PREFIX}${CACHE_VERSION}`;
 
 // Bed crops and site maps: ~17 MB over 45 files for Home2Suites and ~10 MB over
@@ -86,8 +95,9 @@ const SHELL_CACHE = `${CACHE_PREFIX}${CACHE_VERSION}`;
 const BED_CACHE = 'wolf-beds-v2';
 // Home2Suites: 44 pictures + site map + 22 symbols = 67.
 // WSRCC:        47 pictures + site map + 15 symbols = 63.
+// Baxter:        7 pictures + site map + 10 symbols = 18 (10/7/26).
 // Boulders:     4 marked-up plans + 1 size schedule = 5, in /beds-boulders/.
-// 135 together. The cap was 100 when WSRCC landed, which would have silently
+// 153 together. The cap was 100 when WSRCC landed, which would have silently
 // evicted the job a crew was not currently looking at -- the exact failure the
 // last bump was for. Keep headroom ahead of the next job, and remember the trim
 // deletes oldest-first with no warning.
@@ -267,11 +277,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Per-job asset folders: /beds/ + /symbols/ for Home2Suites, /beds-wsrcc/ +
-  // /symbols-wsrcc/ for WSRCC, /beds-boulders/ for every job's boulder plan. Matching the bare names missed every WSRCC file,
-  // so none of that job's maps cached for offline -- which is the whole point
-  // of this worker out in the yard.
-  if (/\/(beds|symbols)(-[a-z0-9]+)?\//.test(url.pathname)) {
+  // Per-job asset folders -- see JOB_ASSET_RE in the PURE block.
+  if (JOB_ASSET_RE.test(url.pathname)) {
     event.respondWith(cacheFirst(req).catch(() => safeNetwork(req)));
     return;
   }
