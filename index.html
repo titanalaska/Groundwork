@@ -1342,6 +1342,37 @@ var WSRCC_DISCREPANCY = {
   SP: "callouts 71 vs schedule 72"
 };
 
+// ---- Baxter Family Housing ---------------------------------------------------
+// Built by tools/baxter-beds.py off the VECTOR bid set (The Boutet Company,
+// sheet L1, on the Trello card). The sheet is exploded geometry with no text
+// layer for its callouts, so every quantity was READ BY EYE (BAXTER-readings.txt
+// in the room) and reconciled: each bed matches the sheet's own req'd/shown
+// line, and each species its schedule -- except where the sheet disagrees with
+// itself, which BAXTER_DISCREPANCY carries: it calls out 7 White Spruce
+// against a schedule of 9, and 7 Prairiefire Crabapple against 8 (the eighth
+// is drawn in Area C with no callout). One bed per planter the sheet draws:
+// the three perimeter strips and Areas A-D, numbered north to south.
+/* BAXTER-BEDS:BEGIN (tools/baxter-inject-beds.py) */
+var BAXTER_BEDS = [{"bed":"B01","where":"West bed (McLean Pl)","units":44,"items":{"BP":2,"IS":12,"JH":1,"PF":16,"PG":2,"RR":10,"SV":1},"zone":"McLean Pl","seq":1},{"bed":"B02","where":"Northeast bed (Baxter Rd)","units":50,"items":{"BP":3,"IS":12,"JH":3,"PF":14,"PG":2,"RR":15,"SV":1},"zone":"Baxter Rd","seq":2},{"bed":"B03","where":"Area A (fire hydrant)","units":17,"items":{"JH":2,"MP":2,"PF":3,"SB":7,"VT":3},"zone":"Erna Court","seq":3},{"bed":"B04","where":"Area D (mailboxes)","units":22,"items":{"MP":3,"PF":1,"RR":1,"SB":8,"VT":9},"zone":"Erna Court","seq":4},{"bed":"B05","where":"Area B (light pole)","units":13,"items":{"JH":1,"MP":2,"PF":1,"SB":8,"VT":1},"zone":"Erna Court","seq":5},{"bed":"B06","where":"Area C (Erna Court)","units":8,"items":{"JH":1,"PF":3,"SB":3,"VT":1},"zone":"Erna Court","seq":6},{"bed":"B07","where":"Southeast bed (Baxter Rd)","units":50,"items":{"BP":3,"IS":12,"JH":3,"PF":17,"PG":3,"RR":12},"zone":"Baxter Rd","seq":7}];
+var BAXTER_SPECIES = {"PG":"White Spruce","BP":"Paper Birch","MP":"Prairiefire Crabapple","SV":"Hardy Purple Common Lilac","JH":"Creeping Juniper","IS":"Alaska Flag Iris","PF":"Yellow Potentilla","RR":"Rugosa Rose","SB":"Birchleaf Spirea","VT":"Dwarf American Cranberry"};
+var BAXTER_MAP_PLAN = [4014, 1620];
+var BAXTER_MAP_XY = {"B01":[129,519],"B02":[3167,531],"B03":[2573,738],"B04":[1708,919],"B05":[2637,985],"B06":[1975,1033],"B07":[3167,1247]};
+var BAXTER_DISCREPANCY = {"PG":"callouts 7, schedule 9 -- the drawing calls out 7 White Spruce (2 west, 2 northeast, 3 southeast); the schedule says 9 (read 10/7/26, unconfirmed with Chris)","MP":"callouts 7, schedule 8 -- the drawing calls out 7 Prairiefire Crabapple (A 2, B 2, D 3) but DRAWS 8: the eighth, in Area C, has no callout; the schedule says 8 (read 10/7/26, unconfirmed with Chris)","area C":"callouts 0 trees, sheet line says 1 -- the line says 1 tree; a crabapple IS drawn in Area C but carries no callout (read 10/7/26, unconfirmed with Chris)"};
+/* BAXTER-BEDS:END */
+var BAXTER_SPACING = {};
+// Geometric bands, like WSRCC's: no build order or crew split has been set.
+// The keys are the street names, on purpose: a card prints its zone key after
+// the place, and a bare compass word as a Spanish key ("East") rewrote Home2's
+// "East end of the curb" before that line's own rule could run.
+var BAXTER_ZONES = {
+  "McLean Pl":  {name: "McLean Pl - the west frontage", crew: "", order: 1,
+                 note: "Geometric band, not a build order. No crew split set for this job yet."},
+  "Erna Court": {name: "Erna Court - the court and Areas A-D", crew: "", order: 2,
+                 note: "Geometric band, not a build order. No crew split set for this job yet."},
+  "Baxter Rd":  {name: "Baxter Rd - the east frontage", crew: "", order: 3,
+                 note: "Geometric band, not a build order. No crew split set for this job yet."}
+};
+
 var LOCAL_KEY = "wolf-field-checklist-v1";
 var itemMap = {};   // species slug -> {itemId, itemName, mappedBy, mappedAt}
 var pulls = {};     // species slug -> [{qty, job, who, at}], newest first
@@ -2469,6 +2500,9 @@ var CATEGORY = {
   CA: "shrubs", CL: "shrubs", PFA: "shrubs", PFG: "shrubs", PFP: "shrubs",
   SB: "shrubs", SP: "shrubs",
   CAO: "grasses",
+  // Baxter-only. BP, JH, SB, SV and IS are already here with the same category.
+  PG: "trees", MP: "trees",
+  PF: "shrubs", RR: "shrubs", VT: "shrubs",
   A: "perennials", AD: "perennials", APV: "perennials",
   G: "perennials", H: "perennials", IS: "perennials",
 };
@@ -2567,7 +2601,7 @@ function stakeTableHTML(b){
   var rk = (BED_BOULDERS && BED_BOULDERS.beds[b.bed]) || [];
   var rkOwn = BED_BOULDERS && BED_BOULDERS.own[b.bed];
   if(!st && !ex.length && !rk.length && !rkOwn) return "";
-  var ROCK = {"BLDR-A": "Type A Boulder", "BLDR-B": "Type B Boulder"};
+  var ROCK = {"BLDR-A": "Type A Boulder", "BLDR-B": "Type B Boulder", "BLDR": "Boulder"};
   function row(r){
     var rock = !!ROCK[r.code];
     return '<div class="tape-row' + (r.note ? " tape-flag" : "") + '">' +
@@ -2604,12 +2638,18 @@ function stakeTableHTML(b){
   var edge = (st && st.edge) || (rkOwn && rkOwn.edge);
   var held = BED_STAKES.held && BED_STAKES.held.SPA && b.items && b.items.SPA
     ? '<div class="tape-foot">' + BED_STAKES.held.SPA + "</div>" : "";
+  // Baxter: Matt was not sure what is built when it shipped (10/7/26), so that
+  // job's stakes carry a line saying the zeros assume the buildings and curbs
+  // are in. Rendered on every card of a job whose stakes carry `foot`, until
+  // the line is deleted from the data.
+  var zeros = BED_STAKES && BED_STAKES.foot
+    ? '<div class="tape-foot tape-zeros">' + (lang === "es" ? BED_STAKES.foot.es : BED_STAKES.foot.en) + "</div>" : "";
   var line = edge
     ? (edge === "curb"
         ? "the curb and square off it (the plan line may be face or back of curb, about 6″ apart)"
         : "the " + edge + " and square off it")
     : "the fence line and square off it";
-  return h + held + '<div class="tape-foot">Plan distances, to the trunk, along ' +
+  return h + held + zeros + '<div class="tape-foot">Plan distances, to the trunk, along ' +
     line + ". If the ground is out by more than a foot, " +
     "stop and check before you stake.</div>";
 }
@@ -2931,8 +2971,9 @@ var lbZoom = "fit";
 //     x 3.6 = 15.0 px/ft -> 12 / 15.0 = 0.8 in
 //   site map: 4013 px / 2100 pt = 1.911 px/pt x 3.6 = 6.88 px/ft -> 1.7 in
 function inchesPerPixel(src){
-  if(currentJob !== "wsrcc") return "1.6";
-  return String(src || "").indexOf("site-map.jpg") !== -1 ? "1.7" : "0.8";
+  // Per job, from its config (`zoom`), where each number has its arithmetic.
+  var z = (JOB_DATA[currentJob] || H2S).zoom;
+  return String(src || "").indexOf("site-map.jpg") !== -1 ? z.map : z.crop;
 }
 
 function applyZoom(){
@@ -3119,6 +3160,11 @@ var WSRCC_SPECIES_ALIAS = {
   CAK: "Karl Foerster Reed Grass",
   CAO: "Overdam Reed Grass"
 };
+// Baxter's BAXTER_SPECIES carries the checklist's exact names, so every code
+// resolves on the exact-slug match and nothing is pinned here. Keep it that
+// way: the prefix fallback in codeRow silently picks the first row that merely
+// STARTS the same.
+var BAXTER_SPECIES_ALIAS = {};
 var SPECIES_ALIAS = H2S_SPECIES_ALIAS;
 // Keyed per job. It was pinned to JOBS.h2s.groups and cached globally, so every
 // WSRCC code was resolved against Home2Suites' checklist -- which silently fed
@@ -3138,9 +3184,9 @@ function codeRow(code, job){
   var forJob = job || currentJob;
   if(!CODE_ROW_BY_JOB[forJob]){
     var map = {};
-    var d = (forJob === "wsrcc") ? WSRCC : H2S;
+    var d = JOB_DATA[forJob] || H2S;        // species-only jobs: see applyJobData
     var species = d.species;
-    var alias = (forJob === "wsrcc") ? WSRCC_SPECIES_ALIAS : H2S_SPECIES_ALIAS;
+    var alias = JOB_ALIAS[forJob] || H2S_SPECIES_ALIAS;
     var rows = [], g = JOBS[forJob].groups;
     Object.keys(g).forEach(function(gk){
       g[gk].items.forEach(function(r){ rows.push(r); });
@@ -3761,7 +3807,20 @@ var ES = {
   "North side": "Lado norte", "South side": "Lado sur",
   "North-east corner": "Esquina noreste", "North-west corner": "Esquina noroeste",
   "South-east corner": "Esquina sureste", "South-west corner": "Esquina suroeste",
-  "By the building": "Junto al edificio"
+  "By the building": "Junto al edificio",
+  // --- Baxter (10/7/26): the sheet's own names for its planters, and its bands
+  "West bed (McLean Pl)": "Cama oeste (McLean Pl)",
+  "Northeast bed (Baxter Rd)": "Cama noreste (Baxter Rd)",
+  "Southeast bed (Baxter Rd)": "Cama sureste (Baxter Rd)",
+  "Area A (fire hydrant)": "Área A (hidrante)",
+  "Area B (light pole)": "Área B (poste de luz)",
+  "Area C (Erna Court)": "Área C (Erna Court)",
+  "Area D (mailboxes)": "Área D (buzones)",
+  // The zone KEYS are the street names and need no line: a bare compass word
+  // as a key ("East") rewrote "East end of the curb" before its own rule ran.
+  "McLean Pl - the west frontage": "McLean Pl - el frente oeste",
+  "Erna Court - the court and Areas A-D": "Erna Court - la calle interior y las áreas A-D",
+  "Baxter Rd - the east frontage": "Baxter Rd - el frente este"
 };
 
 // Where Spanish word order differs from English, or a number sits in the
@@ -4134,7 +4193,9 @@ var H2S = {beds: BEDS, species: SPECIES, spacing: SPACING, zones: ZONES,
            disc: DISCREPANCY, mapPlan: MAP_PLAN, mapXY: MAP_XY,
            bedImg: "./beds/", symImg: "./symbols/", offlineMB: 17,
            links: H2S_BED_LINKS, noSym: [], runs: [], stakes: H2S_STAKES,
-           boulders: H2S_BOULDERS};
+           boulders: H2S_BOULDERS,
+           // the zoom hint, inches per picture pixel: see inchesPerPixel
+           zoom: {map: "1.6", crop: "1.6"}};
 var WSRCC = {beds: WSRCC_BEDS, species: WSRCC_SPECIES, spacing: WSRCC_SPACING,
              zones: WSRCC_ZONES, disc: WSRCC_DISCREPANCY,
              mapPlan: WSRCC_MAP_PLAN, mapXY: WSRCC_MAP_XY,
@@ -4149,18 +4210,42 @@ var WSRCC = {beds: WSRCC_BEDS, species: WSRCC_SPECIES, spacing: WSRCC_SPACING,
              // a strip of the whole length. Built by tools/wsrcc-pills.py RUNS.
              runs: ["B01", "B03", "B05", "B06"],
              stakes: WSRCC_STAKES,
-             noSym: []};
+             noSym: [],
+             // crops 1500 px / 360 pt x 3.6 pt/ft = 15.0 px/ft -> 0.8 in;
+             // site map 4013 px / 2100 pt x 3.6 = 6.88 px/ft -> 1.7 in
+             zoom: {map: "1.7", crop: "0.8"}};
+// Baxter Family Housing: seven beds off the vector bid set (10/7/26). Its
+// codes collide with the other two jobs' (BP, JH, SB, SV, IS) and are
+// different drawings, so the symbol folder is its own. offlineMB: 3.09 MB
+// measured by tools/baxter-pictures.py, rounded up.
+var BAXTER = {beds: BAXTER_BEDS, species: BAXTER_SPECIES, spacing: BAXTER_SPACING,
+              zones: BAXTER_ZONES, disc: BAXTER_DISCREPANCY,
+              mapPlan: BAXTER_MAP_PLAN, mapXY: BAXTER_MAP_XY,
+              bedImg: "./beds-baxter/", symImg: "./symbols-baxter/", offlineMB: 4,
+              links: {}, noSym: [], runs: [],
+              stakes: BAXTER_STAKES, boulders: BAXTER_BOULDERS,
+              // crops 1500 px / 77.65 pt = 19.32 px/pt x 0.7765 pt/ft = 15.0 px/ft
+              //   -> 12 / 15.0 = 0.8 in; site map 4013 px / 620 pt = 6.47 px/pt
+              //   x 0.7765 = 5.03 px/ft -> 12 / 5.03 = 2.4 in
+              zoom: {map: "2.4", crop: "0.8"}};
+// One table, keyed by job. Each `currentJob === "wsrcc" ? WSRCC : H2S` this
+// replaced would have handed a third job Home2Suites' data.
+var JOB_DATA = {h2s: H2S, wsrcc: WSRCC, baxter: BAXTER};
+var JOB_ALIAS = {h2s: H2S_SPECIES_ALIAS, wsrcc: WSRCC_SPECIES_ALIAS, baxter: BAXTER_SPECIES_ALIAS};
 // WSRCC codes collide with Wolf's (CS, AP, BP, PTE, CAK are in both jobs and are
 // different drawings), which is why the symbol folders are separate.
 function applyJobData(){
-  var d = (currentJob === "wsrcc") ? WSRCC : H2S;
+  // A species-only job (Charter, Palmer, Raspberry) has no bed data and never
+  // shows the bed view; it inherits Home2Suites' globals as the old ternary
+  // gave it, so nothing that reads SPECIES or BEDS off a species tab changes.
+  var d = JOB_DATA[currentJob] || H2S;
   BEDS = d.beds; SPECIES = d.species; SPACING = d.spacing; ZONES = d.zones;
   DISCREPANCY = d.disc; MAP_PLAN = d.mapPlan; MAP_XY = d.mapXY;
   BED_IMG = d.bedImg; SYM_IMG = d.symImg; OFFLINE_MB = d.offlineMB;
   BED_LINKS = d.links; NO_SYM = d.noSym; BED_RUNS = d.runs || [];
   BED_STAKES = d.stakes || null;
   BED_BOULDERS = d.boulders || null;
-  SPECIES_ALIAS = (currentJob === "wsrcc") ? WSRCC_SPECIES_ALIAS : H2S_SPECIES_ALIAS;
+  SPECIES_ALIAS = JOB_ALIAS[currentJob] || H2S_SPECIES_ALIAS;
   NAME_CODE = null;   // rebuilt against the SPECIES now loaded
   // CODE_ROW_BY_JOB is deliberately NOT cleared: it is keyed by job, so each
   // job's map stays valid and generateReport() can ask about either one.
@@ -4170,7 +4255,7 @@ var NO_SYM = [];
 var BED_RUNS = [];
 var BED_STAKES = null;
 var BED_BOULDERS = null;
-function hasBedView(job){ return job === "h2s" || job === "wsrcc"; }
+function hasBedView(job){ return !!JOB_DATA[job]; }
 
 function renderBeds(){
   var container = document.getElementById("groups");
