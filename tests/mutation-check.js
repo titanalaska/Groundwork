@@ -88,8 +88,9 @@ const MUTATIONS = [
   },
   {
     name: 'use the Home2Suites zoom figure on WSRCC',
-    find: '  if(currentJob !== "wsrcc") return "1.6";',
-    replace: '  return "1.6";',
+    // 10/7: the hint moved into each job's config; this reads Home2's for all.
+    find: '  var z = (JOB_DATA[currentJob] || H2S).zoom;',
+    replace: '  var z = H2S.zoom;',
     caughtBy: 'WSRCC bed picture: 0.8 in a pixel',
     tag: 'zoom',
   },
@@ -540,8 +541,9 @@ const MUTATIONS = [
   },
   {
     name: 'never hand Home2 its boulders',
-    find: 'boulders: H2S_BOULDERS};',
-    replace: 'boulders: null};',
+    // 10/7: the config gained a `zoom` line after this one, so no closing brace.
+    find: 'boulders: H2S_BOULDERS,',
+    replace: 'boulders: null,',
     caughtBy: 'all 45 drawn are on a card',
     tag: 'stakes',
   },
@@ -565,6 +567,28 @@ const MUTATIONS = [
     replace: 'var sched = BOULDER_SCHEDULE;',
     caughtBy: 'Baxter shows its own plan and size',
     tag: 'boulders',
+  },
+  // Baxter's bed view (10/7/26).
+  {
+    name: 'never hand the Baxter job its tape table',
+    find: 'stakes: BAXTER_STAKES,',
+    replace: 'stakes: null,',
+    caughtBy: 'exactly one tape row',
+    tag: 'baxter',
+  },
+  {
+    name: 'swap two Baxter counts in one bed (Area B: 1 PF, 8 SB -> 2 PF, 7 SB)',
+    find: '"PF":1,"SB":8',
+    replace: '"PF":2,"SB":7',
+    caughtBy: "sum to the sheet's callouts",
+    tag: 'baxter',
+  },
+  {
+    name: "point the Baxter tab at WSRCC's data",
+    find: 'baxter: BAXTER}',
+    replace: 'baxter: WSRCC}',
+    caughtBy: "each job's own beds",
+    tag: 'baxter',
   },
 ];
 
