@@ -3,3 +3,6 @@ test-results/
 playwright-report/
 _mutant.html
 __pycache__/
+
+# plan-execution scratch (superpowers ledgers, briefs, review packages)
+.superpowers/
