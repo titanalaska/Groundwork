@@ -154,6 +154,11 @@ var JOBS = {
       trees: { label: "Trees", items: [
         ["Paper Birch", 8],
         ["Prairiefire Crabapple", 8],
+        // Matt, 10/8/26: the engineer's DRAFT Enhanced Landscape Plan (11/20/2025) is going ahead for
+        // Phase I -- 2 Spring Snow Crabapple, a plant NEW to this job (its own row: the plant NAME is
+        // the storage key, so never Prairiefire's). 207 + 2 = 209. White Spruce 9 and Paper Birch 8 are
+        // NOT raised: the new 5 spruce and 2 birch come out of them (spruce 3 + 5 = 8 of 9, birch 3 + 2 = 5 of 8).
+        ["Spring Snow Crabapple", 2],
         ["White Spruce", 9],
         ["Hardy Purple Common Lilac", 2, true]
       ]},
@@ -195,6 +200,9 @@ var JOBS = {
       // quantity moves: 44 + 50 = 94 plants now have no bed. First, so /net-need
       // reads it before the two stock notes.
       "&#9888;&#65039; <strong>Revised plan &mdash; two beds deducted.</strong> Signed off (Matt, 10/7/26; Chris&#39;s margin note on the revised L1, Plan Set 11465): the West perimeter bed (McLean Pl, <strong>44</strong> plants) and the Northeast perimeter bed (Baxter Rd, <strong>50</strong> plants) are not planted at Baxter. <strong>The quantities below are what was ordered; they are not reduced</strong> &mdash; the 94 plants from those two beds are extra and go back to the yard for winter storage and use on other jobs.",
+      // Matt, 10/8/26: the engineer's draft ENHANCED LANDSCAPE PLAN (11/20/2025), Phase I only. The nine
+      // trees are cards B08-B11; the north buildings' 17 (Phase II) are not this job.
+      "&#127795; <strong>Enhanced Landscape Plan &mdash; 9 new trees.</strong> The engineer&#39;s draft of 11/20/2025 is going ahead for Phase I (Matt, 10/8/26): <strong>5 White Spruce, 2 Paper Birch and 2 Spring Snow Crabapple</strong>, in cards B08&ndash;B11, each one measured off a building corner. The 4 deciduous ones get a moose fence. <strong>White Spruce and Paper Birch stay at the ordered 9 and 8</strong> &mdash; the new trees come out of those. Spring Snow Crabapple is new to this job: 2.",
       // Matt, 9/28/26. The 38 were bought on Dan's list for this job, so they
       // are not a claim on the yard. /net-need reads this note: without it the
       // Bailey rugosa gets split three ways and Palmer is told to buy 37.
@@ -204,6 +212,7 @@ var JOBS = {
     ],
     flagsEs: [
       "&#9888;&#65039; <strong>Plan revisado &mdash; dos camas deducidas.</strong> Aprobado (Matt, 10/7/26; nota al margen de Chris en el L1 revisado, Plan Set 11465): la cama perimetral oeste (McLean Pl, <strong>44</strong> plantas) y la cama perimetral noreste (Baxter Rd, <strong>50</strong> plantas) no se plantan en Baxter. <strong>Las cantidades de abajo son lo que se pidi&oacute;; no se redujeron</strong> &mdash; las 94 plantas de esas dos camas sobran y regresan al vivero para guardarse en invierno y usarse en otros trabajos.",
+      "&#127795; <strong>Plan de paisajismo mejorado &mdash; 9 &aacute;rboles nuevos.</strong> El borrador del ingeniero del 20 de noviembre de 2025 sigue adelante para la Fase I (Matt, 8 de octubre de 2026): <strong>5 piceas blancas, 2 abedules papir&iacute;feros y 2 manzanos silvestres &#39;Spring Snow&#39;</strong>, en las tarjetas B08&ndash;B11, cada uno medido desde una esquina de edificio. Los 4 de hoja caduca llevan cerca contra alces. <strong>La picea blanca y el abedul siguen en los 9 y 8 pedidos</strong> &mdash; los &aacute;rboles nuevos salen de esos. El manzano &#39;Spring Snow&#39; es nuevo en este trabajo: 2.",
       "&#9989; <strong>Rosa rugosa &mdash; cubierta por el pedido de Danny.</strong> Las <strong>38</strong> de este trabajo vinieron de Danny (Alaska Trees). <strong>No saques rugosa de Bailey del vivero para Baxter</strong> &mdash; ese material est&aacute; asignado a Home2Suites y Palmer.",
       "&#9989; <strong>Enebro rastrero &mdash; comprado y en el sitio.</strong> Los <strong>11</strong> de este trabajo se compraron para &eacute;l y ya est&aacute;n en el sitio, todav&iacute;a sin plantar. <strong>No saques enebro del vivero para Baxter.</strong>"
     ]

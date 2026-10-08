@@ -31,8 +31,8 @@ test('every job\'s bed and symbol folder is served from the bed cache', () => {
     '/Groundwork/symbols/AP.png',
     '/Groundwork/beds-wsrcc/v3/site-map.jpg',
     '/Groundwork/symbols-wsrcc/PFA.png',
-    '/Groundwork/beds-baxter/v2/B03.jpg',
-    '/Groundwork/beds-baxter/v2/site-map.jpg',
+    '/Groundwork/beds-baxter/v3/B11.jpg',
+    '/Groundwork/beds-baxter/v3/site-map.jpg',
     '/Groundwork/symbols-baxter/PF.png',
     '/Groundwork/beds-boulders/baxter-v1.jpg',
   ]) {

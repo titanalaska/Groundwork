@@ -298,6 +298,9 @@ var VENDORS = {
     "bailey": null
    }
   },
+  "class-3-boulder": {
+   "mapped": false
+  },
   "colorado-green-spruce": {
    "mapped": true,
    "offers": {
@@ -2048,6 +2051,9 @@ var VENDORS = {
     "bailey": null
    }
   },
+  "spring-snow-crabapple": {
+   "mapped": false
+  },
   "subalpine-fir-arizonica": {
    "mapped": true,
    "offers": {
@@ -2077,6 +2083,15 @@ var VENDORS = {
     "stewart": null,
     "bailey": null
    }
+  },
+  "type-a-boulder-class-4": {
+   "mapped": false
+  },
+  "type-b-boulder-class-3": {
+   "mapped": false
+  },
+  "type-c-boulder-class-2": {
+   "mapped": false
   },
   "vanhoutte-spirea": {
    "mapped": true,

@@ -69,7 +69,7 @@ function cachesToDelete(names, keep){
 }
 // ---- /PURE ----
 
-const CACHE_VERSION = 'v40';
+const CACHE_VERSION = 'v41';
 const SHELL_CACHE = `${CACHE_PREFIX}${CACHE_VERSION}`;
 
 // Bed crops and site maps: ~17 MB over 45 files for Home2Suites and ~10 MB over
@@ -95,11 +95,11 @@ const SHELL_CACHE = `${CACHE_PREFIX}${CACHE_VERSION}`;
 const BED_CACHE = 'wolf-beds-v2';
 // Home2Suites: 44 pictures + site map + 22 symbols = 67.
 // WSRCC:        47 pictures + site map + 15 symbols = 63.
-// Baxter:        5 pictures + site map + 10 symbols = 16 (10/7/26; 18 before the
-//                revision deducted two beds, and the pictures moved to /beds-baxter/v2/
-//                -- a new path, so the bed cache did not need to bump).
+// Baxter:        9 pictures + site map + 11 symbols = 21 (10/8/26: 5 beds after the 10/7
+//                deducts + 4 for the Enhanced Landscape Plan's trees; the pictures live in
+//                /beds-baxter/v3/ -- a new path, so the bed cache did not need to bump).
 // Boulders:     4 marked-up plans + 1 size schedule = 5, in /beds-boulders/.
-// 151 together. The cap was 100 when WSRCC landed, which would have silently
+// 156 together. The cap was 100 when WSRCC landed, which would have silently
 // evicted the job a crew was not currently looking at -- the exact failure the
 // last bump was for. Keep headroom ahead of the next job, and remember the trim
 // deletes oldest-first with no warning.

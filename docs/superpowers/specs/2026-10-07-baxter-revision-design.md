@@ -132,8 +132,9 @@ beds, never left to fail or pasted from output.
 
 ## Not in this job
 
-The species swaps, the lupine, Areas C/D/SE changes, the L1a enhanced add,
-tape-out for anything new, a reduced species quantity, status.html.
+The species swaps, the lupine, Areas C/D/SE changes, a reduced species quantity,
+the enhanced plan's Phase II trees (7 Paper Birch, 10 Spring Snow around the north buildings),
+status.html.
 
 ## Ship
 
@@ -152,3 +153,35 @@ memory note.
 ## Open, not blocking
 
 - The magenta run's length is read off the photo (about 50 ft).
+
+## Addendum, 10/8/26: the Enhanced Landscape Plan add (going ahead for Phase I)
+
+Ben texted the engineer's DRAFT Enhanced Landscape Plan (11/20/2025) and Matt confirmed the add is
+going ahead. It arrived as a vector PDF (print-to-PDF off the text, then over the cable), so the nine
+Phase I trees have exact positions, which the photo of the same sheet could not give.
+
+- **Which trees.** The sheet's own schedule is PG 5, BP 9, MS 12 (new trees only; every shrub is 0).
+  South of Erna Court: PG 5, BP 2, MS 2 = Chris's hand list. North (Phase II buildings): BP 7, MS 10,
+  not this job. Both counts are hard stops in `tools/baxter-enh-trees.py`.
+- **Registration.** The two sheets are the same CAD base at the same scale (bar: 60 ft = 46.59 pt).
+  A pure shift of (98.86, -50.24) pt matches 617 long strokes with a spread of 0.00 / 0.24 pt, with the
+  runner-up shift at a third of the votes. The new trees are expressed in the ORIGINAL sheet's frame and
+  zeroed off its built edges (`BAXTER-built.json`).
+- **Four cards, B08-B11** (appended; nothing renumbers): B08 West of Bldg C (3 spruce, zero: north end of
+  Bldg C's west wall); B09 South of Bldgs C and B (2 spruce, zero: west end of Bldg B's south wall);
+  B10 Between Bldgs C and B (1 birch, 1 Spring Snow, zero: north end of Bldg B's west wall); B11
+  Between Bldgs B and A (same, off Bldg A's west wall). The zero is the end of the named wall that gives
+  the shorter longest pull. Every tree is within 40 ft of its wall and 70 ft along it.
+- **Notes on rows.** Each deciduous tree: "Moose fence on this tree: 3 posts (L2 detail 4)" (the hand
+  list's 4 fences, one per new deciduous tree; no new counter, because the moose feature belongs to
+  Home2 and Charter). The two south spruce are drawn about 7 ft SOUTH of the property line on the
+  sheet, and say so: "Check the line before you dig."
+- **Species.** ONE new row, Spring Snow Crabapple, 2: new to Baxter, never Prairiefire's row (the plant
+  name is the storage key). White Spruce 9 and Paper Birch 8 are NOT raised: the beds need 3 + 5 = 8
+  spruce and 3 + 2 = 5 birch, inside the ordered quantities. 207 + 2 = 209. The alias table gets an
+  `unresolved` row with no invented vendor names.
+- **Pictures.** Crops from the enhanced sheet itself (it draws the new trees in cyan), with a pill per
+  tree and a ringed "0" at the zero; the site map gains cyan rings and markers 8-11, placed clear of
+  the sheet's callouts. All Baxter pictures move to `beds-baxter/v3/` (a changed map under the v2 path
+  would never reach a phone that cached it). The Spring Snow symbol is cut from the enhanced schedule.
+- **Code.** `MS` joins `CATEGORY` as a tree, or a card counts its Spring Snow as not needing a stake.

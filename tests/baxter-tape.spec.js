@@ -25,7 +25,7 @@
 const { test, expect } = require('@playwright/test');
 const { loadApp, openJob } = require('./helpers');
 
-const STAKED = ['PG', 'BP', 'MP', 'SV', 'JH', 'PF', 'RR', 'SB', 'VT'];
+const STAKED = ['PG', 'BP', 'MP', 'MS', 'SV', 'JH', 'PF', 'RR', 'SB', 'VT'];
 
 async function openBeds(page, job) {
   await openJob(page, job);
@@ -114,4 +114,52 @@ test('a bed with no built edge shows no tape section, and no Baxter bed lacks on
   });
   await expect(page.locator('#bed-B06 .sub-head', { hasText: 'Tape it out' })).toHaveCount(0);
   await expect(page.locator('#bed-B05 .sub-head', { hasText: 'Tape it out' })).toHaveCount(1);
+});
+
+// The Enhanced Landscape Plan's nine new trees (10/8/26), cards B08-B11, measured off the
+// original sheet's building corners after registering the two sheets by a pure shift
+// (98.86, -50.24) pt.
+//
+// The paper row, the first Paper Birch (B10, E1 on the enhanced sheet): enhanced (551.43, 252.12)
+// -> original (452.57, 302.35). Edge: "west wall of Building B", a = (465.18, 288.41) the NORTH
+// end (the zero), b = (465.26, 321.10).
+//   L = 32.690 pt; u = (0.00245, 1.00000)  (runs south)
+//   v = p - a = (-12.61, 13.94)
+//   along = v.u = 13.909 pt / 0.7765 = 17.91 ft = 215.0 in -> 17' 11"   going south
+//   off   = v x u = 12.644 pt / 0.7765 = 16.28 ft = 195.4 in -> 16' 3"  west of the wall
+// The Spring Snow beside it (E3): v = (-28.67, -17.93) -> 23.18 ft NORTH of the zero, 36.87 ft west.
+
+test('the new trees are each measured: one tape row per tree on B08-B11', async ({ page }) => {
+  const got = await page.evaluate(() => ['B08', 'B09', 'B10', 'B11'].map((b) => [b, BED_STAKES.beds[b].rows.map((r) => r.code).join(',')]));
+  expect(got).toEqual([['B08', 'PG,PG,PG'], ['B09', 'PG,PG'], ['B10', 'MS,BP'], ['B11', 'MS,BP']]);
+});
+
+test('the first new birch is where the sheet puts it: 17\' 11" south, 16\' 3" west of the wall', async ({ page }) => {
+  const card = page.locator('#bed-B10');
+  await expect(card.locator('.tape-zero').first()).toContainText('North end of the west wall of Building B');
+  const row = card.locator('.tape-row', { hasText: 'Paper Birch' });
+  await expect(row).toHaveCount(1);
+  await expect(row).toContainText('17′ 11″');
+  await expect(row).toContainText('going south');
+  await expect(row).toContainText('16′ 3″');
+  await expect(row).toContainText('west of the building wall');
+  const ms = card.locator('.tape-row', { hasText: 'Spring Snow Crabapple' });
+  await expect(ms).toContainText('23′ 2″');
+  await expect(ms).toContainText('going north');
+});
+
+test('every new deciduous tree says moose fence, and the two south spruce say they are over the line', async ({ page }) => {
+  const got = await page.evaluate(() => {
+    const out = { decid: [], south: [] };
+    ['B10', 'B11'].forEach((b) => BED_STAKES.beds[b].rows.forEach((r) => out.decid.push(r.code + ':' + (r.note || ''))));
+    BED_STAKES.beds.B09.rows.forEach((r) => out.south.push(r.note || ''));
+    return out;
+  });
+  expect(got.decid).toEqual(['MS:Moose fence on this tree: 3 posts (L2 detail 4)', 'BP:Moose fence on this tree: 3 posts (L2 detail 4)',
+                             'MS:Moose fence on this tree: 3 posts (L2 detail 4)', 'BP:Moose fence on this tree: 3 posts (L2 detail 4)']);
+  expect(got.south.every((n) => n.indexOf('south of the property line') !== -1)).toBe(true);
+  await expect(page.locator('#bed-B10 .tape-note').first()).toBeVisible();
+  await expect(page.locator('#bed-B09 .tape-note')).toHaveCount(2);
+  // the spruce on the west side have neither note
+  await expect(page.locator('#bed-B08 .tape-note')).toHaveCount(0);
 });

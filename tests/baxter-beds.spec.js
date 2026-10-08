@@ -14,6 +14,9 @@
 //   PG 7-4 = 3, BP 8-5 = 3, MP 7, SV 2-2 = 0, JH 11-4 = 7, IS 36-24 = 12,
 //   PF 55-30 = 25, RR 38-25 = 13, SB 26, VT 14.
 //   5 beds: B03 Area A (fire hydrant) ... B07 Southeast bed (Baxter Rd).
+//   The Enhanced Landscape Plan (engineer's draft 11/20/2025, going ahead for Phase I, Matt
+//   10/8/26) adds 9 trees in four cards B08-B11: PG 3 + 2, BP 1 + 1, MS 1 + 1 -- so PG 3+5 = 8,
+//   BP 3+2 = 5, MS 0+2 = 2, and 110 + 9 = 119 over 9 beds.
 //   Home2Suites has 44 beds and WSRCC 47, both starting "North side".
 
 const fs = require('fs');
@@ -22,12 +25,12 @@ const { test, expect } = require('@playwright/test');
 const { loadApp, openJob } = require('./helpers');
 
 const REPO = path.resolve(__dirname, '..');
-const CALLOUTS = { PG: 3, BP: 3, MP: 7, JH: 7, IS: 12, PF: 25, RR: 13, SB: 26, VT: 14 };
+const CALLOUTS = { PG: 8, BP: 5, MP: 7, MS: 2, JH: 7, IS: 12, PF: 25, RR: 13, SB: 26, VT: 14 };
 const NAMES = {
   PG: 'White Spruce', BP: 'Paper Birch', MP: 'Prairiefire Crabapple',
   SV: 'Hardy Purple Common Lilac', JH: 'Creeping Juniper', IS: 'Alaska Flag Iris',
   PF: 'Yellow Potentilla', RR: 'Rugosa Rose', SB: 'Birchleaf Spirea',
-  VT: 'Dwarf American Cranberry',
+  VT: 'Dwarf American Cranberry', MS: 'Spring Snow Crabapple',
 };
 
 async function openBeds(page, job) {
@@ -40,16 +43,16 @@ test.beforeEach(async ({ page }) => {
   await openBeds(page, 'baxter');
 });
 
-test('Baxter cards sum to the sheet\'s callouts less the two deducted beds, 110 over 5 beds', async ({ page }) => {
+test('Baxter cards sum to the sheet\'s callouts less the two deducted beds plus the enhanced add, 119 over 9 beds', async ({ page }) => {
   const got = await page.evaluate(() => {
     const sums = {};
     BEDS.forEach((b) => Object.keys(b.items).forEach((c) => { sums[c] = (sums[c] || 0) + b.items[c]; }));
     return { sums, beds: BEDS.length, markers: Object.keys(MAP_XY).length, total: BEDS.reduce((m, b) => m + b.units, 0) };
   });
   expect(got.sums).toEqual(CALLOUTS);
-  expect(got.total).toBe(110);                // 204 - 44 - 50
-  expect(got.beds).toBe(5);
-  expect(got.markers).toBe(5);
+  expect(got.total).toBe(119);                // 204 - 44 - 50 + 9 new trees
+  expect(got.beds).toBe(9);
+  expect(got.markers).toBe(9);
 });
 
 test('the sheet\'s disagreements with its own schedule are carried, not corrected', async ({ page }) => {
@@ -67,20 +70,20 @@ test('every Baxter picture the app asks for is on disk', async ({ page }) => {
       .concat(BED_RUNS.map((id) => BED_IMG + id + '-run.jpg'))
       .concat(Object.keys(SPECIES).filter((c) => NO_SYM.indexOf(c) === -1).map((c) => SYM_IMG + c + '.png')),
   }));
-  // v2/ holds the map and the five crops: the page finds the map by the name
+  // v3/ holds the map and the nine crops: the page finds the map by the name
   // site-map.jpg, so a new version means a new folder, not a new name.
-  expect(want.bedImg).toBe('./beds-baxter/v2/');
+  expect(want.bedImg).toBe('./beds-baxter/v3/');
   expect(want.symImg).toBe('./symbols-baxter/');
-  expect(want.urls.length, '1 site map + 5 beds + 10 symbols').toBe(16);
+  expect(want.urls.length, '1 site map + 9 beds + 11 symbols').toBe(21);
   const missing = want.urls.filter((u) => !fs.existsSync(path.join(REPO, u)));
   expect(missing, 'these would render as no picture at all').toEqual([]);
   // Nothing stray: the offline save would carry any extra file in these folders.
-  const onDisk = fs.readdirSync(path.join(REPO, 'beds-baxter', 'v2')).sort();
-  expect(onDisk).toEqual(['B03.jpg', 'B04.jpg', 'B05.jpg', 'B06.jpg', 'B07.jpg', 'site-map.jpg']);
-  expect(fs.readdirSync(path.join(REPO, 'beds-baxter')), 'the old top-level pictures are gone').toEqual(['v2']);
+  const onDisk = fs.readdirSync(path.join(REPO, 'beds-baxter', 'v3')).sort();
+  expect(onDisk).toEqual(['B03.jpg', 'B04.jpg', 'B05.jpg', 'B06.jpg', 'B07.jpg', 'B08.jpg', 'B09.jpg', 'B10.jpg', 'B11.jpg', 'site-map.jpg']);
+  expect(fs.readdirSync(path.join(REPO, 'beds-baxter')), 'the old folders are gone').toEqual(['v3']);
 });
 
-test('all ten Baxter codes resolve to their checklist rows by name', async ({ page }) => {
+test('all eleven Baxter codes resolve to their checklist rows by name', async ({ page }) => {
   const got = await page.evaluate((codes) => {
     const out = {};
     codes.forEach((c) => { const row = codeRow(c, 'baxter'); out[c] = row ? row[0] : null; });
@@ -98,7 +101,7 @@ test('switching jobs renders each job\'s own beds', async ({ page }) => {
   expect(seen).toEqual([
     [44, 'North side', 44],
     [47, 'North side', 47],
-    [5, 'Area A (fire hydrant)', 5],          // B03 now leads: B01 and B02 are deducted
+    [9, 'Area A (fire hydrant)', 9],          // B03 leads (B01/B02 deducted); B08-B11 follow
   ]);
 });
 
