@@ -59,7 +59,9 @@ test('the status report names "area C", never undefined', async ({ page }) => {
 });
 
 test('no fit box on a bed whose only massed species has no spacing', async ({ page }) => {
-  for (const bed of ['B01', 'B02', 'B07']) {
+  // Iris only grows on the three perimeter beds; B01 and B02 are deducted, so B07
+  // is the one left. The interior beds (B03-B06) hold no iris at all.
+  for (const bed of ['B07']) {
     await expect(page.locator(`#bed-${bed} .fit-row`)).toHaveCount(0);
     await expect(page.locator(`#bed-${bed}`)).not.toContainText('Plan needs');
   }

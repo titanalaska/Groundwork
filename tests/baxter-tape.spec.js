@@ -53,12 +53,17 @@ test('every tree and shrub on a Baxter card has exactly one tape row', async ({ 
   expect(bad).toEqual([]);
 });
 
-test('all ten boulders have a tape row, each on a bed\'s own zero', async ({ page }) => {
+test('all ten boulders are accounted for: seven on the shown beds, three at the deducted ones', async ({ page }) => {
+  // The sheet draws 10: B01 1, B02 2, B03 2, B05 2, B06 2, B07 1. The revision
+  // deducts B01 and B02, so 7 have tape rows on their beds' zeros and the other
+  // 3 (1 + 2) are counted in the deducted note, not given rows.
   const got = await page.evaluate(() => ({
     onBeds: Object.keys(BED_BOULDERS.beds).reduce((m, k) => m + BED_BOULDERS.beds[k].filter((r) => r.code === 'BLDR').length, 0),
     own: Object.keys(BED_BOULDERS.own).length,
+    beds: Object.keys(BED_BOULDERS.beds).sort(),
+    deducted: BED_DEDUCTED.reduce((m, d) => m + d.boulders, 0),
   }));
-  expect(got).toEqual({ onBeds: 10, own: 0 });
+  expect(got).toEqual({ onBeds: 7, own: 0, beds: ['B03', 'B05', 'B06', 'B07'], deducted: 3 });
 });
 
 test('no tape row names a code its card lacks', async ({ page }) => {
@@ -94,9 +99,11 @@ test('the eighth crabapple, drawn with no callout, is measured on Area C and fla
 
 test('the tape table is on the card, every row of it', async ({ page }) => {
   const want = await page.evaluate(() =>
-    BED_STAKES.beds.B01.rows.length + (BED_STAKES.extra.B01 || []).length + (BED_BOULDERS.beds.B01 || []).length);
-  expect(want).toBe(33);                                   // 32 plants + 1 boulder, off the readings
-  await expect(page.locator('#bed-B01 .tape-row')).toHaveCount(want);
+    BED_STAKES.beds.B07.rows.length + (BED_STAKES.extra.B07 || []).length + (BED_BOULDERS.beds.B07 || []).length);
+  // The Southeast bed: BP 3 + JH 3 + PF 17 + PG 3 + RR 12 = 38 staked plants (its
+  // 12 iris are massed, no rows) + 1 boulder = 39, off the readings.
+  expect(want).toBe(39);
+  await expect(page.locator('#bed-B07 .tape-row')).toHaveCount(want);
 });
 
 test('a bed with no built edge shows no tape section, and no Baxter bed lacks one', async ({ page }) => {

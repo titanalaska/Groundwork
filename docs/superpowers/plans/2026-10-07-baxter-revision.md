@@ -18,7 +18,7 @@
 - Fences (vertices on the vector sheet, pt; `FT = 0.7765` pt/ft): green `(146.09,232.14)→(383.09,232.14)→(383.09,332.98)`; yellow `(383.09,332.98)→(612.85,332.98)`; blue `(612.85,256.31)→(612.85,332.98)`; magenta `(573.0,256.31)→(612.85,256.31)` approximate. Rounded to 5 ft: about 435, 295, 100, 50.
 - Every `Edit` to `index.html` runs the syntax hook; Python injectors bypass it, so after each injection run `node .claude/hooks/check-html-js.js index.html` from the repo (silent = clean).
 - Expected values in tests are worked on paper in comments. A test is not evidence until seen to fail. Never rename `wolf-*` keys or `DOC_PATH`.
-- Changed pictures get NEW filenames (`site-map-r.jpg`), so `BED_CACHE` stays `wolf-beds-v2`; `CACHE_VERSION` v38 → v39 in the shipping commit.
+- Changed pictures get a NEW folder, `beds-baxter/v2/` (the map keeps the name `site-map.jpg`: the page finds it by that name), so `BED_CACHE` stays `wolf-beds-v2`; `CACHE_VERSION` v38 → v39 in the shipping commit.
 
 ## Review Focus
 
@@ -60,15 +60,15 @@ Spec (rewritten to the real scope), this plan, live-state snapshot `BAXTER-live-
 
 **Files:**
 - Create (room): `tools/baxter-rev-map.py`
-- Output: `beds-baxter/site-map-r.jpg`; `BAXTER-rev-map-xy.json` (room)
-- Remove: `beds-baxter/site-map.jpg`, `B01.jpg`, `B02.jpg`
+- Output: `beds-baxter/v2/site-map.jpg`; `BAXTER-rev-map-xy.json` (room)
+- Move `B03.jpg`–`B07.jpg` into `beds-baxter/v2/`; remove `beds-baxter/site-map.jpg`, `B01.jpg`, `B02.jpg`
 
 **Interfaces:**
 - `BAXTER-rev-map-xy.json`: `{"plan": [W, H], "xy": {"B03": [x, y], …, "B07": [x, y]}}` — the same geometry contract as `BAXTER-map-xy.json` (radius 46, ring 5, font 48, marker 60 px left of the stack); the five xy values equal the shipped ones exactly.
 
 - [ ] **Step 1: Implement `tools/baxter-rev-map.py`**, lifting `font`, `draw_pills` and the site-map block from `tools/baxter-pictures.py` (that file runs `main()` at import, so copy, do not import): same render at `MAP_W = 4013`, same pills for every stack except `W` and `NE`, markers only for B03–B07, a semi-transparent grey wash over the bounding box of the `W` and `NE` stacks' pill boxes and their plants (from `BAXTER-trunks.json`, +6 pt), with the word DEDUCTED on a white plate at its centre.
-- [ ] **Step 2:** Run it; open `site-map-r.jpg`: no pill or marker on the two deducted beds, the word DEDUCTED legible, markers 3–7 where they were (compare to the shipped map). Check the five xy values equal `BAXTER-map-xy.json`'s for B03–B07 (assert in the script).
-- [ ] **Step 3:** `git rm beds-baxter/site-map.jpg beds-baxter/B01.jpg beds-baxter/B02.jpg`; list `beds-baxter/` and confirm exactly `B03..B07.jpg` and `site-map-r.jpg` remain; `symbols-baxter/` untouched.
+- [ ] **Step 2:** Run it; open `v2/site-map.jpg`: no pill or marker on the two deducted beds, the word DEDUCTED legible, markers 3–7 where they were (compare to the shipped map). Check the five xy values equal `BAXTER-map-xy.json`'s for B03–B07 (assert in the script).
+- [ ] **Step 3:** `git rm beds-baxter/site-map.jpg beds-baxter/B01.jpg beds-baxter/B02.jpg`; list `beds-baxter/` and confirm only `v2/` remains, holding exactly `B03..B07.jpg` and `site-map.jpg`; `symbols-baxter/` untouched.
 - [ ] **Step 4: Commit the pictures alone** → `Baxter revision: site map without the deducted beds` (revertible on its own).
 
 ---
@@ -76,7 +76,7 @@ Spec (rewritten to the real scope), this plan, live-state snapshot `BAXTER-live-
 ### Task 4: The page
 
 **Files:**
-- Modify: `index.html` — `BAXTER` config (`deducted: BAXTER_DEDUCTED`, `fences: BAXTER_FENCES`, `offlineMB`), `applyJobData` (`BED_DEDUCTED = d.deducted || null; BED_FENCES = d.fences || null;`), their `var` declarations beside `BED_STAKES`, `deductedHTML()` and `fencesHTML()` appended in `renderBeds` after `mapLegendHTML()`, the "Go to bed" `max`/`placeholder`, the site-map `<img>` name (`site-map-r.jpg`), `ES`
+- Modify: `index.html` — `BAXTER` config (`deducted: BAXTER_DEDUCTED`, `fences: BAXTER_FENCES`, `offlineMB`), `applyJobData` (`BED_DEDUCTED = d.deducted || null; BED_FENCES = d.fences || null;`), their `var` declarations beside `BED_STAKES`, `deductedHTML()` and `fencesHTML()` appended in `renderBeds` after `mapLegendHTML()`, the "Go to bed" `max`/`placeholder`, `bedImg: "./beds-baxter/v2/"`, `ES`
 - Test: `tests/baxter-rev.spec.js` (new)
 
 **Interfaces:**
@@ -94,7 +94,7 @@ Spec (rewritten to the real scope), this plan, live-state snapshot `BAXTER-live-
   - `the species view still lists every original row with its original quantity` (the ten names and 9/8/8/2/11/36/55/38/26/14 from `jobs.js`) and the first Baxter flag is the new one.
   - `Spanish`: after `lang='es'`, the note, a fence kind and the flag contain no English-only text; every new key is in `ES`.
 - [ ] **Step 2:** Run `npx playwright test tests/baxter-rev.spec.js` → fails (no such blocks).
-- [ ] **Step 3:** Implement with the Edit tool, one function at a time, each gated on its data; hook silent after each edit. Point the site-map image at `site-map-r.jpg`.
+- [ ] **Step 3:** Implement with the Edit tool, one function at a time, each gated on its data; hook silent after each edit. `bedImg` points at `./beds-baxter/v2/`.
 - [ ] **Step 4:** New spec passes. Expect the three existing Baxter specs to fail on 7-bed expectations: list them.
 - [ ] **Step 5: Commit** `Baxter revision: deducted beds hidden, fences listed`.
 
@@ -107,8 +107,8 @@ Spec (rewritten to the real scope), this plan, live-state snapshot `BAXTER-live-
 
 - [ ] **Step 1:** Run the three Baxter specs; for each failure rewrite the expectation from the five-bed truth worked on paper (bed count 5; per-species sums from Task 4; boulder rows on cards B03 2, B05 2, B06 2, B07 1 = 7; `no tape row for B01/B02`), never from the code's output.
 - [ ] **Step 2:** Update the three `baxter` mutation guards whose `find` strings name deducted data, and add three tagged `baxter-rev`: show B01 again (the five-bed test goes red), renumber the kept beds (id test red), drop `fences: BAXTER_FENCES` (fences test red). `MUTATE_ONLY=baxter npm run verify-tests` and `MUTATE_ONLY=baxter-rev …` → all caught, **zero SKIPPED**.
-- [ ] **Step 3:** `sw.js` `CACHE_VERSION = 'v39'`; the Baxter picture-count comment corrected to the real file count; add a `sw-folders` case for `/Groundwork/beds-baxter/site-map-r.jpg`.
+- [ ] **Step 3:** `sw.js` `CACHE_VERSION = 'v39'`; the Baxter picture-count comment corrected to the real file count; add a `sw-folders` case for `/Groundwork/beds-baxter/v2/site-map.jpg`.
 - [ ] **Step 4:** `npm test` → all green; record the three totals. `npm run verify-tests` → no SKIPPED. Update the CLAUDE.md Groundwork test row with the recorded totals (the baseline was 40 Python, 44 node, 204 Playwright).
 - [ ] **Step 5: Commit** `Baxter revision: specs on the five-bed truth, guards, sw v39`.
 - [ ] **Step 6: Look at it.** Serve the repo (`python -m http.server 8123`, launch.json entry) and open it in the in-app browser: Baxter → Beds. Screenshot the site map, B03, B07, the deducted note, the fences list, the species view top, Spanish mode. Fix anything wrong and re-run `npm test`.
-- [ ] **Step 7:** Show Matt the screenshots and the open items; **push only on his go**: `git push groundwork groundwork-rename:main`; then with `gh` wait for Pages and fetch `sw.js` (contains `v39`), `beds-baxter/site-map-r.jpg` → 200. Update the memory note.
+- [ ] **Step 7:** Show Matt the screenshots and the open items; **push only on his go**: `git push groundwork groundwork-rename:main`; then with `gh` wait for Pages and fetch `sw.js` (contains `v39`), `beds-baxter/v2/site-map.jpg` → 200. Update the memory note.

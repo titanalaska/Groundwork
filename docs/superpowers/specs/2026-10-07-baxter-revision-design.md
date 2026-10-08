@@ -81,7 +81,7 @@ Trello plans 9-30/Baxter - Landscaping Bid Set.pdf (original L1, vector)
         |        line y 332.98; SE bed west edge x 612.85; Erna Court walk y 256.31),
         |       lengths by Wolf-Checklist-repo/tools/baxter_fence.py (tested)
         |
-        +--> tools/baxter-rev-map.py     --> beds-baxter/site-map-r.jpg
+        +--> tools/baxter-rev-map.py     --> beds-baxter/v2/site-map.jpg
         |       the shipped map minus the West/NE callouts and markers, with a grey
         |       DEDUCTED wash; BAXTER-rev-map-xy.json for markers 3-7
         v
@@ -108,10 +108,12 @@ marked approximate.
   not `BEDS.length` (5); typing 1 or 2 answers "No bed 1" as it does now.
 - Spanish for the note, the fence kinds and the one species-view flag; never a
   bare compass word as a key.
-- sw.js v39 in the shipping commit; `site-map-r.jpg` is a new filename so the
-  bed cache (`wolf-beds-v2`) does not bump; the superseded `site-map.jpg`,
-  `B01.jpg` and `B02.jpg` are removed from `beds-baxter/` so the offline save does
-  not carry them. `localStorage`, the `wolf-*` keys and `DOC_PATH` are untouched.
+- sw.js v39 in the shipping commit. The pictures move to a new folder,
+  `beds-baxter/v2/` (the five crops, bytes unchanged, and the new map), so the bed
+  cache (`wolf-beds-v2`) does not bump. The map keeps the name `site-map.jpg`
+  because the page finds it by that name (zoom hint, live marker overlay) — the same
+  answer WSRCC gave with `beds-wsrcc/v3/`. The old top-level files, including
+  `B01.jpg` and `B02.jpg`, are removed so the offline save does not carry them. `localStorage`, the `wolf-*` keys and `DOC_PATH` are untouched.
 
 ## Tests
 

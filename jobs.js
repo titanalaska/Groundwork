@@ -188,6 +188,13 @@ var JOBS = {
       noteEs: "&#9888;&#65039; <strong>El plano dibuja 10, el programa dice 9.</strong> Est&aacute; en la hoja L1 del juego de H5: 1 al final de la cama oeste (se&ntilde;al de alto de McLean Pl), 2 en la isla del poste de luz junto a los buzones, 2 en el &Aacute;rea A (hidrante), 2 en el &Aacute;rea B (poste de luz), 3 en las camas de Baxter Rd. El programa y Chris dicen <strong>9</strong>. Van al final de las camas <strong>para proteger las plantas de las m&aacute;quinas quitanieves</strong> &mdash; los marcadores reflectantes se ponen por temporada. Preg&uacute;ntale a Chris cu&aacute;l se quita, o coloca 10."
     },
     flags: [
+      // Matt, 10/7/26: the revised plan is signed off -- Chris's margin note on the
+      // revised L1: deduct landscaping (the West and Northeast perimeter beds),
+      // deduct the north fencing, add the south cedar and vinyl-coated chain link.
+      // The species list below is unchanged and still right, so no row, name or
+      // quantity moves: 44 + 50 = 94 plants now have no bed. First, so /net-need
+      // reads it before the two stock notes.
+      "&#9888;&#65039; <strong>Revised plan &mdash; two beds deducted.</strong> Signed off (Matt, 10/7/26; Chris&#39;s margin note on the revised L1, Plan Set 11465): the West perimeter bed (McLean Pl, <strong>44</strong> plants) and the Northeast perimeter bed (Baxter Rd, <strong>50</strong> plants) are not planted at Baxter. <strong>The quantities below are what was ordered; they are not reduced</strong> &mdash; the 94 plants from those two beds are extra until they are placed. Where they go is Matt&#39;s call.",
       // Matt, 9/28/26. The 38 were bought on Dan's list for this job, so they
       // are not a claim on the yard. /net-need reads this note: without it the
       // Bailey rugosa gets split three ways and Palmer is told to buy 37.
@@ -196,6 +203,7 @@ var JOBS = {
       "&#9989; <strong>Creeping Juniper &mdash; bought and on site.</strong> The <strong>11</strong> for this job were bought for it and are on site, not planted yet. <strong>Do not pull juniper from the yard for Baxter.</strong>"
     ],
     flagsEs: [
+      "&#9888;&#65039; <strong>Plan revisado &mdash; dos camas deducidas.</strong> Aprobado (Matt, 10/7/26; nota al margen de Chris en el L1 revisado, Plan Set 11465): la cama perimetral oeste (McLean Pl, <strong>44</strong> plantas) y la cama perimetral noreste (Baxter Rd, <strong>50</strong> plantas) no se plantan en Baxter. <strong>Las cantidades de abajo son lo que se pidi&oacute;; no se redujeron</strong> &mdash; las 94 plantas de esas dos camas sobran hasta que se coloquen. A d&oacute;nde van es decisi&oacute;n de Matt.",
       "&#9989; <strong>Rosa rugosa &mdash; cubierta por el pedido de Danny.</strong> Las <strong>38</strong> de este trabajo vinieron de Danny (Alaska Trees). <strong>No saques rugosa de Bailey del vivero para Baxter</strong> &mdash; ese material est&aacute; asignado a Home2Suites y Palmer.",
       "&#9989; <strong>Enebro rastrero &mdash; comprado y en el sitio.</strong> Los <strong>11</strong> de este trabajo se compraron para &eacute;l y ya est&aacute;n en el sitio, todav&iacute;a sin plantar. <strong>No saques enebro del vivero para Baxter.</strong>"
     ]

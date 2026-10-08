@@ -591,6 +591,35 @@ const MUTATIONS = [
     caughtBy: "each job's own beds",
     tag: 'baxter',
   },
+  // The signed-off revision (10/7/26): B01/B02 deducted, four fence runs added.
+  {
+    name: 'renumber the first kept Baxter bed (B03 becomes B01): a mark would land on the wrong bed',
+    find: 'var BAXTER_BEDS = [{"bed":"B03"',
+    replace: 'var BAXTER_BEDS = [{"bed":"B01"',
+    caughtBy: 'five beds, B03 to B07',
+    tag: 'baxter-rev',
+  },
+  {
+    name: 'say nothing about the deducted beds',
+    find: '  BED_DEDUCTED = d.deducted || null;',
+    replace: '  BED_DEDUCTED = null;',
+    caughtBy: 'the deducted note names both beds',
+    tag: 'baxter-rev',
+  },
+  {
+    name: 'drop the fences list',
+    find: 'deducted: BAXTER_DEDUCTED, fences: BAXTER_FENCES,',
+    replace: 'deducted: BAXTER_DEDUCTED, fences: null,',
+    caughtBy: 'the fences list shows the four added runs',
+    tag: 'baxter-rev',
+  },
+  {
+    name: '"Go to bed" takes its max from the card count, not the highest bed number',
+    find: "topBedNo + '\" placeholder=\"' + Math.min(39, topBedNo)",
+    replace: "BEDS.length + '\" placeholder=\"' + Math.min(39, BEDS.length)",
+    caughtBy: 'its max is the highest bed',
+    tag: 'baxter-rev',
+  },
   // The Share button (10/7/26): the link it hands out is the install address,
   // never the page's own -- a laptop preview would share localhost.
   {
