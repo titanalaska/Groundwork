@@ -58,6 +58,10 @@ test('the deducted note names both beds with their plants, and only on Baxter', 
   await expect(note).toContainText('Northeast bed (Baxter Rd)');
   await expect(note).toContainText('50 plants');
   await expect(note).toContainText('3 boulders');          // 1 at B01 + 2 at B02
+  // Matt, 10/7/26: not worried about the boulders, only that the landscaping has
+  // room for them -- so no "ask Chris" question hangs on the crew.
+  await expect(note).toContainText('room for them');
+  await expect(note).not.toContainText('ask Chris');
   for (const job of ['h2s', 'wsrcc']) {
     await openBeds(page, job);
     await expect(page.locator('.deducted-note')).toHaveCount(0);
@@ -112,7 +116,11 @@ test('the species list is exactly as it was: ten rows, original quantities, the 
   expect(got.flags[0]).toContain('<strong>44</strong>');
   expect(got.flags[0]).toContain('<strong>50</strong>');
   expect(got.flags[0]).toContain('Plan Set 11465');          // where the numbers came from
+  // Matt, 10/7/26: the extra plants go back to the yard for winter and other jobs.
+  expect(got.flags[0]).toContain('back to the yard for winter storage');
+  expect(got.flags[0]).not.toContain('call');                // the open question is answered
   expect(got.flagsEs[0]).toContain('dos camas deducidas');
+  expect(got.flagsEs[0]).toContain('invierno');
 });
 
 test('the new blocks read in Spanish', async ({ page }) => {
@@ -120,6 +128,7 @@ test('the new blocks read in Spanish', async ({ page }) => {
   const note = page.locator('.deducted-note');
   await expect(note).toContainText('plantas');
   await expect(note).not.toContainText(' plants');
+  await expect(note).toContainText('lugar para ellas');      // room for the boulders
   const fences = page.locator('.fences');
   await expect(fences).toContainText('Cerca de cedro');
   await expect(fences).toContainText('unos 435 pies');

@@ -48,7 +48,7 @@ In Beds view the job shows five cards, B03–B07. **Bed ids are never renumbered
 ```
 Deducted by the signed-off revision: B01 West bed (McLean Pl), 44 plants, and
 B02 Northeast bed (Baxter Rd), 50 plants. Nothing is planted there. The 3
-boulders drawn at their ends: ask Chris whether they still go.
+boulders drawn at their ends: make sure the landscaping has room for them.
 ```
 
 Under the site map, a Fences list:
@@ -67,8 +67,9 @@ McLean Pl. Shop drawings, 4' minimum footing, finished side outward.
 
 The site map picture is redone: the West and Northeast beds greyed out and
 labelled DEDUCTED, markers 3–7 only. The Species view gets one more note at the
-top saying the two beds are deducted and that the quantities below are what was
-ordered, not reduced.
+top saying the two beds are deducted, that the quantities below are what was
+ordered, not reduced, and that the extra plants go back to the yard for winter
+storage and use on other jobs.
 
 ## Architecture
 
@@ -141,8 +142,13 @@ On `groundwork-rename`; commits: pictures alone; data and page; fences. Push
 fetch the new asset and sw.js from Pages. Update the CLAUDE.md test table and the
 memory note.
 
+## Answered (Matt, 10/7/26, after the first push)
+
+- The 94 deducted plants go back to the yard for winter storage and use on other
+  jobs (the species note says so).
+- The 3 boulders at the deducted beds' ends are not a worry; the only job is to
+  make sure the landscaping has room for them (the deducted note says so).
+
 ## Open, not blocking
 
-- Where the 94 deducted plants go, and the 3 boulders at the deducted beds' ends
-  (Chris).
 - The magenta run's length is read off the photo (about 50 ft).

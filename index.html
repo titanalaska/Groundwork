@@ -4371,8 +4371,10 @@ function deductedHTML(){
   return '<div class="deducted-note"><b>' +
     L("Deducted by the signed-off revision", "Deducidas por la revisión aprobada") + "</b><br>" +
     list + ". " + L("Nothing is planted there.", "No se planta nada ahí.") +
-    (rocks ? " " + L("The " + rocks + " boulders drawn at their ends: ask Chris whether they still go.",
-                     "Las " + rocks + " rocas dibujadas en sus extremos: pregúntale a Chris si todavía van.") : "") +
+    // Matt, 10/7/26: no question for the crew to chase -- just make sure the
+    // landscaping leaves room for them.
+    (rocks ? " " + L("The " + rocks + " boulders drawn at their ends: make sure the landscaping has room for them.",
+                     "Las " + rocks + " rocas dibujadas en sus extremos: asegúrate de que haya lugar para ellas en el paisajismo.") : "") +
     "</div>";
 }
 
