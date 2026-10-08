@@ -190,7 +190,8 @@ const MUTATIONS = [
   },
   {
     name: 'resolve WSRCC codes against the Home2Suites species list',
-    find: '    var d = (forJob === "wsrcc") ? WSRCC : H2S;',
+    // 10/7: the ternary became the JOB_DATA table lookup.
+    find: '    var d = JOB_DATA[forJob] || H2S;        // species-only jobs: see applyJobData',
     replace: '    var d = H2S;',
     caughtBy: 'switching jobs rebuilds',
   },

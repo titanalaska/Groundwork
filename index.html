@@ -3820,7 +3820,20 @@ var ES = {
   // as a key ("East") rewrote "East end of the curb" before its own rule ran.
   "McLean Pl - the west frontage": "McLean Pl - el frente oeste",
   "Erna Court - the court and Areas A-D": "Erna Court - la calle interior y las áreas A-D",
-  "Baxter Rd - the east frontage": "Baxter Rd - el frente este"
+  "Baxter Rd - the east frontage": "Baxter Rd - el frente este",
+  // Baxter's built edges, as the zero line names them (BAXTER-built.json). Each
+  // starts with its own "del" / "de la", because the zero rule prints
+  // "Extremo <dir> " + name.
+  "McLean Pl sidewalk, its east edge (the west bed's edge)":
+    "de la acera de McLean Pl, su borde este (el borde de la cama oeste)",
+  "Baxter Rd line from the Erna Court entrance curb return (north side) north to the chain-link fence":
+    "de la línea de Baxter Rd desde el retorno del bordillo de la entrada de Erna Court (lado norte), hacia el norte hasta la cerca de malla",
+  "Baxter Rd line from the Erna Court entrance curb return (south side) south to the property line":
+    "de la línea de Baxter Rd desde el retorno del bordillo de la entrada de Erna Court (lado sur), hacia el sur hasta el lindero",
+  "Area A island curb, south side": "del bordillo de la isla del Área A, lado sur",
+  "Area D (mailbox) island curb, southeast side": "del bordillo de la isla del Área D (buzones), lado sureste",
+  "Area B island curb, southwest side": "del bordillo de la isla del Área B, lado suroeste",
+  "curb east of Area C, by the light pole": "del bordillo al este del Área C, junto al poste de luz"
 };
 
 // Where Spanish word order differs from English, or a number sits in the
@@ -3831,11 +3844,20 @@ var ES = {
 var ES_DIR = {north: "norte", south: "sur", east: "este", west: "oeste"};
 var ES_EDGE = {"curb": "del bordillo", "building wall": "de la pared del edificio",
                "sidewalk edge": "del borde de la acera"};
+var ES_END = {north: "norte", south: "sur", east: "este", west: "oeste",
+              norte: "norte", sur: "sur", este: "este", oeste: "oeste"};
 var ES_RULES = [
-  [/^(North|South|East|West) end of the (curb|building wall|sidewalk edge) beside this bed \(it runs (north|south|east|west)\u2013(north|south|east|west)\)$/,
-    function(m, end, edge, a, b){
-      return "Extremo " + ES_DIR[end.toLowerCase()] + " " + ES_EDGE[edge] +
-        " junto a esta cama (va de " + ES_DIR[a] + " a " + ES_DIR[b] + ")";
+  // Home2 names its edge by kind ("curb beside this bed"); Baxter names the
+  // edge itself ("Area B island curb, southwest side"), and those names have
+  // their own ES lines, already swapped by the time this runs. The leading
+  // compass word may already be Spanish too: ES carries bare "North"/"South"
+  // for WSRCC's zone tags, and the phrase pass swaps them first (10/7/26).
+  [/^(North|South|East|West|Norte|Sur|Este|Oeste) end of the (.+) \(it runs (north|south|east|west)\u2013(north|south|east|west)\)$/,
+    function(m, end, name, a, b){
+      var kind = name.match(/^(curb|building wall|sidewalk edge) beside this bed$/);
+      var where = kind ? ES_EDGE[kind[1]] + " junto a esta cama" : name;
+      return "Extremo " + ES_END[end.toLowerCase()] + " " + where +
+        " (va de " + ES_DIR[a] + " a " + ES_DIR[b] + ")";
     }],
   [/^(north|south|east|west) of the (curb|building wall|sidewalk edge)$/,
     function(m, dir, edge){ return "al " + ES_DIR[dir] + " " + ES_EDGE[edge]; }],
@@ -4195,7 +4217,10 @@ var H2S = {beds: BEDS, species: SPECIES, spacing: SPACING, zones: ZONES,
            links: H2S_BED_LINKS, noSym: [], runs: [], stakes: H2S_STAKES,
            boulders: H2S_BOULDERS,
            // the zoom hint, inches per picture pixel: see inchesPerPixel
-           zoom: {map: "1.6", crop: "1.6"}};
+           zoom: {map: "1.6", crop: "1.6"},
+           // who settles a sheet-vs-schedule disagreement: a Corvus plan
+           discContact: {en: "settle this with Peter Briggs at Corvus, 907.222.2859, before ordering to them.",
+                         es: "resuélvelo con Peter Briggs en Corvus, 907.222.2859, antes de pedir con esos números."}};
 var WSRCC = {beds: WSRCC_BEDS, species: WSRCC_SPECIES, spacing: WSRCC_SPACING,
              zones: WSRCC_ZONES, disc: WSRCC_DISCREPANCY,
              mapPlan: WSRCC_MAP_PLAN, mapXY: WSRCC_MAP_XY,
@@ -4213,7 +4238,9 @@ var WSRCC = {beds: WSRCC_BEDS, species: WSRCC_SPECIES, spacing: WSRCC_SPACING,
              noSym: [],
              // crops 1500 px / 360 pt x 3.6 pt/ft = 15.0 px/ft -> 0.8 in;
              // site map 4013 px / 2100 pt x 3.6 = 6.88 px/ft -> 1.7 in
-             zoom: {map: "1.7", crop: "0.8"}};
+             zoom: {map: "1.7", crop: "0.8"},
+             discContact: {en: "settle this with Peter Briggs at Corvus, 907.222.2859, before ordering to them.",
+                           es: "resuélvelo con Peter Briggs en Corvus, 907.222.2859, antes de pedir con esos números."}};
 // Baxter Family Housing: seven beds off the vector bid set (10/7/26). Its
 // codes collide with the other two jobs' (BP, JH, SB, SV, IS) and are
 // different drawings, so the symbol folder is its own. offlineMB: 3.09 MB
@@ -4227,7 +4254,11 @@ var BAXTER = {beds: BAXTER_BEDS, species: BAXTER_SPECIES, spacing: BAXTER_SPACIN
               // crops 1500 px / 77.65 pt = 19.32 px/pt x 0.7765 pt/ft = 15.0 px/ft
               //   -> 12 / 15.0 = 0.8 in; site map 4013 px / 620 pt = 6.47 px/pt
               //   x 0.7765 = 5.03 px/ft -> 12 / 5.03 = 2.4 in
-              zoom: {map: "2.4", crop: "0.8"}};
+              zoom: {map: "2.4", crop: "0.8"},
+              // The Boutet Company's plan; its questions (PG 7 vs 9, MP 7 vs 8,
+              // Area C's tree) sit with Chris, not Corvus.
+              discContact: {en: "settle this with Chris before ordering to them &mdash; the plan is The Boutet Company&#39;s, and none of it has been raised with them.",
+                            es: "resuélvelo con Chris antes de pedir con esos números: el plano es de The Boutet Company y nada de esto se ha consultado con ellos."}};
 // One table, keyed by job. Each `currentJob === "wsrcc" ? WSRCC : H2S` this
 // replaced would have handed a third job Home2Suites' data.
 var JOB_DATA = {h2s: H2S, wsrcc: WSRCC, baxter: BAXTER};
@@ -4520,7 +4551,11 @@ function renderBeds(){
         split.mass.map(function(c){
           return bedRow(c, b.items[c], b.bed, isStakedDone || isPlanted, lineIn(b, c));
         }).join(""));
-      card.insertAdjacentHTML("beforeend", renderFit(b, split.mass));
+      // Only when at least one massed species has a spacing to compare
+      // against: Baxter's iris has none on its sheet, and the box was asking
+      // the crew to pace three beds against "Plan needs 0 sq ft" (10/7/26).
+      if(split.mass.some(function(c){ return ocOf(c) !== null; }))
+        card.insertAdjacentHTML("beforeend", renderFit(b, split.mass));
     }
     card.insertAdjacentHTML("beforeend", stakeTableHTML(b));
 
@@ -4560,18 +4595,21 @@ function renderBeds(){
     });
     var note = document.createElement("div");
     note.className = "zone-note";
+    // Who settles it is per job (`discContact` in the job config): Home2 and
+    // WSRCC are Corvus plans, Baxter is The Boutet Company's and its questions
+    // sit with Chris. And a key can be an area ("area C"), not only a species.
+    var contact = (JOB_DATA[currentJob] || H2S).discContact;
+    var allSpecies = discCodes.every(function(c){ return SPECIES && SPECIES[c]; });
+    var n = parts.length;
     note.innerHTML = lang === "es"
-      ? "<b>" + (parts.length === 1 ? "Una especie no cuadra."
-          : parts.length + " especies no cuadran.") +
+      ? "<b>" + (n === 1 ? (allSpecies ? "Una especie no cuadra." : "Una cosa no cuadra.")
+          : n + (allSpecies ? " especies no cuadran." : " cosas no cuadran.")) +
         "</b> " + parts.join("; ") + ". Los n\u00fameros de las camas de arriba son " +
-        "lo que el plano dibuja en realidad &mdash; resu\u00e9lvelo con Peter Briggs " +
-        "en Corvus, 907.222.2859, antes de pedir con esos n\u00fameros."
-      : "<b>" + (parts.length === 1
-        ? "One species does not add up."
-        : parts.length + " species do not add up.") +
+        "lo que el plano dibuja en realidad &mdash; " + contact.es
+      : "<b>" + (n === 1 ? (allSpecies ? "One species does not add up." : "One thing does not add up.")
+          : n + (allSpecies ? " species do not add up." : " things do not add up.")) +
       "</b> " + parts.join("; ") + ". The bed numbers above are what the sheet " +
-      "actually draws &mdash; settle " + (parts.length === 1 ? "it" : "them") +
-      " with Peter Briggs at Corvus, 907.222.2859, before ordering to them.";
+      "actually draws &mdash; " + contact.en;
     container.appendChild(note);
   }
   // Bed numbers are padded in the data (B39) but people type 39.
@@ -4813,7 +4851,8 @@ function generateReport(){
   lines.push("");
   lines.push("NOTE: three species do not reconcile against the sheet's own schedule --");
   Object.keys(DISCREPANCY).forEach(function(c){
-    lines.push("  " + SPECIES[c] + ": " + DISCREPANCY[c]);
+    // A key can be an area ("area C" on Baxter), not only a species code.
+    lines.push("  " + (SPECIES[c] || c) + ": " + DISCREPANCY[c]);
   });
   lines.push("Every other species matches exactly. Confirm with Corvus Design before ordering.");
   lines.push("");
