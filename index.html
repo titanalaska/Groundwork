@@ -574,7 +574,7 @@
   .head-row{display:flex;align-items:flex-start;gap:12px;}
   .head-row h1{flex:1;min-width:0;}
   .lang-wrap{margin-left:auto;display:flex;gap:4px;flex-shrink:0;}
-  .lang-btn{
+  .lang-btn,.share-btn{
     padding:8px 11px;border:1px solid var(--line);border-radius:7px;
     background:var(--card);color:var(--ink-soft);
     font-family:inherit;font-weight:700;font-size:.78rem;cursor:pointer;
@@ -1077,6 +1077,10 @@
     <span class="lang-wrap" id="langWrap">
       <button class="lang-btn" data-lang="en">EN</button>
       <button class="lang-btn" data-lang="es">ES</button>
+      <!-- Hands the permanent install link to the phone's share sheet, so
+           one crew member can send the app to another (Matt, 10/7/26). Not a
+           lang-btn: those are wired by data-lang. -->
+      <button class="share-btn" id="shareBtn" aria-label="Share the install link">Share</button>
     </span>
   </div>
   <p class="subhead" id="dateLine"></p>
@@ -3485,6 +3489,8 @@ var ES = {
   " active jobs": " trabajos activos",
   "Loading your counts\u2026": "Cargando tus conteos\u2026",
   "Export status report": "Exportar reporte de estado",
+  "Share": "Compartir", "Share the install link": "Compartir el enlace para instalar",
+  "Link copied — paste it anywhere.": "Enlace copiado — pégalo donde quieras.",
   "Draft today\u2019s daily log": "Borrador del reporte diario",
   "Back up / restore": "Respaldo / restaurar",
   "Status page": "P\u00e1gina de estado",
@@ -4138,7 +4144,36 @@ function wireLangButtons(){
   Array.prototype.forEach.call(wrap.querySelectorAll(".lang-btn"), function(b){
     b.addEventListener("click", function(){ setLang(b.dataset.lang); });
   });
+  var share = document.getElementById("shareBtn");
+  if(share) share.addEventListener("click", shareApp);
   paintLangButtons();
+}
+
+// The Share button (10/7/26). A CONSTANT, never location.href: a laptop
+// preview would hand out localhost, and the old Wolf-Checklist install must
+// never be what a crew member sends on. Phones open the share sheet; a
+// desktop browser has none, so the link goes to the clipboard and the save
+// line says so for a moment, then goes back to what it said.
+var INSTALL_URL = "https://titanalaska.github.io/Groundwork/";
+function shareApp(){
+  var data = {title: "Groundwork", text: "Groundwork — Titan Alaska job checklists", url: INSTALL_URL};
+  if(navigator.share){
+    navigator.share(data).catch(function(){ /* the sheet was closed; nothing to do */ });
+    return;
+  }
+  var el = document.getElementById("saveNote");
+  var was = el ? el.textContent : "";
+  function said(msg){
+    setSaveNote(msg);
+    setTimeout(function(){ if(el && el.textContent === msg) setSaveNote(was); }, 4000);
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(INSTALL_URL).then(
+      function(){ said("Link copied — paste it anywhere."); },
+      function(){ window.prompt("Copy this link", INSTALL_URL); });
+  } else {
+    window.prompt("Copy this link", INSTALL_URL);
+  }
 }
 
 // ---- beds that are not what the callouts imply -----------------------------

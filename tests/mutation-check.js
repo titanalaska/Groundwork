@@ -591,6 +591,15 @@ const MUTATIONS = [
     caughtBy: "each job's own beds",
     tag: 'baxter',
   },
+  // The Share button (10/7/26): the link it hands out is the install address,
+  // never the page's own -- a laptop preview would share localhost.
+  {
+    name: "share this page's own address instead of the install link",
+    find: 'var data = {title: "Groundwork", text: "Groundwork \\u2014 Titan Alaska job checklists", url: INSTALL_URL};',
+    replace: 'var data = {title: "Groundwork", text: "Groundwork \\u2014 Titan Alaska job checklists", url: location.href};',
+    caughtBy: 'opens the share sheet with the install link',
+    tag: 'share',
+  },
 ];
 
 // MUTATE_ONLY=<text> runs just the mutations whose name contains it -- the
