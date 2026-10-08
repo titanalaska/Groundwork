@@ -595,8 +595,10 @@ const MUTATIONS = [
   // never the page's own -- a laptop preview would share localhost.
   {
     name: "share this page's own address instead of the install link",
-    find: 'var data = {title: "Groundwork", text: "Groundwork \\u2014 Titan Alaska job checklists", url: INSTALL_URL};',
-    replace: 'var data = {title: "Groundwork", text: "Groundwork \\u2014 Titan Alaska job checklists", url: location.href};',
+    // The page carries a real em dash in this string; — in the JS source
+    // below becomes that character, so the anchor matches.
+    find: 'var data = {title: "Groundwork", text: "Groundwork — Titan Alaska job checklists", url: INSTALL_URL};',
+    replace: 'var data = {title: "Groundwork", text: "Groundwork — Titan Alaska job checklists", url: location.href};',
     caughtBy: 'opens the share sheet with the install link',
     tag: 'share',
   },
