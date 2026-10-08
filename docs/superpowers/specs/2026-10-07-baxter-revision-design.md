@@ -149,11 +149,29 @@ group-text provenance and the discrepancy list stay in the room.
   now ("callouts 7, schedule 9"); nothing is forced to the schedule.
 - **Judgment values ship empty.** The three new species (MS, LN, PO) ship with
   **no stock note**: what was ordered for them is Matt's to say.
+- **Saved counts are keyed by plant name** (`baxter:<slug(name)>`), and the live
+  shared state read on 10/7 shows real counts in hand against the ORIGINAL names:
+  Prairiefire Crabapple 8, Rugosa Rose 38, Alaska Flag Iris 36, White Spruce 9,
+  Yellow Potentilla 17, Birchleaf Spirea 26, Creeping Juniper 11, Dwarf American
+  Cranberry 14, Hardy Purple Lilac 2, Paper Birch 0. No Staked/Planted marks exist
+  for any Baxter bed yet. **No existing Baxter row is deleted or renamed.**
+  - Rows that stay on the plan (PG, BP, JH, PF, SB, VT, SV) keep their names and
+    take the revised quantity. Where the count already in hand is above the new
+    quantity (spruce 9 vs about 3, juniper 11 vs about 6), the app's existing
+    purple OVER state shows the surplus honestly.
+  - The three swapped species (Prairiefire Crabapple, Alaska Flag Iris, Rugosa
+    Rose) move to their own group, "From the original order — not on the revised
+    plan", with quantity 0, so their counts stay visible as OVER. Matt decides
+    later whether they are installed as substitutes or placed elsewhere; the
+    app does not decide it.
+  - The three new species are NEW rows with no count.
 - The two existing stock notes — "Rugosa covered by Danny's order (38)" and
-  "Creeping Juniper bought and on site (11)" — are kept word for word, with a lead
-  of "Bought for the ORIGINAL plan:". The Rugosa note no longer matches a species
-  on the job, and the juniper job need drops, so neither can claim to cover the
-  revised list. They stay visible until Matt says what they became.
+  "Creeping Juniper bought and on site (11)" — are kept word for word with a lead
+  of "Bought for the ORIGINAL plan:". They stay visible until Matt says what they
+  became.
+- New names go through `check-job.js baxter <total>` (look-alike names block), get
+  Spanish in `ES`, and get `species-alias-table.json` entries with
+  `status: "unverified"` then `python tools/build_vendors.py`.
 - No status.html change (it has no bed view for any job).
 
 ## 3. Tape it out
@@ -179,10 +197,12 @@ the original's after the three renames. By the first look that is **A and B only
 
 ## 4. Pictures
 
-- **Site map:** `site-map.jpg` is unchanged (an overlay of markers, so only the
-  marker list changes). It is the original vector render; Areas C and D drawn on it
-  are the OLD shapes. A caption under it says so, so the crew does not read the old
-  C/D shapes as current.
+- **Site map:** regenerated as `site-map-r.jpg`. The original has every ORIGINAL
+  pill baked into the picture (the deducted beds, MP/IS/RR), so it cannot stay.
+  The new one is the same vector render with pills only on Areas A and B (MS), a
+  grey "DEDUCTED" wash over the West and Northeast beds, and a pale "REVISED — see
+  the card" wash over the stale printed callouts at C, D and the SE bed. The old C
+  and D planting shapes still show under their wash; a caption says so.
 - **A and B crops** stay from the vector render, pills redrawn with MS.
 - **SE, C and D crops** are cut from the revised photo, plain (no pills: the photo
   has no plan coordinates to place them), with a caption "from a photo of the
@@ -221,6 +241,12 @@ wants it. The fence work ships as **its own commit** so it can be reverted alone
 - Spanish for the three new plant names, the footnote, the callout-order line,
   the "no distances" line, the fence names. Matt reads the Spanish before ship.
   Never a bare compass word as a key (the 10/7 rule).
+- The "Go to bed" box takes its max and placeholder from the highest bed number
+  (7), not `BEDS.length` (5); typing 1 or 2 answers "No bed 1" as it does now.
+- The existing Baxter specs (`baxter-beds`, `baxter-tape`, `baxter-review`) encode
+  the original 7 beds and 207 plants and are rewritten to the revised truth, worked
+  on paper, not pasted from output. The `baxter` mutation guards that name original
+  strings are updated, never left SKIPPED.
 - `localStorage` and the `wolf-*` keys are untouched. `DOC_PATH` is untouched.
 
 ## 7. Tests
