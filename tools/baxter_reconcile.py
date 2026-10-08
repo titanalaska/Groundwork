@@ -32,12 +32,32 @@ SCHEDULE = {
     "VT": 14,   # Dwarf American Cranberry
 }
 
+# The signed-off revision (Plan Set 11465, read off a PHOTO of the revised L1,
+# 10/7/26): 201 plants, INCLUDING the two perimeter beds the same sheet's
+# redline deducts. Three species are swapped (RENAME below).
+REVISED_SCHEDULE = {
+    "PG": 7,    # White Spruce
+    "BP": 9,    # Paper Birch
+    "MS": 8,    # Spring Snow Crabapple (was MP, Prairiefire)
+    "SV": 2,    # Hardy Purple Common Lilac -- the tree alternate under the line
+    "JH": 10,   # Creeping Juniper
+    "LN": 36,   # Alaska Nootka Lupine (was IS, Alaska Flag Iris)
+    "PF": 53,   # Yellow Potentilla
+    "PO": 44,   # Center Glow Ninebark (was RR, Rugosa Rose)
+    "SB": 22,   # Birchleaf Spirea
+    "VT": 10,   # Dwarf American Cranberry
+}
+
+# Original code -> revised code. Nothing else changed name.
+RENAME = {"MP": "MS", "IS": "LN", "RR": "PO"}
+
 # How the sheet's own area lines count things: SV is listed under "deciduous
-# tree alternative", so it counts as a tree there; IS is the only perennial.
+# tree alternative", so it counts as a tree there; IS/LN is the only perennial.
 CATEGORY = {
-    "PG": "trees", "BP": "trees", "MP": "trees", "SV": "trees",
-    "JH": "shrubs", "PF": "shrubs", "RR": "shrubs", "SB": "shrubs", "VT": "shrubs",
-    "IS": "perennials",
+    "PG": "trees", "BP": "trees", "MP": "trees", "MS": "trees", "SV": "trees",
+    "JH": "shrubs", "PF": "shrubs", "RR": "shrubs", "PO": "shrubs",
+    "SB": "shrubs", "VT": "shrubs",
+    "IS": "perennials", "LN": "perennials",
 }
 GROUPS = ("trees", "shrubs", "perennials")
 
@@ -125,3 +145,25 @@ def discrepancies(pills, areas, stacks, schedule=None, species=None):
             line += " -- " + areas[area]["note"]
         out[key] = (out[key] + "; " + line) if key in out else line
     return out
+
+
+def rename_items(items):
+    """A bed's {code: qty} with the three swapped species under their new codes."""
+    return {RENAME.get(code, code): qty for code, qty in items.items()}
+
+
+def carried_over(original, revised):
+    """True when the revised bed is the original bed after the renames, count for
+    count. Only then may the original's vector-derived tape-out distances be
+    shown on it: a bed whose counts moved has plants whose positions the photo
+    cannot give, and the app must not invent them."""
+    return rename_items(original) == revised
+
+
+def callout_order(pills, stack):
+    """The stack's callouts as [{qty, code}], top to bottom as the sheet prints
+    them (photo y, then x). Used where there is no tape table: the crew goes by
+    the order on the drawing."""
+    mine = [p for p in pills if p["stack"] == stack]
+    mine.sort(key=lambda p: (p["px"][1], p["px"][0]))
+    return [{"qty": int(p["qty"]), "code": p["code"]} for p in mine]
