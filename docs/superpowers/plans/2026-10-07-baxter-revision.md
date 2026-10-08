@@ -105,7 +105,8 @@
 **Interfaces (pure, `baxter_rev.py`):**
 - `build_beds(callouts: dict, original_beds: list[dict]) -> list[dict]` — five bed records `{"bed", "seq", "zone", "where", "units", "items"}` for `B03..B07`, items renamed/read from the callouts file (A and B from the originals via `rename_items`; C, D, SE from the pills of their stacks); `seq` = the original `seq` so ordering is stable.
 - `carry_stakes(stakes: dict, keep: list[str]) -> dict` — the original `BAXTER_STAKES` filtered to beds in `keep` with row codes renamed; `foot`, `held`, `no_edge`, `extra` for kept beds only.
-- `own_boulders(boulders: dict, stakes_kept: dict, original_stakes: dict) -> dict` — for every kept bed that has boulder rows but no stake table, move them to `own[bed] = {"ref", "edge", "rows"}` using the original bed's zero `ref`/`edge`, so each prints its own zero.
+- `carried_ids(beds: list[dict], original_beds: list[dict]) -> list[str]` — ids whose counts equal the original's after the renames (the tape-out carry-over rule, computed, not hard-coded).
+- `own_boulders(boulders: dict, stakes_kept: dict, original_stakes: dict, shown: list[str]) -> dict` — rows only for `shown` beds; a shown bed with no stake table gets `own[bed] = {"ref", "edge", "rows"}` using the original bed's zero `ref`/`edge`, so each prints its own zero.
 - `deducted(original_beds, boulders) -> list[dict]` — `[{"bed": "B01", "where": ..., "plants": 44, "boulders": 1}, {"bed": "B02", ..., "plants": 50, "boulders": 2}]`.
 
 - [ ] **Step 1: Write the failing tests** (`unittest`, hand-built fixtures with an id gap, not 1-2-3):
